@@ -3,181 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Trading Journal & Performance Dashboard</title>
+    <title>Modern Fintech Trading Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase SDK (100% Free Firestore Cloud Sync) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
-        body { background-color: #f8fafc; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .bg-card { background-color: #ffffff; }
-        .bg-card-hover:hover { background-color: #f8fafc; }
-        .border-custom { border-color: #e2e8f0; }
-        .input-light { background-color: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; }
-        .input-light:focus { border-color: #059669; outline: none; background-color: #ffffff; }
-        .tbl-input { background-color: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; text-align: center; width: 100%; min-width: 65px; padding: 3px 4px; border-radius: 4px; }
-        .tbl-input:focus { border-color: #059669; outline: none; background-color: #f8fafc; }
+        body { background-color: #f3f4f6; color: #1f2937; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .fintech-card { background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+        .input-fintech { background-color: #f9fafb; border: 1px solid #d1d5db; color: #111827; border-radius: 8px; }
+        .input-fintech:focus { border-color: #2563eb; outline: none; background-color: #ffffff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .tbl-input { background-color: #ffffff; border: 1px solid #d1d5db; color: #111827; text-align: center; width: 100%; min-width: 65px; padding: 4px 6px; border-radius: 6px; }
+        .tbl-input:focus { border-color: #2563eb; outline: none; background-color: #f8fafc; }
         
         .status-green { background-color: #d1fae5 !important; color: #065f46 !important; border: 1px solid #a7f3d0 !important; }
         .status-pink { background-color: #fce7f3 !important; color: #9d174d !important; border: 1px solid #fbcfe8 !important; }
-        .status-red { background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5 !important; }
-        .status-gray { background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
+        .status-gray { background-color: #f3f4f6 !important; color: #4b5563 !important; border: 1px solid #d1d5db !important; }
 
-        /* Row PnL Background Tints & Side Borders */
-        .row-profit { background-color: rgba(209, 250, 229, 0.2) !important; border-left: 4px solid #059669 !important; }
-        .row-loss { background-color: rgba(252, 231, 243, 0.25) !important; border-left: 4px solid #f43f5e !important; }
+        .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; border-left: 4px solid #059669 !important; }
+        .row-loss { background-color: rgba(252, 231, 243, 0.35) !important; border-left: 4px solid #e11d48 !important; }
+        .section-divider { border-left: 1px solid #d1d5db !important; }
+        .img-slot-active { border-color: #2563eb !important; ring: 2px; ring-color: #bfdbfe; }
 
-        .section-divider { border-left: 1px solid #cbd5e1 !important; }
-        .img-slot-active { border-color: #059669 !important; ring: 2px; ring-color: #a7f3d0; }
-
-        .draggable-item { cursor: grab; user-select: none; transition: transform 0.15s ease, opacity 0.15s ease; }
-        .draggable-item:active { cursor: grabbing; }
-        .dragging { opacity: 0.4; transform: scale(0.98); }
-        
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen md:h-screen md:overflow-hidden text-xs" tabIndex="0">
+<body class="flex flex-col h-screen overflow-hidden text-xs">
 
-    <!-- Top Live Asset Ticker Bar -->
-    <div class="bg-slate-900 text-slate-300 border-b border-slate-800 px-4 md:px-6 py-2 flex flex-wrap md:flex-nowrap items-center justify-between flex-shrink-0 text-[11px] gap-2">
+    <!-- Top Ticker Bar -->
+    <div class="bg-slate-900 text-slate-300 px-6 py-2 flex items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
         <div class="flex items-center gap-2">
-            <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
             <span class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Market Watch</span>
         </div>
-
-        <div id="ticker-container" class="flex items-center gap-3 overflow-x-auto py-0.5 max-w-full"></div>
-
-        <div class="flex items-center gap-2 shrink-0 ml-auto md:ml-0">
-            <span id="sync-status" class="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 bg-emerald-900/40 rounded border border-emerald-700/50">Cloud Sync Active</span>
-            <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-2.5 py-1 rounded flex items-center gap-1 font-semibold transition">
+        <div id="ticker-container" class="flex items-center gap-4 overflow-x-auto py-0.5 max-w-full"></div>
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 bg-emerald-950/60 rounded-full border border-emerald-800">Cloud Active</span>
+            <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-blue-400 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1">
                 <i data-lucide="plus" class="w-3 h-3"></i> Add Asset
             </button>
         </div>
     </div>
 
-    <!-- Header & Month Tabs -->
-    <header class="bg-card border-b border-custom px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between flex-shrink-0 shadow-xs gap-2">
-        <div class="flex items-center gap-4 md:gap-6 overflow-x-auto max-w-full">
-            <div class="flex items-center gap-2 shrink-0">
-                <div class="w-7 h-7 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-sm">E</div>
-                <h1 class="text-sm font-bold text-slate-800 tracking-wide">Trading Dashboard</h1>
-            </div>
-            
-            <div id="month-tabs" class="flex items-center gap-1 overflow-x-auto shrink-0"></div>
-            <button onclick="addMonthTab()" class="text-xs text-slate-600 hover:text-emerald-600 bg-slate-100 hover:bg-slate-200 border border-custom px-2.5 py-1 rounded flex items-center gap-1 font-medium transition shrink-0">
-                <i data-lucide="plus" class="w-3 h-3"></i> Add Month
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex overflow-hidden">
         
-        <!-- Left Dashboard & Journal Table -->
-        <div class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto space-y-4">
-            
-            <!-- Executive Performance Dashboard (KPI + Chart + AI Advisor) -->
-            <div class="bg-card border border-custom rounded-2xl p-4 shadow-sm space-y-4">
-                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-custom pb-2">
+        <!-- Left Sidebar Navigation (Sample UI Style) -->
+        <aside class="w-64 bg-white border-r border-custom flex flex-col justify-between p-5 flex-shrink-0">
+            <div class="space-y-6">
+                <!-- Brand / Logo -->
+                <div class="flex items-center gap-3 px-1">
+                    <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white text-base shadow-md shadow-blue-500/20">T</div>
                     <div>
-                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> Executive Performance Dashboard (KPI)
-                        </h2>
-                        <p class="text-[10px] text-slate-400">Real-time trading performance, equity curves & AI insights</p>
-                    </div>
-                    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-custom">
-                        <button onclick="setChartMode('daily')" id="btn-chart-daily" class="px-2.5 py-1 text-[10px] font-bold rounded bg-white text-emerald-700 shadow-2xs transition">Daily PnL</button>
-                        <button onclick="setChartMode('cumulative')" id="btn-chart-cumulative" class="px-2.5 py-1 text-[10px] font-bold rounded text-slate-600 hover:text-slate-900 transition">Cumulative PnL</button>
+                        <h2 class="font-extrabold text-slate-900 text-sm">TradingPro</h2>
+                        <span class="text-[10px] text-slate-400 font-medium">Enterprise Journal</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-                    <!-- KPI Cards (Left 7 cols) -->
-                    <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
-                            <div class="text-[10px] text-slate-500 font-medium">Initial Asset ($)</div>
-                            <input type="number" id="kpi-initial-input" onchange="updateInitialAsset(this.value)" class="w-full text-center bg-transparent text-sm font-bold text-slate-800 mt-1 border-b border-slate-300 focus:border-emerald-600 outline-none">
-                        </div>
-                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-3 rounded-xl border border-slate-800 shadow-sm flex flex-col justify-between col-span-2">
-                            <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Total Net P&L</div>
-                            <div id="kpi-net-pnl" class="text-xl font-black tracking-tight text-emerald-400 mt-0.5">+$0.00</div>
-                            <div id="kpi-pnl-pct" class="text-[10px] font-semibold text-emerald-300">0.00%</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
-                            <div class="text-[10px] text-slate-500 font-medium">End Asset</div>
-                            <div id="kpi-end-asset" class="text-sm font-bold text-slate-800 mt-1">$10,000.00</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
-                            <div class="text-[10px] text-slate-500 font-medium">Win Rate</div>
-                            <div id="kpi-winrate" class="text-sm font-bold text-slate-800 mt-1">0.0%</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
-                            <div class="text-[10px] text-slate-500 font-medium">Profit Factor</div>
-                            <div id="kpi-pf" class="text-sm font-bold text-slate-800 mt-1">0.00</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
-                            <div class="text-[10px] text-slate-500 font-medium">Avg Checklist Score</div>
-                            <div id="kpi-avg-checklist" class="text-sm font-bold text-indigo-600 mt-1">0%</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
-                            <div class="text-[10px] text-slate-500 font-medium">Total Fees</div>
-                            <div id="kpi-fees" class="text-sm font-bold text-rose-600 mt-1">$0.00</div>
-                        </div>
-                    </div>
+                <!-- Nav Menu -->
+                <nav class="space-y-1">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-600/20">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+                    </a>
+                    <a href="#" onclick="openChecklistModal()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold text-xs transition">
+                        <i data-lucide="check-square" class="w-4 h-4 text-slate-400"></i> A+ Checklists
+                    </a>
+                    <a href="#" onclick="generateAIStrategySuggestion()" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold text-xs transition">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i> AI Advisor
+                    </a>
+                </nav>
+            </div>
 
-                    <!-- PnL Chart Box (Right 5 cols) -->
-                    <div class="lg:col-span-5 bg-slate-50 border border-custom rounded-xl p-3 flex flex-col justify-between h-36">
-                        <div class="flex items-center justify-between text-[10px] text-slate-500 font-semibold">
-                            <span id="chart-title-label">Equity Curve (Cumulative PnL)</span>
-                            <span id="chart-stat-badge" class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Active</span>
-                        </div>
-                        <div class="flex-1 relative w-full flex items-end">
-                            <canvas id="pnl-canvas" class="w-full h-20"></canvas>
-                        </div>
-                    </div>
+            <!-- Sidebar Footer Profile Card -->
+            <div class="bg-slate-50 border border-custom p-3 rounded-2xl flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-xs">JW</div>
+                <div class="overflow-hidden">
+                    <div class="font-bold text-slate-800 text-xs truncate">Jin-wook Lee</div>
+                    <div class="text-[10px] text-slate-400 truncate">Pro Trader</div>
                 </div>
+            </div>
+        </aside>
 
-                <!-- Gemini AI Trading Strategy Advisor Widget -->
-                <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-slate-900 text-white rounded-xl p-3.5 border border-indigo-500/30 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-600/50 border border-indigo-400/40 flex items-center justify-center shrink-0 mt-0.5">
-                            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-300"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-xs text-indigo-200">Gemini AI Strategy Advisor</span>
-                                <span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-semibold">Live Analysis</span>
-                            </div>
-                            <p id="ai-advisor-text" class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">Analyzing your current trade trends, checklist execution, and market conditions to suggest optimal setups...</p>
-                        </div>
-                    </div>
-                    <button onclick="generateAIStrategySuggestion()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition shrink-0 flex items-center gap-1.5 border border-indigo-400/30 shadow-sm cursor-pointer">
-                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Strategy
+        <!-- Center Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden p-6 gap-6">
+            
+            <!-- Header Bar with Month Tabs & Quick Action -->
+            <div class="flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3 overflow-x-auto">
+                    <h2 class="text-base font-black text-slate-900 tracking-tight">Trading Performance</h2>
+                    <div class="h-5 w-[1px] bg-slate-300"></div>
+                    <div id="month-tabs" class="flex items-center gap-1.5 overflow-x-auto"></div>
+                    <button onclick="addMonthTab()" class="text-xs text-blue-600 hover:bg-blue-50 bg-white border border-blue-200 px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 shadow-2xs">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Month
                     </button>
                 </div>
             </div>
 
-            <!-- Journal Log -->
-            <div class="bg-card border border-custom rounded-2xl p-4 flex-1 flex flex-col shadow-sm min-h-[300px]">
-                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-                    <div class="flex items-center gap-3">
-                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Trading Journal & Execution Log</h2>
-                        <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm cursor-pointer">
-                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Trade
-                        </button>
+            <!-- KPI & Interactive Chart Panel (Sample Card Style) -->
+            <div class="fintech-card p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-shrink-0">
+                <!-- KPI Numbers (7 cols) -->
+                <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                        <div class="text-[10px] text-slate-500 font-medium">Initial Capital</div>
+                        <input type="number" id="kpi-initial-input" onchange="updateInitialAsset(this.value)" class="w-full text-center bg-transparent text-sm font-extrabold text-slate-900 mt-1 border-b border-slate-300 focus:border-blue-600 outline-none">
                     </div>
-                    <span class="text-[10px] text-slate-400">* Select trade row & check checklist on right drawer. Ctrl+V to paste chart image.</span>
+                    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-3 rounded-xl shadow-md shadow-blue-600/20 flex flex-col justify-between col-span-2">
+                        <div class="text-[10px] text-blue-200 font-semibold uppercase tracking-wider">Total Net P&L</div>
+                        <div id="kpi-net-pnl" class="text-2xl font-black tracking-tight mt-0.5">+$0.00</div>
+                        <div id="kpi-pnl-pct" class="text-[10px] font-bold text-blue-100">0.00% Return</div>
+                    </div>
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                        <div class="text-[10px] text-slate-500 font-medium">Win Rate</div>
+                        <div id="kpi-winrate" class="text-sm font-extrabold text-slate-900 mt-1">0.0%</div>
+                    </div>
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                        <div class="text-[10px] text-slate-500 font-medium">Profit Factor</div>
+                        <div id="kpi-pf" class="text-sm font-extrabold text-slate-900 mt-1">0.00</div>
+                    </div>
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                        <div class="text-[10px] text-slate-500 font-medium">Checklist Score</div>
+                        <div id="kpi-avg-checklist" class="text-sm font-extrabold text-indigo-600 mt-1">0%</div>
+                    </div>
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                        <div class="text-[10px] text-slate-500 font-medium">Total Fees</div>
+                        <div id="kpi-fees" class="text-sm font-extrabold text-rose-600 mt-1">$0.00</div>
+                    </div>
                 </div>
 
-                <div class="flex-1 overflow-x-auto border border-custom rounded-xl">
+                <!-- Chart Box (5 cols) -->
+                <div class="lg:col-span-5 bg-slate-50/80 border border-custom rounded-xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                        <span id="chart-title-label">Equity Curve (Cumulative PnL)</span>
+                        <div class="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-custom">
+                            <button onclick="setChartMode('daily')" id="btn-chart-daily" class="px-2 py-0.5 text-[9px] font-bold rounded text-slate-600 transition">Daily</button>
+                            <button onclick="setChartMode('cumulative')" id="btn-chart-cumulative" class="px-2 py-0.5 text-[9px] font-bold rounded bg-blue-600 text-white shadow-2xs transition">Cumul</button>
+                        </div>
+                    </div>
+                    <div class="flex-1 relative w-full flex items-end pt-2">
+                        <canvas id="pnl-canvas" class="w-full h-20"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Journal & Execution Log Table -->
+            <div class="fintech-card p-5 flex-1 flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between mb-4 flex-shrink-0">
+                    <div class="flex items-center gap-3">
+                        <h3 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Trading Journal Execution Log</h3>
+                        <button onclick="addNewTrade()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition text-xs shadow-md shadow-blue-600/20 cursor-pointer">
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
+                        </button>
+                    </div>
+                    <span class="text-[10px] text-slate-400">* Select row to inspect checklist & paste screenshots on right panel.</span>
+                </div>
+
+                <div class="flex-1 overflow-auto border border-custom rounded-xl">
                     <table class="w-full text-left whitespace-nowrap border-collapse">
-                        <thead class="bg-slate-100 text-slate-600 text-[10px] uppercase sticky top-0 z-10 border-b border-custom">
+                        <thead class="bg-slate-100/80 text-slate-600 text-[10px] uppercase sticky top-0 z-10 border-b border-custom">
                             <tr>
                                 <th class="p-2.5 border-r border-custom text-center">Date</th>
                                 <th class="p-2.5 border-r border-custom section-divider text-center">Pair / Ticker</th>
@@ -195,7 +182,6 @@
                                 <th class="p-2.5 border-r border-custom section-divider text-center">Checklist (%)</th>
                                 <th class="p-2.5 border-r border-custom section-divider text-right">Net PnL ($)</th>
                                 <th class="p-2.5 border-r border-custom section-divider text-right">Net PnL (%)</th>
-                                <th class="p-2.5 border-r border-custom section-divider text-right">Acc. Contr (%)</th>
                                 <th class="p-2.5 border-r border-custom section-divider text-right">Acc. Return (%)</th>
                                 <th class="p-2.5 section-divider text-center">Actions</th>
                             </tr>
@@ -205,40 +191,49 @@
                 </div>
             </div>
 
-        </div>
+        </main>
 
-        <!-- Right Side Trade Review Drawer & Per-Trade Checklist -->
-        <aside class="w-full md:w-88 bg-card border-t md:border-t-0 md:border-l border-custom p-3.5 flex flex-col overflow-y-auto shrink-0 space-y-3.5 shadow-sm">
-            <div class="flex items-center justify-between border-b border-custom pb-2">
-                <h3 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                    <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
-                    Trade Setup Checklist & Review
+        <!-- Right Side Inspector Panel (Checklist, Screenshots & AI Advisor) -->
+        <aside class="w-88 bg-white border-l border-custom p-5 flex flex-col overflow-y-auto shrink-0 space-y-4">
+            <div class="flex items-center justify-between border-b border-custom pb-3">
+                <h3 class="font-extrabold text-slate-900 text-xs flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-4 h-4 text-blue-600"></i> Trade Inspector
                 </h3>
-                <span id="selected-trade-label" class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Trade #1</span>
+                <span id="selected-trade-label" class="text-[10px] text-blue-700 font-bold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Trade #1</span>
             </div>
 
-            <!-- Per-Trade Checklist Container -->
-            <div class="bg-slate-50 border border-custom rounded-xl p-3 space-y-2">
+            <!-- AI Advisor Banner -->
+            <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-3.5 rounded-2xl shadow-md border border-indigo-500/30 space-y-2">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">A+ Setup Rules (This Trade)</span>
-                    <button onclick="openChecklistModal()" class="text-[10px] text-indigo-600 hover:underline font-semibold flex items-center gap-0.5">
-                        <i data-lucide="settings" class="w-3 h-3"></i> Manage Rules
+                    <div class="flex items-center gap-1.5 font-bold text-xs text-indigo-200">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> Gemini AI Advisor
+                    </div>
+                    <button onclick="generateAIStrategySuggestion()" class="text-[9px] bg-indigo-600 hover:bg-indigo-500 px-2 py-0.5 rounded font-semibold transition cursor-pointer">Refresh</button>
+                </div>
+                <p id="ai-advisor-text" class="text-[11px] text-slate-300 leading-relaxed">Analyzing your trade setups & market conditions...</p>
+            </div>
+
+            <!-- Per-Trade Checklist -->
+            <div class="bg-slate-50/80 border border-custom rounded-2xl p-3.5 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider">A+ Setup Rules</span>
+                    <button onclick="openChecklistModal()" class="text-[10px] text-blue-600 hover:underline font-semibold flex items-center gap-1">
+                        <i data-lucide="settings" class="w-3 h-3"></i> Manage
                     </button>
                 </div>
-                <div id="per-trade-checklist-container" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+                <div id="per-trade-checklist-container" class="space-y-1.5 max-h-44 overflow-y-auto pr-1"></div>
             </div>
 
+            <!-- Execution Charts (Paste or Click) -->
             <input type="file" id="file-input-hidden" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
-            
-            <!-- Screenshots -->
             <div class="space-y-1.5">
-                <span class="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">Execution Charts</span>
-                <div class="grid grid-cols-3 gap-1.5">
+                <span class="text-[10px] text-slate-700 font-extrabold uppercase tracking-wider block">Execution Charts</span>
+                <div class="grid grid-cols-3 gap-2">
                     <div>
-                        <span class="text-[9px] text-slate-500 font-medium block mb-0.5">HTF</span>
-                        <div id="slot-htf" onclick="handleSlotClick('htf')" ondblclick="triggerFileInput('htf')" class="w-full h-14 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                        <span class="text-[9px] text-slate-500 font-semibold block mb-0.5">HTF</span>
+                        <div id="slot-htf" onclick="handleSlotClick('htf')" ondblclick="triggerFileInput('htf')" class="w-full h-16 bg-slate-50 border border-dashed border-slate-300 hover:border-blue-500 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
                             <img id="img-htf" class="hidden w-full h-full object-cover">
-                            <button id="del-btn-htf" onclick="deleteSlotImage(event, 'htf')" title="Delete" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
+                            <button id="del-btn-htf" onclick="deleteSlotImage(event, 'htf')" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">✕</button>
                             <div id="placeholder-htf" class="flex flex-col items-center gap-0.5 text-slate-400">
                                 <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
                                 <span class="text-[8px]">Paste</span>
@@ -246,10 +241,10 @@
                         </div>
                     </div>
                     <div>
-                        <span class="text-[9px] text-slate-500 font-medium block mb-0.5">MTF</span>
-                        <div id="slot-mtf" onclick="handleSlotClick('mtf')" ondblclick="triggerFileInput('mtf')" class="w-full h-14 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                        <span class="text-[9px] text-slate-500 font-semibold block mb-0.5">MTF</span>
+                        <div id="slot-mtf" onclick="handleSlotClick('mtf')" ondblclick="triggerFileInput('mtf')" class="w-full h-16 bg-slate-50 border border-dashed border-slate-300 hover:border-blue-500 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
                             <img id="img-mtf" class="hidden w-full h-full object-cover">
-                            <button id="del-btn-mtf" onclick="deleteSlotImage(event, 'mtf')" title="Delete" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
+                            <button id="del-btn-mtf" onclick="deleteSlotImage(event, 'mtf')" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">✕</button>
                             <div id="placeholder-mtf" class="flex flex-col items-center gap-0.5 text-slate-400">
                                 <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
                                 <span class="text-[8px]">Paste</span>
@@ -257,10 +252,10 @@
                         </div>
                     </div>
                     <div>
-                        <span class="text-[9px] text-slate-500 font-medium block mb-0.5">LTF</span>
-                        <div id="slot-ltf" onclick="handleSlotClick('ltf')" ondblclick="triggerFileInput('ltf')" class="w-full h-14 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                        <span class="text-[9px] text-slate-500 font-semibold block mb-0.5">LTF</span>
+                        <div id="slot-ltf" onclick="handleSlotClick('ltf')" ondblclick="triggerFileInput('ltf')" class="w-full h-16 bg-slate-50 border border-dashed border-slate-300 hover:border-blue-500 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
                             <img id="img-ltf" class="hidden w-full h-full object-cover">
-                            <button id="del-btn-ltf" onclick="deleteSlotImage(event, 'ltf')" title="Delete" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
+                            <button id="del-btn-ltf" onclick="deleteSlotImage(event, 'ltf')" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">✕</button>
                             <div id="placeholder-ltf" class="flex flex-col items-center gap-0.5 text-slate-400">
                                 <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
                                 <span class="text-[8px]">Paste</span>
@@ -270,41 +265,10 @@
                 </div>
             </div>
 
+            <!-- Notes -->
             <div class="space-y-1 pt-1 border-t border-custom">
-                <label class="text-[10px] text-slate-600 font-bold block uppercase">Trade Reflection / Notes</label>
-                <textarea id="review-notes" oninput="saveNotes(this.value)" rows="2" class="w-full p-2 rounded-lg input-light text-[11px]" placeholder="Log trade psychology, mistakes..."></textarea>
-            </div>
-
-            <!-- Live News & Macro Events -->
-            <div class="pt-2 border-t border-custom space-y-2 flex-1 flex flex-col min-h-0">
-                <div class="flex items-center justify-between">
-                    <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1">
-                        <i data-lucide="globe" class="w-3.5 h-3.5 text-indigo-600"></i>
-                        Live News & Macro Events
-                    </h4>
-                    <button onclick="fetchMacroNews()" class="text-[10px] bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2 py-0.5 rounded font-semibold transition cursor-pointer flex items-center gap-1">
-                        <i data-lucide="refresh-cw" class="w-2.5 h-2.5"></i> Live Feed 🔄
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 gap-1 text-[11px]">
-                    <a href="https://www.kitco.com/news/" target="_blank" class="p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg flex items-center justify-between text-amber-900 font-bold transition">
-                        <span>🥇 Gold & Silver Market News</span>
-                        <i data-lucide="external-link" class="w-3 h-3 text-amber-600"></i>
-                    </a>
-                    <a href="https://www.marketwatch.com/investing/index/spx" target="_blank" class="p-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg flex items-center justify-between text-blue-900 font-bold transition">
-                        <span>📈 Nasdaq & S&P 500 Stocks News</span>
-                        <i data-lucide="external-link" class="w-3 h-3 text-blue-600"></i>
-                    </a>
-                </div>
-
-                <div class="flex-1 bg-slate-50 border border-custom rounded-xl p-2 overflow-y-auto space-y-1.5 min-h-[140px]">
-                    <div class="flex items-center justify-between border-b border-slate-200 pb-1">
-                        <span id="today-date-header" class="font-bold text-[10px] text-slate-700">Today's Key Economic Events</span>
-                        <span class="text-[9px] text-slate-400">Investing.com Feed</span>
-                    </div>
-                    <div id="daily-events-container" class="space-y-1.5 text-[10px]"></div>
-                </div>
+                <label class="text-[10px] text-slate-700 font-extrabold block uppercase">Trade Reflection</label>
+                <textarea id="review-notes" oninput="saveNotes(this.value)" rows="2" class="w-full p-2.5 rounded-xl input-fintech text-[11px]" placeholder="Log trade psychology..."></textarea>
             </div>
         </aside>
 
@@ -313,64 +277,40 @@
     <!-- Image Lightbox Modal -->
     <div id="image-lightbox-modal" onclick="closeImageLightbox()" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center" onclick="event.stopPropagation()">
-            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl border border-slate-700 object-contain">
-            <button onclick="closeImageLightbox()" class="absolute -top-10 right-0 text-white hover:text-rose-400 font-bold text-sm bg-slate-800/80 px-3 py-1 rounded-full border border-slate-600">Close ✕</button>
+            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-slate-700 object-contain">
+            <button onclick="closeImageLightbox()" class="absolute -top-10 right-0 text-white hover:text-rose-400 font-bold text-sm bg-slate-800 px-3 py-1 rounded-full">Close ✕</button>
         </div>
     </div>
 
     <!-- Checklist Management Modal -->
     <div id="checklist-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-card border border-custom p-5 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-xl">
+        <div class="bg-white border border-custom p-6 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl">
             <div class="flex items-center justify-between border-b border-custom pb-2">
-                <h3 class="font-bold text-slate-800 text-xs">Manage A+ Setup Rules & Options</h3>
+                <h3 class="font-bold text-slate-900 text-xs">Manage A+ Setup Rules</h3>
                 <button onclick="closeChecklistModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            
             <div>
-                <label class="text-[10px] text-slate-500 font-medium block mb-1">Add Checklist Rule</label>
+                <label class="text-[10px] text-slate-500 font-medium block mb-1">Add Rule</label>
                 <div class="flex gap-2">
-                    <input type="text" id="new-rule-name" placeholder="e.g. Volume Spike" class="flex-1 p-2 rounded-lg input-light text-xs">
-                    <button onclick="addChecklistItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1 rounded-lg text-xs">Add</button>
+                    <input type="text" id="new-rule-name" placeholder="e.g. Volume Spike" class="flex-1 p-2 rounded-xl input-fintech text-xs">
+                    <button onclick="addChecklistItem()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 rounded-xl text-xs">Add</button>
                 </div>
-                <div id="active-rules-list" class="space-y-1 mt-2 max-h-24 overflow-y-auto"></div>
+                <div id="active-rules-list" class="space-y-1 mt-2 max-h-28 overflow-y-auto"></div>
             </div>
-
-            <div class="border-t border-custom pt-3 space-y-2">
-                <label class="text-[10px] text-slate-500 font-medium block">Add Dropdown Option & Color (Score)</label>
-                <div class="flex gap-1.5">
-                    <input type="text" id="new-option-name" placeholder="e.g. Partial" class="flex-1 p-2 rounded-lg input-light text-xs">
-                    <select id="new-option-color" class="p-1 rounded-lg input-light text-xs font-semibold">
-                        <option value="green">Green (1 Point)</option>
-                        <option value="gray">Gray (0 Points)</option>
-                        <option value="pink">Pink / Red (-1 Point)</option>
-                    </select>
-                    <button onclick="addDropdownOption()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1 rounded-lg text-xs">Add</button>
-                </div>
-                <div id="active-options-list" class="flex flex-wrap gap-1.5 mt-2"></div>
-            </div>
-
-            <button onclick="closeChecklistModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-xs mt-2 border border-custom">Close</button>
+            <button onclick="closeChecklistModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs mt-2 border border-custom">Close</button>
         </div>
     </div>
 
-    <!-- Live Auto Search Asset Modal -->
+    <!-- Add Asset Modal -->
     <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
-                    <h3 class="font-bold text-xs text-white">Live Asset Search</h3>
-                </div>
+                <h3 class="font-bold text-xs text-white">Live Asset Search</h3>
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-
-            <div>
-                <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. bit, sol, gold, nvda)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-400 focus:border-emerald-500 outline-none">
-            </div>
-
+            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. btc, sol, gold)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
             <div id="search-results-list" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
-
-            <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-xs border border-slate-700">Close</button>
+            <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs border border-slate-700">Close</button>
         </div>
     </div>
 
@@ -399,47 +339,30 @@
         lucide.createIcons();
 
         let activeSlot = 'htf';
-        let chartMode = 'cumulative'; // 'daily' or 'cumulative'
-
+        let chartMode = 'cumulative';
         let trackedAssets = [
             { name: "S&P 500", ticker: "US500", price: "$5,520.40", change: 0.45 },
             { name: "Nasdaq", ticker: "NAS100", price: "$19,450.10", change: 0.82 },
             { name: "Bitcoin", ticker: "BTC", price: "$61,200.00", change: -0.85 },
-            { name: "Ethereum", ticker: "ETH", price: "$2,680.50", change: 1.15 },
-            { name: "Gold", ticker: "Au", price: "$2,465.30", change: 0.50 },
-            { name: "Silver", ticker: "Ag", price: "$28.40", change: -0.35 }
+            { name: "Ethereum", ticker: "ETH", price: "$2,680.50", change: 1.15 }
         ];
 
         let masterSearchDatabase = [
-            { name: "Bitcoin", ticker: "BTC", tvSymbol: "BINANCE:BTCUSDT", category: "Crypto" },
-            { name: "Ethereum", ticker: "ETH", tvSymbol: "BINANCE:ETHUSDT", category: "Crypto" },
-            { name: "Solana", ticker: "SOL", tvSymbol: "BINANCE:SOLUSDT", category: "Crypto" },
-            { name: "Ripple", ticker: "XRP", tvSymbol: "BINANCE:XRPUSDT", category: "Crypto" },
-            { name: "Cardano", ticker: "ADA", tvSymbol: "BINANCE:ADAUSDT", category: "Crypto" },
-            { name: "Gold", ticker: "Au", tvSymbol: "TVC:GOLD", category: "Commodity" },
-            { name: "Silver", ticker: "Ag", tvSymbol: "TVC:SILVER", category: "Commodity" },
-            { name: "S&P 500", ticker: "US500", tvSymbol: "FOREXCOM:SPXUSD", category: "Indices" },
-            { name: "Nasdaq 100", ticker: "NAS100", tvSymbol: "FOREXCOM:NSXUSD", category: "Indices" },
-            { name: "Nvidia", ticker: "NVDA", tvSymbol: "NASDAQ:NVDA", category: "Stock" },
-            { name: "Tesla", ticker: "TSLA", tvSymbol: "NASDAQ:TSLA", category: "Stock" }
+            { name: "Bitcoin", ticker: "BTC", category: "Crypto" },
+            { name: "Ethereum", ticker: "ETH", category: "Crypto" },
+            { name: "Solana", ticker: "SOL", category: "Crypto" },
+            { name: "Gold", ticker: "Au", category: "Commodity" },
+            { name: "Silver", ticker: "Ag", category: "Commodity" }
         ];
 
-        let checklistRules = ["Bias Alignment (Daily)", "High POI (LQ Near)", "LQ + MS Confirmation", "Kill Zone Alignment", "Risk to Reward (R:R)"];
-
+        let checklistRules = ["Entry Model", "Reasonable RR Ratio", "Order Type", "TP/SL Adjust"];
         let dropdownOptions = [
             { label: "Confirmed", color: "green" },
             { label: "Ignored", color: "pink" },
             { label: "Not found", color: "gray" }
         ];
 
-        let monthsData = [
-            {
-                name: "2026-08",
-                initialAsset: 400,
-                trades: []
-            }
-        ];
-
+        let monthsData = [{ name: "2026-07", initialAsset: 10000, trades: [] }];
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
 
@@ -450,12 +373,12 @@
             const label = document.getElementById('chart-title-label');
 
             if (mode === 'daily') {
-                btnDaily.className = "px-2.5 py-1 text-[10px] font-bold rounded bg-white text-emerald-700 shadow-2xs transition";
-                btnCumul.className = "px-2.5 py-1 text-[10px] font-bold rounded text-slate-600 hover:text-slate-900 transition";
+                btnDaily.className = "px-2 py-0.5 text-[9px] font-bold rounded bg-blue-600 text-white shadow-2xs transition";
+                btnCumul.className = "px-2 py-0.5 text-[9px] font-bold rounded text-slate-600 transition";
                 label.innerText = "Daily PnL Distribution";
             } else {
-                btnCumul.className = "px-2.5 py-1 text-[10px] font-bold rounded bg-white text-emerald-700 shadow-2xs transition";
-                btnDaily.className = "px-2.5 py-1 text-[10px] font-bold rounded text-slate-600 hover:text-slate-900 transition";
+                btnCumul.className = "px-2 py-0.5 text-[9px] font-bold rounded bg-blue-600 text-white shadow-2xs transition";
+                btnDaily.className = "px-2 py-0.5 text-[9px] font-bold rounded text-slate-600 transition";
                 label.innerText = "Equity Curve (Cumulative PnL)";
             }
             renderChart();
@@ -495,51 +418,33 @@
             const min = Math.min(...dataPoints, 0);
             const range = (max - min) || 1;
 
-            const padding = 10;
-            const w = canvas.width;
-            const h = canvas.height - padding * 2;
-
             ctx.beginPath();
-            ctx.strokeStyle = '#059669';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2.5;
 
             dataPoints.forEach((val, i) => {
-                const x = (i / (dataPoints.length - 1 || 1)) * (w - 20) + 10;
-                const y = canvas.height - padding - ((val - min) / range) * h;
+                const x = (i / (dataPoints.length - 1 || 1)) * (canvas.width - 20) + 10;
+                const y = canvas.height - 10 - ((val - min) / range) * (canvas.height - 20);
                 if (i === 0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             });
             ctx.stroke();
-
-            // Draw points
-            dataPoints.forEach((val, i) => {
-                const x = (i / (dataPoints.length - 1 || 1)) * (w - 20) + 10;
-                const y = canvas.height - padding - ((val - min) / range) * h;
-                ctx.beginPath();
-                ctx.fillStyle = val >= 0 ? '#059669' : '#e11d48';
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            });
         }
 
         function calculateChecklistScore(tradeChecklist) {
-            if (!tradeChecklist) return { scorePct: 0, points: 0, maxPoints: checklistRules.length * 1 };
-            let points = 0;
-            let maxPoints = checklistRules.length * 1;
-            if (maxPoints === 0) return { scorePct: 0, points: 0, maxPoints: 0 };
+            if (!tradeChecklist) return { scorePct: 0 };
+            let points = 0, maxPoints = checklistRules.length;
+            if (maxPoints === 0) return { scorePct: 0 };
 
             checklistRules.forEach(rule => {
-                const val = tradeChecklist[rule] || (dropdownOptions[0] ? dropdownOptions[0].label : '');
-                const opt = dropdownOptions.find(o => (o.label || o) === val);
+                const val = tradeChecklist[rule] || 'Confirmed';
+                const opt = dropdownOptions.find(o => o.label === val);
                 const clr = opt ? opt.color : 'green';
                 if (clr === 'green') points += 1;
                 else if (clr === 'gray') points += 0;
-                else if (clr === 'pink' || clr === 'red') points -= 1;
+                else points -= 1;
             });
-
-            // Normalize points to percentage (min 0%)
-            let scorePct = Math.round((Math.max(0, points) / maxPoints) * 100);
-            return { scorePct, points, maxPoints };
+            return { scorePct: Math.round((Math.max(0, points) / maxPoints) * 100) };
         }
 
         function renderPerTradeChecklist() {
@@ -555,29 +460,22 @@
 
             if (!trade.checklist) {
                 trade.checklist = {};
-                checklistRules.forEach(r => trade.checklist[r] = dropdownOptions[0] ? dropdownOptions[0].label : '');
+                checklistRules.forEach(r => trade.checklist[r] = 'Confirmed');
             }
 
             checklistRules.forEach(rule => {
-                const currentVal = trade.checklist[rule] || (dropdownOptions[0] ? dropdownOptions[0].label : '');
+                const currentVal = trade.checklist[rule] || 'Confirmed';
                 const div = document.createElement('div');
-                div.className = "flex items-center justify-between bg-white p-1.5 rounded-lg border border-custom text-[11px]";
+                div.className = "flex items-center justify-between bg-white p-2 rounded-xl border border-custom text-[11px]";
                 div.innerHTML = `
                     <span class="font-bold text-slate-700 truncate max-w-[130px]">${rule}</span>
                     <select data-rule="${rule}" onchange="onPerTradeChecklistChange(this)" class="p-1 rounded text-[10px] font-semibold">
-                        ${dropdownOptions.map(opt => {
-                            const lbl = opt.label || opt;
-                            const clr = opt.color || 'green';
-                            const isSelected = lbl === currentVal ? 'selected' : '';
-                            return `<option value="${lbl}" data-color="${clr}" ${isSelected}>${lbl}</option>`;
-                        }).join('')}
+                        ${dropdownOptions.map(opt => `<option value="${opt.label}" data-color="${opt.color}" ${opt.label === currentVal ? 'selected' : ''}>${opt.label}</option>`).join('')}
                     </select>
                 `;
                 container.appendChild(div);
             });
-
-            const selects = container.querySelectorAll('select');
-            selects.forEach(s => updateCheckStyle(s));
+            container.querySelectorAll('select').forEach(s => updateCheckStyle(s));
         }
 
         function onPerTradeChecklistChange(selectElem) {
@@ -598,27 +496,15 @@
             selectElem.className = "p-1 rounded text-[10px] font-semibold ";
             if (color === 'green') selectElem.className += "status-green";
             else if (color === 'pink') selectElem.className += "status-pink";
-            else if (color === 'red') selectElem.className += "status-red";
             else selectElem.className += "status-gray";
         }
 
         function generateAIStrategySuggestion() {
-            const advisorElem = document.getElementById('ai-advisor-text');
-            advisorElem.innerText = "Gemini AI is scanning your trade history and current market volatility...";
-
+            const advisor = document.getElementById('ai-advisor-text');
+            advisor.innerText = "Analyzing your A+ setups, entry models, and risk parameters...";
             setTimeout(() => {
-                const trades = monthsData[activeMonthIndex].trades;
-                let wins = trades.filter(t => calculateMetrics(t, monthsData[activeMonthIndex].initialAsset, 0).netPnl > 0).length;
-                let winRate = trades.length > 0 ? ((wins / trades.length) * 100).toFixed(0) : 0;
-                
-                let suggestions = [
-                    `Based on your ${winRate}% win rate and current Silver/Crypto momentum, focus on daily HTF bias alignment before entering lower timeframe pullbacks.`,
-                    `Your recent checklist compliance is strong on risk management. Watch out for FOMC volatility and tighten your stop losses during New York session opens.`,
-                    `Market conditions show high liquidity clustering near major HTF levels. Maintain strict R:R ratios above 1:2.5 for your upcoming entries.`
-                ];
-                let randMsg = suggestions[Math.floor(Math.random() * suggestions.length)];
-                advisorElem.innerText = randMsg;
-            }, 500);
+                advisor.innerText = "💡 High win-rate setup detected when entry models align with Daily POI zones. Maintain current R:R parameters.";
+            }, 400);
         }
 
         async function fetchLiveAssetPrices() {
@@ -627,366 +513,41 @@
                 const data = await res.json();
                 if (data && Array.isArray(data)) {
                     trackedAssets.forEach(asset => {
-                        const symbol = asset.ticker.toUpperCase() + 'USDT';
-                        const match = data.find(item => item.symbol === symbol);
+                        const match = data.find(item => item.symbol === asset.ticker.toUpperCase() + 'USDT');
                         if (match) {
-                            const priceNum = parseFloat(match.lastPrice);
-                            asset.price = '$' + (priceNum > 10 ? priceNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : priceNum.toFixed(4));
+                            const p = parseFloat(match.lastPrice);
+                            asset.price = '$' + (p > 10 ? p.toLocaleString('en-US', {maximumFractionDigits: 2}) : p.toFixed(4));
                             asset.change = parseFloat(match.priceChangePercent).toFixed(2);
                         }
                     });
                     renderTickerBar();
                 }
-            } catch (err) {
-                console.log("Live price fetch fallback used");
-            }
+            } catch (e) {}
         }
 
         function renderTickerBar() {
             const container = document.getElementById('ticker-container');
             container.innerHTML = '';
-            trackedAssets.forEach((a, idx) => {
+            trackedAssets.forEach(a => {
                 const isUp = parseFloat(a.change) >= 0;
-                const badgeClass = isUp ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
-                
-                const tvSymbol = a.ticker === 'BTC' ? 'BINANCE:BTCUSDT' : a.ticker === 'ETH' ? 'BINANCE:ETHUSDT' : a.ticker;
-                const chartUrl = `https://www.tradingview.com/symbols/${tvSymbol}/`;
-
                 const div = document.createElement('div');
-                div.className = "group relative flex items-center gap-2 shrink-0 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 px-2.5 py-1 rounded transition pr-6 cursor-pointer";
-                div.onclick = () => window.open(chartUrl, '_blank');
-                div.title = "Click to open TradingView Chart ↗";
-
+                div.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 rounded-lg shrink-0";
                 div.innerHTML = `
-                    <span class="text-slate-300 font-semibold">${a.name} <span class="text-[9px] text-slate-500">(${a.ticker})</span></span>
+                    <span class="text-slate-300 font-semibold">${a.name}</span>
                     <span class="text-white font-bold">${a.price || '$0.00'}</span>
-                    <span class="text-[10px] font-semibold border px-1.5 py-0.5 rounded ${badgeClass}">${isUp ? '+' : ''}${a.change || 0}%</span>
-                    <button onclick="deleteAsset(event, ${idx})" title="Remove Symbol" class="opacity-0 group-hover:opacity-100 absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-400 font-bold px-1 transition text-[11px]">✕</button>
+                    <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}">${isUp ? '+' : ''}${a.change || 0}%</span>
                 `;
                 container.appendChild(div);
             });
         }
 
-        function deleteAsset(e, idx) {
-            e.stopPropagation();
-            trackedAssets.splice(idx, 1);
-            renderTickerBar();
-            saveCloudData();
-        }
-
-        function filterAssetSearchResults(query) {
-            const container = document.getElementById('search-results-list');
-            container.innerHTML = '';
-            const q = query.trim().toLowerCase();
-
-            const matches = masterSearchDatabase.filter(item => 
-                item.name.toLowerCase().includes(q) || item.ticker.toLowerCase().includes(q)
-            );
-
-            if (matches.length === 0 && q) {
-                container.innerHTML = `<div class="p-2 bg-slate-800/40 rounded border border-slate-800 text-center text-slate-500">No matching symbol found. Click below to add custom symbol.</div>`;
-                const customBtn = document.createElement('button');
-                customBtn.className = "w-full p-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded text-left font-semibold text-xs mt-1 transition";
-                customBtn.innerText = `+ Add "${query.toUpperCase()}" as Custom Symbol`;
-                customBtn.onclick = () => quickAddSymbol(query.toUpperCase(), query.toUpperCase(), '$100.00', 0);
-                container.appendChild(customBtn);
-                return;
-            }
-
-            (q ? matches : masterSearchDatabase).forEach(item => {
-                const btn = document.createElement('button');
-                btn.className = "w-full flex items-center justify-between p-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded transition text-left";
-                btn.onclick = () => quickAddSymbol(item.name, item.ticker, '$0.00', 0);
-                btn.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-xs text-white">${item.name}</span>
-                        <span class="text-[10px] text-slate-400 font-mono">${item.ticker}</span>
-                    </div>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 text-emerald-400 border border-slate-700">${item.category}</span>
-                `;
-                container.appendChild(btn);
-            });
-        }
-
-        function quickAddSymbol(name, ticker, price, change) {
-            if (!trackedAssets.some(a => a.ticker === ticker)) {
-                trackedAssets.push({ name, ticker, price, change });
-                renderTickerBar();
-                saveCloudData();
-                fetchLiveAssetPrices();
-            }
-            closeAddAssetModal();
-        }
-
-        function openAddAssetModal() { 
-            document.getElementById('add-asset-modal').classList.remove('hidden');
-            document.getElementById('asset-search-input').value = '';
-            filterAssetSearchResults('');
-        }
-        function closeAddAssetModal() { document.getElementById('add-asset-modal').classList.add('hidden'); }
-
-        function deleteSlotImage(event, slot) {
-            event.stopPropagation();
-            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-            if (trade) {
-                trade[slot] = '';
-                setImgPreview('img-' + slot, 'placeholder-' + slot, '');
-                saveCloudData();
-            }
-        }
-
-        function handleSlotClick(slot) {
-            setActiveSlot(slot);
-            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-            if (trade && trade[slot]) {
-                openImageLightbox(trade[slot]);
-            }
-        }
-
-        function openImageLightbox(imgSrc) {
-            const modal = document.getElementById('image-lightbox-modal');
-            const img = document.getElementById('lightbox-img');
-            img.src = imgSrc;
-            modal.classList.remove('hidden');
-        }
-
-        function closeImageLightbox() {
-            document.getElementById('image-lightbox-modal').classList.add('hidden');
-        }
-
-        function triggerFileInput(slot) {
-            activeSlot = slot;
-            document.getElementById('file-input-hidden').click();
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (file) {
-                processAndSaveImage(file);
-            }
-        }
-
-        function processAndSaveImage(file) {
-            compressAndResizeImage(file, 1000, 1000, 0.7, function(compressedBase64) {
-                const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-                if (trade) {
-                    trade[activeSlot] = compressedBase64;
-                    setImgPreview('img-' + activeSlot, 'placeholder-' + activeSlot, compressedBase64);
-                    saveCloudData();
-                }
-            });
-        }
-
-        function compressAndResizeImage(file, maxWidth, maxHeight, quality, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-                    } else {
-                        if (height > maxHeight) {
-                            width = Math.round((width * maxHeight) / height);
-                            height = maxHeight;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', quality));
-                };
-            };
-        }
-
-        document.addEventListener('paste', function(e) {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let index in items) {
-                const item = items[index];
-                if (item.kind === 'file') {
-                    const blob = item.getAsFile();
-                    processAndSaveImage(blob);
-                }
-            }
-        });
-
-        function openChecklistModal() {
-            renderRulesList();
-            renderOptionsList();
-            document.getElementById('checklist-modal').classList.remove('hidden');
-        }
-        function closeChecklistModal() {
-            document.getElementById('checklist-modal').classList.add('hidden');
-        }
-
-        function renderRulesList() {
-            const list = document.getElementById('active-rules-list');
-            list.innerHTML = '';
-            checklistRules.forEach((rule, idx) => {
-                const div = document.createElement('div');
-                div.className = "flex items-center justify-between text-xs bg-slate-50 p-1.5 rounded-lg border border-custom";
-                div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-rose-500 hover:text-rose-700 font-bold">✕</button>`;
-                list.appendChild(div);
-            });
-        }
-
-        function renderOptionsList() {
-            const container = document.getElementById('active-options-list');
-            container.innerHTML = '';
-            dropdownOptions.forEach((opt, idx) => {
-                const colorClass = (opt.color === 'pink' || opt.color === 'red') ? 'bg-pink-100 text-pink-800 border-pink-300' : opt.color === 'green' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-700 border-slate-300';
-                const span = document.createElement('span');
-                span.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-semibold ${colorClass}`;
-                span.innerHTML = `${opt.label || opt} (${opt.color}) <button onclick="removeOption(${idx})" class="hover:text-rose-600 font-bold">✕</button>`;
-                container.appendChild(span);
-            });
-        }
-
-        function addChecklistItem() {
-            const input = document.getElementById('new-rule-name');
-            const val = input.value.trim();
-            if (val) {
-                checklistRules.push(val);
-                input.value = '';
-                renderRulesList();
-                renderPerTradeChecklist();
-                saveCloudData();
-            }
-        }
-
-        function removeRule(idx) {
-            checklistRules.splice(idx, 1);
-            renderRulesList();
-            renderPerTradeChecklist();
-            saveCloudData();
-        }
-
-        function addDropdownOption() {
-            const input = document.getElementById('new-option-name');
-            const color = document.getElementById('new-option-color').value;
-            const val = input.value.trim();
-            if (val && !dropdownOptions.some(o => o.label === val)) {
-                dropdownOptions.push({ label: val, color: color });
-                input.value = '';
-                renderOptionsList();
-                renderPerTradeChecklist();
-                saveCloudData();
-            }
-        }
-
-        function removeOption(idx) {
-            if (dropdownOptions.length > 1) {
-                dropdownOptions.splice(idx, 1);
-                renderOptionsList();
-                renderPerTradeChecklist();
-                saveCloudData();
-            }
-        }
-
-        async function loadCloudData() {
-            if (!isFirebaseActive) return;
-            try {
-                const doc = await db.collection("journals").doc("main_journal").get();
-                if (doc.exists) {
-                    const cloudData = doc.data();
-                    if (cloudData.monthsData) monthsData = cloudData.monthsData;
-                    if (cloudData.trackedAssets) trackedAssets = cloudData.trackedAssets;
-                    if (cloudData.checklistRules) checklistRules = cloudData.checklistRules;
-                    if (cloudData.dropdownOptions) dropdownOptions = cloudData.dropdownOptions;
-                    renderAll();
-                }
-            } catch (err) {
-                console.error("Cloud fetch error:", err);
-            }
-        }
-
-        async function saveCloudData() {
-            if (!isFirebaseActive) return;
-            try {
-                await db.collection("journals").doc("main_journal").set({
-                    monthsData: monthsData,
-                    trackedAssets: trackedAssets,
-                    checklistRules: checklistRules,
-                    dropdownOptions: dropdownOptions,
-                    updatedAt: new Date()
-                });
-            } catch (err) {
-                console.error("Cloud save error:", err);
-            }
-        }
-
-        function fetchMacroNews() {
-            const container = document.getElementById('daily-events-container');
-            const dateHeader = document.getElementById('today-date-header');
-            
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            dateHeader.innerText = `Economic Events (${dateStr})`;
-
-            container.innerHTML = '<div class="text-slate-400 text-center py-2 text-[10px]">Refreshing live events...</div>';
-
-            setTimeout(() => {
-                const todayEvents = [
-                    { time: "07:30 EST", country: "US", impact: "high", event: "PPI (MoM) (Jul)", forecast: "0.2%", previous: "-0.3%" },
-                    { time: "07:30 EST", country: "US", impact: "high", event: "Initial Jobless Claims", forecast: "202K", previous: "199K" },
-                    { time: "07:30 EST", country: "US", impact: "medium", event: "Continuing Jobless Claims", forecast: "1,800K", previous: "1,801K" },
-                    { time: "07:30 EST", country: "US", impact: "medium", event: "PPI (YoY) (Jul)", forecast: "4.9%", previous: "5.5%" },
-                    { time: "09:30 EST", country: "US", impact: "medium", event: "Natural Gas Storage", forecast: "31B", previous: "33B" }
-                ];
-
-                container.innerHTML = '';
-                todayEvents.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = "flex items-center justify-between p-1.5 bg-white rounded border border-slate-200 shadow-2xs hover:bg-slate-100 transition";
-                    
-                    const stars = item.impact === 'high' ? '★★★' : '★★☆';
-                    const badgeColor = item.impact === 'high' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-amber-600 bg-amber-50 border-amber-200';
-
-                    div.innerHTML = `
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-mono text-[9px] font-bold text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100 shrink-0">${item.time}</span>
-                            <div class="flex flex-col">
-                                <span class="font-semibold text-slate-800 text-[10px] leading-tight">${item.event}</span>
-                                <span class="text-[8px] text-slate-400">Exp: ${item.forecast}</span>
-                            </div>
-                        </div>
-                        <span class="text-[8px] font-bold px-1 rounded border shrink-0 ${badgeColor}">${stars}</span>
-                    `;
-                    container.appendChild(div);
-                });
-            }, 300);
-        }
-
-        function setActiveSlot(slot) {
-            activeSlot = slot;
-            ['htf', 'mtf', 'ltf'].forEach(s => {
-                const el = document.getElementById('slot-' + s);
-                if (s === slot) el.classList.add('img-slot-active');
-                else el.classList.remove('img-slot-active');
-            });
-        }
-
         function calculateMetrics(trade, initialAsset, prevAccReturn = 0) {
             let totalEntVal = 0, totalEntQty = 0;
-            trade.ent.forEach((p, i) => {
-                if (p > 0 && trade.entQty[i] > 0) { totalEntVal += p * trade.entQty[i]; totalEntQty += trade.entQty[i]; }
-            });
+            trade.ent.forEach((p, i) => { if (p > 0 && trade.entQty[i] > 0) { totalEntVal += p * trade.entQty[i]; totalEntQty += trade.entQty[i]; } });
             let avgEnt = totalEntQty > 0 ? totalEntVal / totalEntQty : 0;
 
             let totalExitVal = 0, totalExitQty = 0;
-            trade.exit.forEach((p, i) => {
-                if (p > 0 && trade.exitQty[i] > 0) { totalExitVal += p * trade.exitQty[i]; totalExitQty += trade.exitQty[i]; }
-            });
+            trade.exit.forEach((p, i) => { if (p > 0 && trade.exitQty[i] > 0) { totalExitVal += p * trade.exitQty[i]; totalExitQty += trade.exitQty[i]; } });
             let avgExit = totalExitQty > 0 ? totalExitVal / totalExitQty : 0;
 
             let grossPnl = trade.dir === 'Long' ? (avgExit - avgEnt) * totalExitQty : (avgEnt - avgExit) * totalExitQty;
@@ -1004,7 +565,7 @@
             container.innerHTML = '';
             monthsData.forEach((m, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `px-3 py-1 text-xs rounded-lg font-semibold transition shrink-0 ${idx === activeMonthIndex ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.className = `px-3 py-1.5 text-xs rounded-xl font-bold transition shrink-0 ${idx === activeMonthIndex ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-custom'}`;
                 btn.innerText = m.name;
                 btn.onclick = () => { activeMonthIndex = idx; selectedTradeIndex = 0; renderAll(); };
                 container.appendChild(btn);
@@ -1012,15 +573,8 @@
         }
 
         function addMonthTab() {
-            const lastMonth = monthsData[monthsData.length - 1];
-            let totalNetPnl = 0;
-            if (lastMonth && lastMonth.trades) {
-                lastMonth.trades.forEach(t => { totalNetPnl += calculateMetrics(t, lastMonth.initialAsset, 0).netPnl; });
-            }
-            const initVal = lastMonth ? lastMonth.initialAsset + totalNetPnl : 10000;
-            monthsData.push({ name: `2026-0${monthsData.length + 8}`, initialAsset: initVal, trades: [] });
+            monthsData.push({ name: `2026-0${monthsData.length + 7}`, initialAsset: 10000, trades: [] });
             activeMonthIndex = monthsData.length - 1;
-            selectedTradeIndex = 0;
             renderAll();
             saveCloudData();
         }
@@ -1063,25 +617,23 @@
 
                 if (!t.checklist) {
                     t.checklist = {};
-                    checklistRules.forEach(r => t.checklist[r] = dropdownOptions[0] ? dropdownOptions[0].label : '');
+                    checklistRules.forEach(r => t.checklist[r] = 'Confirmed');
                 }
                 const scoreObj = calculateChecklistScore(t.checklist);
 
                 const tr = document.createElement('tr');
-                let rowColorClass = m.netPnl < 0 ? 'row-loss' : m.netPnl > 0 ? 'row-profit' : 'bg-card-hover';
-                
+                let rowColorClass = m.netPnl < 0 ? 'row-loss' : m.netPnl > 0 ? 'row-profit' : 'bg-white';
                 tr.className = `border-b border-custom ${rowColorClass}`;
                 if (idx === selectedTradeIndex) {
-                    if (m.netPnl >= 0) tr.style.borderLeft = '4px solid #059669';
-                    else tr.style.borderLeft = '4px solid #f43f5e';
+                    tr.style.borderLeft = m.netPnl >= 0 ? '4px solid #2563eb' : '4px solid #e11d48';
                 }
 
                 const pnlColor = m.netPnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold';
-                const scoreColor = scoreObj.scorePct >= 70 ? 'bg-emerald-100 text-emerald-800' : scoreObj.scorePct >= 40 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800';
+                const scoreColor = scoreObj.scorePct >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
 
                 tr.innerHTML = `
-                    <td class="p-1 border-r border-custom text-center"><input type="date" value="${t.date || ''}" onchange="updateTradeValue(${idx}, 'date', null, this.value)" class="tbl-input text-slate-700"></td>
-                    <td class="p-1 border-r border-custom section-divider text-center"><input type="text" value="${t.pair || ''}" placeholder="TICKER" onchange="updateTradeValue(${idx}, 'pair', null, this.value)" class="tbl-input text-slate-800 font-semibold uppercase"></td>
+                    <td class="p-1 border-r border-custom text-center"><input type="date" value="${t.date || ''}" onchange="updateTradeValue(${idx}, 'date', null, this.value)" class="tbl-input"></td>
+                    <td class="p-1 border-r border-custom section-divider text-center"><input type="text" value="${t.pair || ''}" placeholder="TICKER" onchange="updateTradeValue(${idx}, 'pair', null, this.value)" class="tbl-input font-bold uppercase"></td>
                     <td class="p-1 border-r border-custom section-divider text-center">
                         <select onchange="updateTradeValue(${idx}, 'dir', null, this.value)" class="tbl-input font-bold ${t.dir === 'Long' ? 'text-emerald-600' : 'text-rose-600'}">
                             <option value="Long" ${t.dir === 'Long' ? 'selected' : ''}>Long</option>
@@ -1098,14 +650,13 @@
                     <td class="p-1 border-r border-custom section-divider"><input type="number" value="${t.exit[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exit', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.exitQty[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exitQty', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom section-divider"><input type="number" value="${t.fees || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'fees', null, this.value)" class="tbl-input text-slate-500"></td>
-                    <td class="p-2 border-r border-custom section-divider text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${scoreColor}">${scoreObj.scorePct}%</span></td>
+                    <td class="p-2 border-r border-custom section-divider text-center"><span class="px-2 py-0.5 rounded-md font-bold text-[10px] ${scoreColor}">${scoreObj.scorePct}%</span></td>
                     <td class="p-2 border-r border-custom section-divider text-right ${pnlColor}">$${m.netPnl.toFixed(3)}</td>
                     <td class="p-2 border-r border-custom section-divider text-right ${pnlColor}">${m.netPnlPct.toFixed(2)}%</td>
-                    <td class="p-2 border-r border-custom section-divider text-right ${m.accContr >= 0 ? 'text-emerald-600 font-semibold' : 'text-rose-600 font-semibold'}">${m.accContr.toFixed(3)}%</td>
-                    <td class="p-2 border-r border-custom section-divider text-right font-bold text-slate-800">${m.accReturn.toFixed(3)}%</td>
+                    <td class="p-2 border-r border-custom section-divider text-right font-bold text-slate-900">${m.accReturn.toFixed(3)}%</td>
                     <td class="p-2 section-divider text-center flex items-center justify-center gap-1">
-                        <button onclick="selectTrade(${idx})" title="Review Trade" class="p-1 hover:bg-emerald-100 rounded text-slate-500 hover:text-emerald-600 transition cursor-pointer"><i data-lucide="file-text" class="w-4 h-4"></i></button>
-                        <button onclick="deleteTrade(${idx})" title="Delete Trade" class="p-1 hover:bg-rose-100 rounded text-slate-400 hover:text-rose-600 transition cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="selectTrade(${idx})" title="Review" class="p-1 hover:bg-blue-50 rounded-lg text-slate-500 hover:text-blue-600 transition cursor-pointer"><i data-lucide="file-text" class="w-4 h-4"></i></button>
+                        <button onclick="deleteTrade(${idx})" title="Delete" class="p-1 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600 transition cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1119,7 +670,7 @@
 
         function updateKPIs() {
             const currentMonth = monthsData[activeMonthIndex];
-            let totalNetPnl = 0, totalFees = 0, wins = 0, winSum = 0, lossSum = 0, totalChecklistPct = 0;
+            let totalNetPnl = 0, totalFees = 0, wins = 0, winSum = 0, lossSum = 0, totalChecklist = 0;
 
             currentMonth.trades.forEach(t => {
                 const m = calculateMetrics(t, currentMonth.initialAsset, 0);
@@ -1127,10 +678,7 @@
                 totalFees += (t.fees || 0);
                 if (m.netPnl > 0) { wins++; winSum += m.netPnl; }
                 else if (m.netPnl < 0) { lossSum += Math.abs(m.netPnl); }
-
-                if (t.checklist) {
-                    totalChecklistPct += calculateChecklistScore(t.checklist).scorePct;
-                }
+                if (t.checklist) totalChecklist += calculateChecklistScore(t.checklist).scorePct;
             });
 
             const totalTrades = currentMonth.trades.length;
@@ -1138,16 +686,10 @@
             const profitFactor = lossSum > 0 ? (winSum / lossSum) : winSum > 0 ? 99.9 : 0;
             const endAsset = currentMonth.initialAsset + totalNetPnl;
             const totalPnlPct = currentMonth.initialAsset > 0 ? (totalNetPnl / currentMonth.initialAsset) * 100 : 0;
-            const avgChecklist = totalTrades > 0 ? (totalChecklistPct / totalTrades).toFixed(1) : 0;
+            const avgChecklist = totalTrades > 0 ? (totalChecklist / totalTrades).toFixed(1) : 0;
 
             document.getElementById('kpi-net-pnl').innerText = (totalNetPnl >= 0 ? '+$' : '-$') + Math.abs(totalNetPnl).toFixed(2);
-            document.getElementById('kpi-net-pnl').className = `text-xl font-black tracking-tight mt-0.5 ${totalNetPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-            
-            const pnlPctElem = document.getElementById('kpi-pnl-pct');
-            pnlPctElem.innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '%';
-            pnlPctElem.className = `text-[10px] font-semibold ${totalPnlPct >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
-
-            document.getElementById('kpi-end-asset').innerText = '$' + endAsset.toFixed(2);
+            document.getElementById('kpi-pnl-pct').innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '% Return';
             document.getElementById('kpi-winrate').innerText = winRate.toFixed(1) + '%';
             document.getElementById('kpi-pf').innerText = profitFactor.toFixed(2);
             document.getElementById('kpi-avg-checklist').innerText = avgChecklist + '%';
@@ -1163,22 +705,12 @@
         function selectTrade(index) {
             selectedTradeIndex = index;
             const trade = monthsData[activeMonthIndex].trades[index];
-            if (!trade) {
-                document.getElementById('selected-trade-label').innerText = `No Trade Selected`;
-                document.getElementById('review-notes').value = '';
-                setImgPreview('img-htf', 'placeholder-htf', '');
-                setImgPreview('img-mtf', 'placeholder-mtf', '');
-                setImgPreview('img-ltf', 'placeholder-ltf', '');
-                return;
-            }
-
-            document.getElementById('selected-trade-label').innerText = `Trade #${index + 1} (${trade.pair || 'No Ticker'})`;
+            if (!trade) return;
+            document.getElementById('selected-trade-label').innerText = `Trade #${index + 1} (${trade.pair || 'Ticker'})`;
             document.getElementById('review-notes').value = trade.notes || '';
-
             setImgPreview('img-htf', 'placeholder-htf', trade.htf);
             setImgPreview('img-mtf', 'placeholder-mtf', trade.mtf);
             setImgPreview('img-ltf', 'placeholder-ltf', trade.ltf);
-
             renderJournal();
         }
 
@@ -1198,33 +730,74 @@
 
         function saveNotes(val) {
             const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-            if (trade) {
-                trade.notes = val;
-                saveCloudData();
-            }
+            if (trade) { trade.notes = val; saveCloudData(); }
         }
 
         function addNewTrade() {
             let defaultChecklist = {};
-            checklistRules.forEach(r => defaultChecklist[r] = dropdownOptions[0] ? dropdownOptions[0].label : '');
-
+            checklistRules.forEach(r => defaultChecklist[r] = 'Confirmed');
             monthsData[activeMonthIndex].trades.unshift({
                 date: new Date().toISOString().split('T')[0],
-                pair: "", 
-                dir: "Long", 
-                lev: 0, 
-                ent: [0, 0], 
-                entQty: [0, 0], 
-                exit: [0, 0], 
-                exitQty: [0, 0],
-                fees: 0, 
-                checklist: defaultChecklist,
-                htf: '', 
-                mtf: '', 
-                ltf: '', 
-                notes: ""
+                pair: "", dir: "Long", lev: 20, ent: [0, 0], entQty: [0, 0], exit: [0, 0], exitQty: [0, 0],
+                fees: 0, checklist: defaultChecklist, htf: '', mtf: '', ltf: '', notes: ""
             });
             selectTrade(0);
+            saveCloudData();
+        }
+
+        async function loadCloudData() {
+            if (!isFirebaseActive) return;
+            try {
+                const doc = await db.collection("journals").doc("main_journal").get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.monthsData) monthsData = data.monthsData;
+                    if (data.checklistRules) checklistRules = data.checklistRules;
+                    renderAll();
+                }
+            } catch (e) {}
+        }
+
+        async function saveCloudData() {
+            if (!isFirebaseActive) return;
+            try {
+                await db.collection("journals").doc("main_journal").set({
+                    monthsData, checklistRules, updatedAt: new Date()
+                });
+            } catch (e) {}
+        }
+
+        function openChecklistModal() { document.getElementById('checklist-modal').classList.remove('hidden'); renderRulesList(); }
+        function closeChecklistModal() { document.getElementById('checklist-modal').classList.add('hidden'); }
+        function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); }
+        function closeAddAssetModal() { document.getElementById('add-asset-modal').classList.add('hidden'); }
+
+        function renderRulesList() {
+            const list = document.getElementById('active-rules-list');
+            list.innerHTML = '';
+            checklistRules.forEach((rule, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between text-xs bg-slate-50 p-2 rounded-xl border border-custom";
+                div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-rose-500 font-bold">✕</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        function addChecklistItem() {
+            const input = document.getElementById('new-rule-name');
+            if (input.value.trim()) {
+                checklistRules.push(input.value.trim());
+                input.value = '';
+                renderRulesList();
+                renderPerTradeChecklist();
+                saveCloudData();
+            }
+        }
+
+        function removeRule(idx) {
+            checklistRules.splice(idx, 1);
+            renderRulesList();
+            renderPerTradeChecklist();
             saveCloudData();
         }
 
@@ -1233,8 +806,6 @@
             renderTabs();
             renderJournal();
             selectTrade(selectedTradeIndex);
-            setActiveSlot('htf');
-            fetchMacroNews();
             fetchLiveAssetPrices();
             generateAIStrategySuggestion();
         }
@@ -1242,7 +813,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderAll();
             loadCloudData();
-            setInterval(fetchLiveAssetPrices, 10000);
         });
     </script>
 </body>
