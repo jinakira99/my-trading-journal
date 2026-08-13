@@ -72,7 +72,7 @@
         </div>
     </header>
 
-    <!-- Main Container (Responsive Stack on Mobile) -->
+    <!-- Main Container -->
     <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         
         <!-- Left Dashboard & Journal Table -->
@@ -176,7 +176,7 @@
 
         </div>
 
-        <!-- Right Side Trade Review Drawer (Mobile Responsive: Full Width below main section) -->
+        <!-- Right Side Trade Review Drawer -->
         <aside class="w-full md:w-80 bg-card border-t md:border-t-0 md:border-l border-custom p-3 flex flex-col overflow-y-auto shrink-0 space-y-3 shadow-sm">
             <div class="flex items-center justify-between border-b border-custom pb-2">
                 <h3 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
@@ -387,6 +387,8 @@
         ];
 
         let checklistRules = ["Bias Alignment (Daily)", "High POI (LQ Near)", "LQ + MS Confirmation", "Kill Zone Alignment", "Risk to Reward (R:R)"];
+        let checklistState = {}; // Stores saved selected values per rule
+
         let dropdownOptions = [
             { label: "Ignored", color: "pink" },
             { label: "Confirmed", color: "green" },
@@ -444,16 +446,19 @@
                 div.ondrop = (e) => handleDrop(e, idx);
                 div.ondragend = (e) => handleDragEnd(e);
 
+                const currentVal = checklistState[rule] || (dropdownOptions[0] ? dropdownOptions[0].label : '');
+
                 div.innerHTML = `
                     <div class="flex items-center justify-between mb-1">
                         <label class="text-[10px] text-slate-600 font-bold truncate cursor-grab">${rule}</label>
                         <i data-lucide="grip-vertical" class="w-3 h-3 text-slate-300"></i>
                     </div>
-                    <select onchange="updateCheckStyle(this)" class="w-full p-1.5 rounded text-xs font-semibold status-green">
+                    <select data-rule="${rule}" onchange="onChecklistChange(this)" class="w-full p-1.5 rounded text-xs font-semibold">
                         ${dropdownOptions.map(opt => {
                             const lbl = opt.label || opt;
                             const clr = opt.color || 'green';
-                            return `<option value="${lbl}" data-color="${clr}">${lbl}</option>`;
+                            const isSelected = lbl === currentVal ? 'selected' : '';
+                            return `<option value="${lbl}" data-color="${clr}" ${isSelected}>${lbl}</option>`;
                         }).join('')}
                     </select>
                 `;
@@ -463,6 +468,13 @@
             
             const selects = container.querySelectorAll('select');
             selects.forEach(s => updateCheckStyle(s));
+        }
+
+        function onChecklistChange(selectElem) {
+            const rule = selectElem.getAttribute('data-rule');
+            checklistState[rule] = selectElem.value;
+            updateCheckStyle(selectElem);
+            saveCloudData();
         }
 
         function resetChecklist() {
@@ -477,8 +489,11 @@
                     }
                 }
                 selectElem.selectedIndex = targetIdx;
+                const rule = selectElem.getAttribute('data-rule');
+                checklistState[rule] = selectElem.value;
                 updateCheckStyle(selectElem);
             });
+            saveCloudData();
         }
 
         function updateCheckStyle(selectElem) {
@@ -735,7 +750,8 @@
         }
 
         function removeRule(idx) {
-            checklistRules.splice(idx, 1);
+            const removed = checklistRules.splice(idx, 1)[0];
+            if (removed && checklistState[removed]) delete checklistState[removed];
             renderRulesList();
             renderChecklistUI();
             saveCloudData();
@@ -772,6 +788,7 @@
                     if (cloudData.monthsData) monthsData = cloudData.monthsData;
                     if (cloudData.trackedAssets) trackedAssets = cloudData.trackedAssets;
                     if (cloudData.checklistRules) checklistRules = cloudData.checklistRules;
+                    if (cloudData.checklistState) checklistState = cloudData.checklistState;
                     if (cloudData.dropdownOptions) dropdownOptions = cloudData.dropdownOptions;
                     renderAll();
                 }
@@ -787,6 +804,7 @@
                     monthsData: monthsData,
                     trackedAssets: trackedAssets,
                     checklistRules: checklistRules,
+                    checklistState: checklistState,
                     dropdownOptions: dropdownOptions,
                     updatedAt: new Date()
                 });
