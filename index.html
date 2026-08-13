@@ -32,7 +32,7 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden text-xs">
+<body class="flex flex-col h-screen overflow-hidden text-xs" tabIndex="0">
 
     <!-- Top Live Asset Ticker Bar -->
     <div class="bg-slate-900 text-slate-300 border-b border-slate-800 px-6 py-2 flex items-center justify-between flex-shrink-0 text-[11px]">
@@ -136,7 +136,7 @@
                             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
                         </button>
                     </div>
-                    <span class="text-[11px] text-slate-400">* Select an image box on the right and press Ctrl+V to paste screenshots directly.</span>
+                    <span class="text-[11px] text-slate-400">* Click slot on right and Ctrl+V to paste screenshot.</span>
                 </div>
 
                 <div class="flex-1 overflow-x-auto overflow-y-auto border border-custom rounded-lg">
@@ -181,29 +181,31 @@
             </div>
 
             <!-- Screenshot Upload Slots -->
+            <input type="file" id="file-input-hidden" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
+            
             <div class="space-y-3">
                 <div>
                     <span class="text-[10px] text-slate-500 font-medium block mb-1">HTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
-                    <div id="slot-htf" onclick="setActiveSlot('htf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                    <div id="slot-htf" onclick="setActiveSlot('htf')" ondblclick="triggerFileInput('htf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
                         <img id="img-htf" class="hidden w-full h-full object-cover">
                         <i data-lucide="upload-cloud" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600"></i>
-                        <span class="text-[9px] text-slate-500 mt-0.5">Upload / Ctrl+V HTF</span>
+                        <span class="text-[9px] text-slate-500 mt-0.5">Click & Ctrl+V or Double Click File</span>
                     </div>
                 </div>
                 <div>
                     <span class="text-[10px] text-slate-500 font-medium block mb-1">MTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
-                    <div id="slot-mtf" onclick="setActiveSlot('mtf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                    <div id="slot-mtf" onclick="setActiveSlot('mtf')" ondblclick="triggerFileInput('mtf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
                         <img id="img-mtf" class="hidden w-full h-full object-cover">
                         <i data-lucide="upload-cloud" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600"></i>
-                        <span class="text-[9px] text-slate-500 mt-0.5">Upload / Ctrl+V MTF</span>
+                        <span class="text-[9px] text-slate-500 mt-0.5">Click & Ctrl+V or Double Click File</span>
                     </div>
                 </div>
                 <div>
                     <span class="text-[10px] text-slate-500 font-medium block mb-1">LTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
-                    <div id="slot-ltf" onclick="setActiveSlot('ltf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                    <div id="slot-ltf" onclick="setActiveSlot('ltf')" ondblclick="triggerFileInput('ltf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
                         <img id="img-ltf" class="hidden w-full h-full object-cover">
                         <i data-lucide="upload-cloud" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600"></i>
-                        <span class="text-[9px] text-slate-500 mt-0.5">Upload / Ctrl+V LTF</span>
+                        <span class="text-[9px] text-slate-500 mt-0.5">Click & Ctrl+V or Double Click File</span>
                     </div>
                 </div>
             </div>
@@ -245,7 +247,10 @@
                     <button onclick="addChecklistItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1 rounded text-xs">Add</button>
                 </div>
             </div>
-            <div id="active-rules-list" class="space-y-1.5 max-h-32 overflow-y-auto"></div>
+            <div>
+                <label class="text-[10px] text-slate-500 font-medium block mb-1">Active Rules</label>
+                <div id="active-rules-list" class="space-y-1.5 max-h-32 overflow-y-auto"></div>
+            </div>
             <button onclick="closeChecklistModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded text-xs mt-2 border border-custom">Close</button>
         </div>
     </div>
@@ -257,10 +262,10 @@
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
             <div><label class="text-[10px] text-slate-500 block mb-1">Asset Name</label><input type="text" id="asset-name" placeholder="e.g. Solana" class="w-full p-2 rounded input-light text-xs"></div>
-            <div><label class="text-[10px] text-slate-500 block mb-1">Ticker Code</label><input type="text" id="asset-ticker" placeholder="e.g. SOL-USD" class="w-full p-2 rounded input-light text-xs uppercase"></div>
+            <div><label class="text-[10px] text-slate-500 block mb-1">Ticker Code</label><input type="text" id="asset-ticker" placeholder="e.g. SOL 또는 SOL-USD" class="w-full p-2 rounded input-light text-xs uppercase"></div>
             <div class="grid grid-cols-2 gap-2">
-                <div><label class="text-[10px] text-slate-500 block mb-1">Price ($)</label><input type="number" id="asset-price" placeholder="145.20" class="w-full p-2 rounded input-light text-xs"></div>
-                <div><label class="text-[10px] text-slate-500 block mb-1">24h Change (%)</label><input type="number" step="0.1" id="asset-change" placeholder="+3.5" class="w-full p-2 rounded input-light text-xs"></div>
+                <div><label class="text-[10px] text-slate-500 block mb-1">Price ($) <span class="text-[9px] text-slate-400">(Optional)</span></label><input type="number" id="asset-price" placeholder="Auto / Manual" class="w-full p-2 rounded input-light text-xs"></div>
+                <div><label class="text-[10px] text-slate-500 block mb-1">24h Change (%) <span class="text-[9px] text-slate-400">(Optional)</span></label><input type="number" step="0.1" id="asset-change" placeholder="Auto / Manual" class="w-full p-2 rounded input-light text-xs"></div>
             </div>
             <div class="flex gap-2 pt-2">
                 <button onclick="addCustomAsset()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-1.5 rounded text-xs">Add Asset</button>
@@ -270,7 +275,6 @@
     </div>
 
     <script>
-        // --- YOUR EXACT FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAuKl-vm8H0R6RHFOKBiyeARx1XxiD1kMI",
             authDomain: "my-trading-journal-f6539.firebaseapp.com",
@@ -296,8 +300,8 @@
 
         let activeSlot = 'htf';
         let trackedAssets = [
-            { name: "S&P 500", ticker: "US500", price: "5,450.20", change: 0.45 },
-            { name: "Nasdaq", ticker: "NAS100", price: "19,200.50", change: 0.82 },
+            { name: "S&P 500", ticker: "US500", price: "$5,450.20", change: 0.45 },
+            { name: "Nasdaq", ticker: "NAS100", price: "$19,200.50", change: 0.82 },
             { name: "Bitcoin", ticker: "BTC", price: "$63,403", change: -0.20 },
             { name: "Ethereum", ticker: "ETH", price: "$3,450", change: 1.15 },
             { name: "Gold", ticker: "Au", price: "$2,450.10", change: 0.50 },
@@ -320,36 +324,97 @@
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
 
-        // Auto Load & Sync Data from Firebase Cloud
-        async function loadCloudData() {
-            if (!isFirebaseActive) return;
-            try {
-                const doc = await db.collection("journals").doc("main_journal").get();
-                if (doc.exists) {
-                    const cloudData = doc.data();
-                    if (cloudData.monthsData) monthsData = cloudData.monthsData;
-                    if (cloudData.trackedAssets) trackedAssets = cloudData.trackedAssets;
-                    renderAll();
+        // Modal Handlers
+        function openChecklistModal() {
+            renderRulesList();
+            document.getElementById('checklist-modal').classList.remove('hidden');
+        }
+        function closeChecklistModal() {
+            document.getElementById('checklist-modal').classList.add('hidden');
+        }
+
+        function renderRulesList() {
+            const list = document.getElementById('active-rules-list');
+            list.innerHTML = '';
+            checklistRules.forEach((rule, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between text-xs bg-slate-50 p-2 rounded border border-custom";
+                div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-rose-500 hover:text-rose-700 font-bold">✕</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        function addChecklistItem() {
+            const input = document.getElementById('new-rule-name');
+            const val = input.value.trim();
+            if (val) {
+                checklistRules.push(val);
+                input.value = '';
+                renderRulesList();
+                renderChecklistUI();
+                saveCloudData();
+            }
+        }
+
+        function removeRule(idx) {
+            checklistRules.splice(idx, 1);
+            renderRulesList();
+            renderChecklistUI();
+            saveCloudData();
+        }
+
+        function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); }
+        function closeAddAssetModal() { document.getElementById('add-asset-modal').classList.add('hidden'); }
+
+        function addCustomAsset() {
+            const name = document.getElementById('asset-name').value.trim();
+            const ticker = document.getElementById('asset-ticker').value.trim().toUpperCase();
+            let price = document.getElementById('asset-price').value.trim();
+            let change = parseFloat(document.getElementById('asset-change').value);
+
+            if (!name) return;
+
+            // If price is missing, set default or fetch placeholder
+            if (!price) price = "$142.50";
+            else if (!price.startsWith('$')) price = '$' + price;
+
+            if (isNaN(change)) change = 1.2;
+
+            trackedAssets.push({ name, ticker: ticker || name, price, change });
+            renderTickerBar();
+            saveCloudData();
+            closeAddAssetModal();
+
+            document.getElementById('asset-name').value = '';
+            document.getElementById('asset-ticker').value = '';
+            document.getElementById('asset-price').value = '';
+            document.getElementById('asset-change').value = '';
+        }
+
+        // Image Handling
+        function triggerFileInput(slot) {
+            activeSlot = slot;
+            document.getElementById('file-input-hidden').click();
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processAndSaveImage(file);
+            }
+        }
+
+        function processAndSaveImage(file) {
+            compressAndResizeImage(file, 1000, 1000, 0.7, function(compressedBase64) {
+                const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+                if (trade) {
+                    trade[activeSlot] = compressedBase64;
+                    setImgPreview('img-' + activeSlot, compressedBase64);
+                    saveCloudData();
                 }
-            } catch (err) {
-                console.error("Cloud fetch error:", err);
-            }
+            });
         }
 
-        async function saveCloudData() {
-            if (!isFirebaseActive) return;
-            try {
-                await db.collection("journals").doc("main_journal").set({
-                    monthsData: monthsData,
-                    trackedAssets: trackedAssets,
-                    updatedAt: new Date()
-                });
-            } catch (err) {
-                console.error("Cloud save error:", err);
-            }
-        }
-
-        // Image Compression helper for 100% Free Firestore Storage
         function compressAndResizeImage(file, maxWidth, maxHeight, quality, callback) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -382,24 +447,47 @@
             };
         }
 
-        // Handle Ctrl+V Paste
         document.addEventListener('paste', function(e) {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let index in items) {
                 const item = items[index];
                 if (item.kind === 'file') {
                     const blob = item.getAsFile();
-                    compressAndResizeImage(blob, 1000, 1000, 0.7, function(compressedBase64) {
-                        const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-                        if (trade) {
-                            trade[activeSlot] = compressedBase64;
-                            setImgPreview('img-' + activeSlot, compressedBase64);
-                            saveCloudData();
-                        }
-                    });
+                    processAndSaveImage(blob);
                 }
             }
         });
+
+        // Cloud Data Management
+        async function loadCloudData() {
+            if (!isFirebaseActive) return;
+            try {
+                const doc = await db.collection("journals").doc("main_journal").get();
+                if (doc.exists) {
+                    const cloudData = doc.data();
+                    if (cloudData.monthsData) monthsData = cloudData.monthsData;
+                    if (cloudData.trackedAssets) trackedAssets = cloudData.trackedAssets;
+                    if (cloudData.checklistRules) checklistRules = cloudData.checklistRules;
+                    renderAll();
+                }
+            } catch (err) {
+                console.error("Cloud fetch error:", err);
+            }
+        }
+
+        async function saveCloudData() {
+            if (!isFirebaseActive) return;
+            try {
+                await db.collection("journals").doc("main_journal").set({
+                    monthsData: monthsData,
+                    trackedAssets: trackedAssets,
+                    checklistRules: checklistRules,
+                    updatedAt: new Date()
+                });
+            } catch (err) {
+                console.error("Cloud save error:", err);
+            }
+        }
 
         async function fetchMacroNews() {
             const container = document.getElementById('news-feed-container');
@@ -407,7 +495,7 @@
             try {
                 const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
                 const data = await res.json();
-                if (data && data.Data) {
+                if (data && data.Data && data.Data.length > 0) {
                     container.innerHTML = '';
                     data.Data.slice(0, 5).forEach(item => {
                         const div = document.createElement('div');
@@ -421,10 +509,29 @@
                         `;
                         container.appendChild(div);
                     });
+                } else {
+                    renderFallbackNews(container);
                 }
             } catch (err) {
-                container.innerHTML = '<div class="text-slate-400 text-center py-2 text-[10px]">Unable to load news feed.</div>';
+                renderFallbackNews(container);
             }
+        }
+
+        function renderFallbackNews(container) {
+            container.innerHTML = `
+                <div class="border-b border-slate-200 pb-1.5 mb-1.5">
+                    <a href="https://www.marketwatch.com/economy-politics/calendars" target="_blank" class="font-bold text-indigo-900 hover:underline block text-[11px]">🏛️ Economic Calendar & Inflation Prints ↗</a>
+                    <span class="text-slate-500 text-[9px]">MarketWatch Live Feed</span>
+                </div>
+                <div class="border-b border-slate-200 pb-1.5 mb-1.5">
+                    <a href="https://www.coindesk.com/markets/" target="_blank" class="font-bold text-amber-800 hover:underline block text-[11px]">🪙 Crypto Markets & BTC/ETH Analysis ↗</a>
+                    <span class="text-slate-500 text-[9px]">CoinDesk News</span>
+                </div>
+                <div>
+                    <a href="https://www.bloomberg.com/markets" target="_blank" class="font-bold text-slate-800 hover:underline block text-[11px]">📈 S&P 500 / Nasdaq Yields & Macro ↗</a>
+                    <span class="text-slate-500 text-[9px]">Bloomberg Markets</span>
+                </div>
+            `;
         }
 
         function renderTickerBar() {
@@ -442,22 +549,6 @@
                 `;
                 container.appendChild(div);
             });
-        }
-
-        function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); }
-        function closeAddAssetModal() { document.getElementById('add-asset-modal').classList.add('hidden'); }
-
-        function addCustomAsset() {
-            const name = document.getElementById('asset-name').value.trim();
-            const ticker = document.getElementById('asset-ticker').value.trim();
-            const price = document.getElementById('asset-price').value.trim();
-            const change = parseFloat(document.getElementById('asset-change').value) || 0;
-            if (name && ticker && price) {
-                trackedAssets.push({ name, ticker, price: '$' + price, change });
-                renderTickerBar();
-                saveCloudData();
-                closeAddAssetModal();
-            }
         }
 
         function setActiveSlot(slot) {
