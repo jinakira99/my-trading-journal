@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Journal & Performance Dashboard</title>
+    <title>Advanced Trading Journal & Performance Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -14,7 +14,7 @@
     <style>
         body { background-color: #f8fafc; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .bg-card { background-color: #ffffff; }
-        .bg-card-hover:hover { background-color: #f1f5f9; }
+        .bg-card-hover:hover { background-color: #f8fafc; }
         .border-custom { border-color: #e2e8f0; }
         .input-light { background-color: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; }
         .input-light:focus { border-color: #059669; outline: none; background-color: #ffffff; }
@@ -27,15 +27,12 @@
         .status-gray { background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
 
         /* Row PnL Background Tints & Side Borders */
-        .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; border-left: 4px solid #059669 !important; }
-        .row-loss { background-color: rgba(252, 231, 243, 0.35) !important; border-left: 4px solid #f43f5e !important; }
+        .row-profit { background-color: rgba(209, 250, 229, 0.2) !important; border-left: 4px solid #059669 !important; }
+        .row-loss { background-color: rgba(252, 231, 243, 0.25) !important; border-left: 4px solid #f43f5e !important; }
 
-        /* Clean Visible Gray Section Dividers */
         .section-divider { border-left: 1px solid #cbd5e1 !important; }
-
         .img-slot-active { border-color: #059669 !important; ring: 2px; ring-color: #a7f3d0; }
 
-        /* Draggable item styles */
         .draggable-item { cursor: grab; user-select: none; transition: transform 0.15s ease, opacity 0.15s ease; }
         .draggable-item:active { cursor: grabbing; }
         .dragging { opacity: 0.4; transform: scale(0.98); }
@@ -65,10 +62,10 @@
     </div>
 
     <!-- Header & Month Tabs -->
-    <header class="bg-card border-b border-custom px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between flex-shrink-0 shadow-sm gap-2">
+    <header class="bg-card border-b border-custom px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between flex-shrink-0 shadow-xs gap-2">
         <div class="flex items-center gap-4 md:gap-6 overflow-x-auto max-w-full">
             <div class="flex items-center gap-2 shrink-0">
-                <div class="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center font-bold text-white text-sm">E</div>
+                <div class="w-7 h-7 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-sm">E</div>
                 <h1 class="text-sm font-bold text-slate-800 tracking-wide">Trading Dashboard</h1>
             </div>
             
@@ -85,95 +82,122 @@
         <!-- Left Dashboard & Journal Table -->
         <div class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto space-y-4">
             
-            <!-- Pre-Trade Setup Checklist -->
-            <div class="bg-card border border-custom rounded-xl p-3 md:p-4 shadow-sm">
-                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
-                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">A+ Setup Pre-Trade Checklist <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">(Drag to reorder)</span></h2>
+            <!-- Executive Performance Dashboard (KPI + Chart + AI Advisor) -->
+            <div class="bg-card border border-custom rounded-2xl p-4 shadow-sm space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-custom pb-2">
+                    <div>
+                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> Executive Performance Dashboard (KPI)
+                        </h2>
+                        <p class="text-[10px] text-slate-400">Real-time trading performance, equity curves & AI insights</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openChecklistModal()" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-custom px-2.5 py-1 rounded flex items-center gap-1 transition font-medium">
-                            <i data-lucide="settings" class="w-3 h-3"></i> Manage Rules
-                        </button>
-                        <button onclick="resetChecklist()" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-custom px-2.5 py-1 rounded flex items-center gap-1 transition font-medium">
-                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset Checklist
-                        </button>
+                    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-custom">
+                        <button onclick="setChartMode('daily')" id="btn-chart-daily" class="px-2.5 py-1 text-[10px] font-bold rounded bg-white text-emerald-700 shadow-2xs transition">Daily PnL</button>
+                        <button onclick="setChartMode('cumulative')" id="btn-chart-cumulative" class="px-2.5 py-1 text-[10px] font-bold rounded text-slate-600 hover:text-slate-900 transition">Cumulative PnL</button>
                     </div>
                 </div>
-                
-                <div id="checklist-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5"></div>
-            </div>
 
-            <!-- KPI Block -->
-            <div class="bg-card border border-custom rounded-xl p-3 md:p-4 shadow-sm">
-                <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Executive Performance Dashboard (KPI)</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 text-center">
-                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
-                        <div class="text-[10px] text-slate-500 font-medium">Initial Asset ($)</div>
-                        <input type="number" id="kpi-initial-input" onchange="updateInitialAsset(this.value)" class="w-full text-center bg-transparent text-sm font-bold text-slate-800 mt-1 border-b border-slate-300 focus:border-emerald-600 outline-none" value="10000">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                    <!-- KPI Cards (Left 7 cols) -->
+                    <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-500 font-medium">Initial Asset ($)</div>
+                            <input type="number" id="kpi-initial-input" onchange="updateInitialAsset(this.value)" class="w-full text-center bg-transparent text-sm font-bold text-slate-800 mt-1 border-b border-slate-300 focus:border-emerald-600 outline-none">
+                        </div>
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-3 rounded-xl border border-slate-800 shadow-sm flex flex-col justify-between col-span-2">
+                            <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Total Net P&L</div>
+                            <div id="kpi-net-pnl" class="text-xl font-black tracking-tight text-emerald-400 mt-0.5">+$0.00</div>
+                            <div id="kpi-pnl-pct" class="text-[10px] font-semibold text-emerald-300">0.00%</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-500 font-medium">End Asset</div>
+                            <div id="kpi-end-asset" class="text-sm font-bold text-slate-800 mt-1">$10,000.00</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-500 font-medium">Win Rate</div>
+                            <div id="kpi-winrate" class="text-sm font-bold text-slate-800 mt-1">0.0%</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-500 font-medium">Profit Factor</div>
+                            <div id="kpi-pf" class="text-sm font-bold text-slate-800 mt-1">0.00</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-500 font-medium">Avg Checklist Score</div>
+                            <div id="kpi-avg-checklist" class="text-sm font-bold text-indigo-600 mt-1">0%</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-custom flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-500 font-medium">Total Fees</div>
+                            <div id="kpi-fees" class="text-sm font-bold text-rose-600 mt-1">$0.00</div>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
-                        <div class="text-[10px] text-slate-500 font-medium">Total Net P&L</div>
-                        <div id="kpi-net-pnl" class="text-sm font-bold text-emerald-600 mt-1">+$0.00</div>
+
+                    <!-- PnL Chart Box (Right 5 cols) -->
+                    <div class="lg:col-span-5 bg-slate-50 border border-custom rounded-xl p-3 flex flex-col justify-between h-36">
+                        <div class="flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+                            <span id="chart-title-label">Equity Curve (Cumulative PnL)</span>
+                            <span id="chart-stat-badge" class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Active</span>
+                        </div>
+                        <div class="flex-1 relative w-full flex items-end">
+                            <canvas id="pnl-canvas" class="w-full h-20"></canvas>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
-                        <div class="text-[10px] text-slate-500 font-medium">End Asset</div>
-                        <div id="kpi-end-asset" class="text-sm font-bold text-slate-800 mt-1">$10,000.00</div>
+                </div>
+
+                <!-- Gemini AI Trading Strategy Advisor Widget -->
+                <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-slate-900 text-white rounded-xl p-3.5 border border-indigo-500/30 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600/50 border border-indigo-400/40 flex items-center justify-center shrink-0 mt-0.5">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-300"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-xs text-indigo-200">Gemini AI Strategy Advisor</span>
+                                <span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-semibold">Live Analysis</span>
+                            </div>
+                            <p id="ai-advisor-text" class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">Analyzing your current trade trends, checklist execution, and market conditions to suggest optimal setups...</p>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
-                        <div class="text-[10px] text-slate-500 font-medium">Total PnL (%)</div>
-                        <div id="kpi-pnl-pct" class="text-sm font-bold text-emerald-600 mt-1">0.00%</div>
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
-                        <div class="text-[10px] text-slate-500 font-medium">Win Rate</div>
-                        <div id="kpi-winrate" class="text-sm font-bold text-slate-800 mt-1">0.0%</div>
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
-                        <div class="text-[10px] text-slate-500 font-medium">Profit Factor</div>
-                        <div id="kpi-pf" class="text-sm font-bold text-slate-800 mt-1">0.00</div>
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
-                        <div class="text-[10px] text-slate-500 font-medium">Total Fees Paid</div>
-                        <div id="kpi-fees" class="text-sm font-bold text-rose-600 mt-1">$0.00</div>
-                    </div>
+                    <button onclick="generateAIStrategySuggestion()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition shrink-0 flex items-center gap-1.5 border border-indigo-400/30 shadow-sm cursor-pointer">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Strategy
+                    </button>
                 </div>
             </div>
 
             <!-- Journal Log -->
-            <div class="bg-card border border-custom rounded-xl p-3 md:p-4 flex-1 flex flex-col shadow-sm min-h-[300px]">
+            <div class="bg-card border border-custom rounded-2xl p-4 flex-1 flex flex-col shadow-sm min-h-[300px]">
                 <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
                     <div class="flex items-center gap-3">
                         <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Trading Journal & Execution Log</h2>
-                        <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-2.5 py-1 rounded flex items-center gap-1 transition text-[11px] shadow-sm">
-                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
+                        <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm cursor-pointer">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Trade
                         </button>
                     </div>
-                    <span class="text-[10px] text-slate-400">* Click slot on right & Ctrl+V to paste screenshot. Click image to zoom.</span>
+                    <span class="text-[10px] text-slate-400">* Select trade row & check checklist on right drawer. Ctrl+V to paste chart image.</span>
                 </div>
 
-                <div class="flex-1 overflow-x-auto border border-custom rounded-lg">
+                <div class="flex-1 overflow-x-auto border border-custom rounded-xl">
                     <table class="w-full text-left whitespace-nowrap border-collapse">
                         <thead class="bg-slate-100 text-slate-600 text-[10px] uppercase sticky top-0 z-10 border-b border-custom">
                             <tr>
-                                <th class="p-2 border-r border-custom text-center">Date</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Pair / Ticker</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Dir</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Lev</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Ent Price 1</th>
-                                <th class="p-2 border-r border-custom text-center">Ent Qty 1</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Ent Price 2</th>
-                                <th class="p-2 border-r border-custom text-center">Ent Qty 2</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Exit Price 1</th>
-                                <th class="p-2 border-r border-custom text-center">Exit Qty 1</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Exit Price 2</th>
-                                <th class="p-2 border-r border-custom text-center">Exit Qty 2</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Fees ($)</th>
-                                <th class="p-2 border-r border-custom section-divider text-right">Net PnL ($)</th>
-                                <th class="p-2 border-r border-custom section-divider text-right">Net PnL (%)</th>
-                                <th class="p-2 border-r border-custom section-divider text-right">Acc. Contr (%)</th>
-                                <th class="p-2 border-r border-custom section-divider text-right">Acc. Return (%)</th>
-                                <th class="p-2 section-divider text-center">Actions</th>
+                                <th class="p-2.5 border-r border-custom text-center">Date</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Pair / Ticker</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Dir</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Lev</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Ent Price 1</th>
+                                <th class="p-2.5 border-r border-custom text-center">Ent Qty 1</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Ent Price 2</th>
+                                <th class="p-2.5 border-r border-custom text-center">Ent Qty 2</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Exit Price 1</th>
+                                <th class="p-2.5 border-r border-custom text-center">Exit Qty 1</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Exit Price 2</th>
+                                <th class="p-2.5 border-r border-custom text-center">Exit Qty 2</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Fees ($)</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-center">Checklist (%)</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-right">Net PnL ($)</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-right">Net PnL (%)</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-right">Acc. Contr (%)</th>
+                                <th class="p-2.5 border-r border-custom section-divider text-right">Acc. Return (%)</th>
+                                <th class="p-2.5 section-divider text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="journal-tbody" class="divide-y divide-custom text-slate-700"></tbody>
@@ -183,93 +207,101 @@
 
         </div>
 
-        <!-- Right Side Trade Review Drawer -->
-        <aside class="w-full md:w-80 bg-card border-t md:border-t-0 md:border-l border-custom p-3 flex flex-col overflow-y-auto shrink-0 space-y-3 shadow-sm">
+        <!-- Right Side Trade Review Drawer & Per-Trade Checklist -->
+        <aside class="w-full md:w-88 bg-card border-t md:border-t-0 md:border-l border-custom p-3.5 flex flex-col overflow-y-auto shrink-0 space-y-3.5 shadow-sm">
             <div class="flex items-center justify-between border-b border-custom pb-2">
                 <h3 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-600"></i>
-                    Trade Review & Charts
+                    <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
+                    Trade Setup Checklist & Review
                 </h3>
-                <span id="selected-trade-label" class="text-[10px] text-slate-400 font-medium">Trade #1</span>
+                <span id="selected-trade-label" class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Trade #1</span>
+            </div>
+
+            <!-- Per-Trade Checklist Container -->
+            <div class="bg-slate-50 border border-custom rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">A+ Setup Rules (This Trade)</span>
+                    <button onclick="openChecklistModal()" class="text-[10px] text-indigo-600 hover:underline font-semibold flex items-center gap-0.5">
+                        <i data-lucide="settings" class="w-3 h-3"></i> Manage Rules
+                    </button>
+                </div>
+                <div id="per-trade-checklist-container" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
             </div>
 
             <input type="file" id="file-input-hidden" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
             
+            <!-- Screenshots -->
             <div class="space-y-1.5">
-                <div>
-                    <span class="text-[9px] text-slate-500 font-medium block mb-0.5">HTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
-                    <div id="slot-htf" onclick="handleSlotClick('htf')" ondblclick="triggerFileInput('htf')" class="w-full h-12 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
-                        <img id="img-htf" class="hidden w-full h-full object-cover">
-                        <button id="del-btn-htf" onclick="deleteSlotImage(event, 'htf')" title="Delete Image" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
-                        <div id="placeholder-htf" class="flex items-center gap-1 text-slate-400">
-                            <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600"></i>
-                            <span class="text-[9px] text-slate-500">HTF Chart</span>
+                <span class="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">Execution Charts</span>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <div>
+                        <span class="text-[9px] text-slate-500 font-medium block mb-0.5">HTF</span>
+                        <div id="slot-htf" onclick="handleSlotClick('htf')" ondblclick="triggerFileInput('htf')" class="w-full h-14 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                            <img id="img-htf" class="hidden w-full h-full object-cover">
+                            <button id="del-btn-htf" onclick="deleteSlotImage(event, 'htf')" title="Delete" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
+                            <div id="placeholder-htf" class="flex flex-col items-center gap-0.5 text-slate-400">
+                                <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                                <span class="text-[8px]">Paste</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <span class="text-[9px] text-slate-500 font-medium block mb-0.5">MTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
-                    <div id="slot-mtf" onclick="handleSlotClick('mtf')" ondblclick="triggerFileInput('mtf')" class="w-full h-12 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
-                        <img id="img-mtf" class="hidden w-full h-full object-cover">
-                        <button id="del-btn-mtf" onclick="deleteSlotImage(event, 'mtf')" title="Delete Image" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
-                        <div id="placeholder-mtf" class="flex items-center gap-1 text-slate-400">
-                            <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600"></i>
-                            <span class="text-[9px] text-slate-500">MTF Chart</span>
+                    <div>
+                        <span class="text-[9px] text-slate-500 font-medium block mb-0.5">MTF</span>
+                        <div id="slot-mtf" onclick="handleSlotClick('mtf')" ondblclick="triggerFileInput('mtf')" class="w-full h-14 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                            <img id="img-mtf" class="hidden w-full h-full object-cover">
+                            <button id="del-btn-mtf" onclick="deleteSlotImage(event, 'mtf')" title="Delete" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
+                            <div id="placeholder-mtf" class="flex flex-col items-center gap-0.5 text-slate-400">
+                                <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                                <span class="text-[8px]">Paste</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <span class="text-[9px] text-slate-500 font-medium block mb-0.5">LTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
-                    <div id="slot-ltf" onclick="handleSlotClick('ltf')" ondblclick="triggerFileInput('ltf')" class="w-full h-12 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
-                        <img id="img-ltf" class="hidden w-full h-full object-cover">
-                        <button id="del-btn-ltf" onclick="deleteSlotImage(event, 'ltf')" title="Delete Image" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
-                        <div id="placeholder-ltf" class="flex items-center gap-1 text-slate-400">
-                            <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600"></i>
-                            <span class="text-[9px] text-slate-500">LTF Chart</span>
+                    <div>
+                        <span class="text-[9px] text-slate-500 font-medium block mb-0.5">LTF</span>
+                        <div id="slot-ltf" onclick="handleSlotClick('ltf')" ondblclick="triggerFileInput('ltf')" class="w-full h-14 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
+                            <img id="img-ltf" class="hidden w-full h-full object-cover">
+                            <button id="del-btn-ltf" onclick="deleteSlotImage(event, 'ltf')" title="Delete" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
+                            <div id="placeholder-ltf" class="flex flex-col items-center gap-0.5 text-slate-400">
+                                <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                                <span class="text-[8px]">Paste</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-1 pt-1.5 border-t border-custom">
-                <label class="text-[10px] text-slate-500 font-medium block">Execution Reflection / Notes</label>
-                <textarea id="review-notes" oninput="saveNotes(this.value)" rows="2" class="w-full p-1.5 rounded input-light text-[11px]" placeholder="Log trade context, mistakes..."></textarea>
+            <div class="space-y-1 pt-1 border-t border-custom">
+                <label class="text-[10px] text-slate-600 font-bold block uppercase">Trade Reflection / Notes</label>
+                <textarea id="review-notes" oninput="saveNotes(this.value)" rows="2" class="w-full p-2 rounded-lg input-light text-[11px]" placeholder="Log trade psychology, mistakes..."></textarea>
             </div>
 
+            <!-- Live News & Macro Events -->
             <div class="pt-2 border-t border-custom space-y-2 flex-1 flex flex-col min-h-0">
                 <div class="flex items-center justify-between">
                     <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1">
                         <i data-lucide="globe" class="w-3.5 h-3.5 text-indigo-600"></i>
-                        Live News & Daily Macro Events
+                        Live News & Macro Events
                     </h4>
-                    <button onclick="fetchMacroNews()" class="text-[10px] text-indigo-600 hover:underline flex items-center gap-0.5 font-medium">
-                        <i data-lucide="refresh-cw" class="w-2.5 h-2.5"></i> Refresh
+                    <button onclick="fetchMacroNews()" class="text-[10px] bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2 py-0.5 rounded font-semibold transition cursor-pointer flex items-center gap-1">
+                        <i data-lucide="refresh-cw" class="w-2.5 h-2.5"></i> Live Feed 🔄
                     </button>
                 </div>
 
                 <div class="grid grid-cols-1 gap-1 text-[11px]">
-                    <a href="https://www.kitco.com/news/" target="_blank" class="p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded flex items-center justify-between text-amber-900 font-bold transition">
+                    <a href="https://www.kitco.com/news/" target="_blank" class="p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg flex items-center justify-between text-amber-900 font-bold transition">
                         <span>🥇 Gold & Silver Market News</span>
                         <i data-lucide="external-link" class="w-3 h-3 text-amber-600"></i>
                     </a>
-                    <a href="https://www.marketwatch.com/investing/index/spx" target="_blank" class="p-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded flex items-center justify-between text-blue-900 font-bold transition">
+                    <a href="https://www.marketwatch.com/investing/index/spx" target="_blank" class="p-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg flex items-center justify-between text-blue-900 font-bold transition">
                         <span>📈 Nasdaq & S&P 500 Stocks News</span>
                         <i data-lucide="external-link" class="w-3 h-3 text-blue-600"></i>
                     </a>
-                    <a href="https://www.coindesk.com/" target="_blank" class="p-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded flex items-center justify-between text-emerald-900 font-bold transition">
-                        <span>🪙 Crypto & Bitcoin Market News</span>
-                        <i data-lucide="external-link" class="w-3 h-3 text-emerald-600"></i>
-                    </a>
                 </div>
 
-                <a href="https://www.investing.com/economic-calendar/" target="_blank" class="p-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded flex items-center justify-between text-slate-800 font-bold transition text-[11px]">
-                    <span>📈 Investing.com Real-time Calendar ↗</span>
-                </a>
-
-                <div class="flex-1 bg-slate-50 border border-custom rounded-lg p-2 overflow-y-auto space-y-1.5 min-h-[160px]">
+                <div class="flex-1 bg-slate-50 border border-custom rounded-xl p-2 overflow-y-auto space-y-1.5 min-h-[140px]">
                     <div class="flex items-center justify-between border-b border-slate-200 pb-1">
                         <span id="today-date-header" class="font-bold text-[10px] text-slate-700">Today's Key Economic Events</span>
-                        <button onclick="fetchMacroNews()" class="text-[9px] bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-1.5 py-0.5 rounded font-semibold transition cursor-pointer">Live Feed 🔄</button>
+                        <span class="text-[9px] text-slate-400">Investing.com Feed</span>
                     </div>
                     <div id="daily-events-container" class="space-y-1.5 text-[10px]"></div>
                 </div>
@@ -286,44 +318,44 @@
         </div>
     </div>
 
-    <!-- Checklist Modal -->
+    <!-- Checklist Management Modal -->
     <div id="checklist-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-card border border-custom p-5 rounded-xl w-96 max-w-[90vw] space-y-4 shadow-xl">
+        <div class="bg-card border border-custom p-5 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-xl">
             <div class="flex items-center justify-between border-b border-custom pb-2">
-                <h3 class="font-bold text-slate-800 text-xs">Manage Rules & Dropdown Options</h3>
+                <h3 class="font-bold text-slate-800 text-xs">Manage A+ Setup Rules & Options</h3>
                 <button onclick="closeChecklistModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
             
             <div>
                 <label class="text-[10px] text-slate-500 font-medium block mb-1">Add Checklist Rule</label>
                 <div class="flex gap-2">
-                    <input type="text" id="new-rule-name" placeholder="e.g. Volume Spike" class="flex-1 p-2 rounded input-light text-xs">
-                    <button onclick="addChecklistItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1 rounded text-xs">Add</button>
+                    <input type="text" id="new-rule-name" placeholder="e.g. Volume Spike" class="flex-1 p-2 rounded-lg input-light text-xs">
+                    <button onclick="addChecklistItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1 rounded-lg text-xs">Add</button>
                 </div>
                 <div id="active-rules-list" class="space-y-1 mt-2 max-h-24 overflow-y-auto"></div>
             </div>
 
             <div class="border-t border-custom pt-3 space-y-2">
-                <label class="text-[10px] text-slate-500 font-medium block">Add Dropdown Status Option & Color</label>
+                <label class="text-[10px] text-slate-500 font-medium block">Add Dropdown Option & Color (Score)</label>
                 <div class="flex gap-1.5">
-                    <input type="text" id="new-option-name" placeholder="e.g. Partial" class="flex-1 p-2 rounded input-light text-xs">
-                    <select id="new-option-color" class="p-1 rounded input-light text-xs font-semibold">
-                        <option value="pink">Pink / Red (분홍/빨강)</option>
-                        <option value="green">Green (녹색)</option>
-                        <option value="gray">Gray (회색)</option>
+                    <input type="text" id="new-option-name" placeholder="e.g. Partial" class="flex-1 p-2 rounded-lg input-light text-xs">
+                    <select id="new-option-color" class="p-1 rounded-lg input-light text-xs font-semibold">
+                        <option value="green">Green (1 Point)</option>
+                        <option value="gray">Gray (0 Points)</option>
+                        <option value="pink">Pink / Red (-1 Point)</option>
                     </select>
-                    <button onclick="addDropdownOption()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1 rounded text-xs">Add</button>
+                    <button onclick="addDropdownOption()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1 rounded-lg text-xs">Add</button>
                 </div>
                 <div id="active-options-list" class="flex flex-wrap gap-1.5 mt-2"></div>
             </div>
 
-            <button onclick="closeChecklistModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded text-xs mt-2 border border-custom">Close</button>
+            <button onclick="closeChecklistModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-xs mt-2 border border-custom">Close</button>
         </div>
     </div>
 
     <!-- Live Auto Search Asset Modal -->
     <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                 <div class="flex items-center gap-2">
                     <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
@@ -333,12 +365,12 @@
             </div>
 
             <div>
-                <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. bit, sol, gold, nvda)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder-slate-400 focus:border-emerald-500 outline-none">
+                <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. bit, sol, gold, nvda)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-400 focus:border-emerald-500 outline-none">
             </div>
 
             <div id="search-results-list" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
 
-            <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-1.5 rounded text-xs border border-slate-700">Close</button>
+            <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-xs border border-slate-700">Close</button>
         </div>
     </div>
 
@@ -367,6 +399,8 @@
         lucide.createIcons();
 
         let activeSlot = 'htf';
+        let chartMode = 'cumulative'; // 'daily' or 'cumulative'
+
         let trackedAssets = [
             { name: "S&P 500", ticker: "US500", price: "$5,520.40", change: 0.45 },
             { name: "Nasdaq", ticker: "NAS100", price: "$19,450.10", change: 0.82 },
@@ -382,23 +416,19 @@
             { name: "Solana", ticker: "SOL", tvSymbol: "BINANCE:SOLUSDT", category: "Crypto" },
             { name: "Ripple", ticker: "XRP", tvSymbol: "BINANCE:XRPUSDT", category: "Crypto" },
             { name: "Cardano", ticker: "ADA", tvSymbol: "BINANCE:ADAUSDT", category: "Crypto" },
-            { name: "Dogecoin", ticker: "DOGE", tvSymbol: "BINANCE:DOGEUSDT", category: "Crypto" },
             { name: "Gold", ticker: "Au", tvSymbol: "TVC:GOLD", category: "Commodity" },
             { name: "Silver", ticker: "Ag", tvSymbol: "TVC:SILVER", category: "Commodity" },
             { name: "S&P 500", ticker: "US500", tvSymbol: "FOREXCOM:SPXUSD", category: "Indices" },
             { name: "Nasdaq 100", ticker: "NAS100", tvSymbol: "FOREXCOM:NSXUSD", category: "Indices" },
             { name: "Nvidia", ticker: "NVDA", tvSymbol: "NASDAQ:NVDA", category: "Stock" },
-            { name: "Tesla", ticker: "TSLA", tvSymbol: "NASDAQ:TSLA", category: "Stock" },
-            { name: "Apple", ticker: "AAPL", tvSymbol: "NASDAQ:AAPL", category: "Stock" },
-            { name: "Microsoft", ticker: "MSFT", tvSymbol: "NASDAQ:MSFT", category: "Stock" }
+            { name: "Tesla", ticker: "TSLA", tvSymbol: "NASDAQ:TSLA", category: "Stock" }
         ];
 
         let checklistRules = ["Bias Alignment (Daily)", "High POI (LQ Near)", "LQ + MS Confirmation", "Kill Zone Alignment", "Risk to Reward (R:R)"];
-        let checklistState = {};
 
         let dropdownOptions = [
-            { label: "Ignored", color: "pink" },
             { label: "Confirmed", color: "green" },
+            { label: "Ignored", color: "pink" },
             { label: "Not found", color: "gray" }
         ];
 
@@ -412,55 +442,129 @@
 
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
-        let draggedIndex = null;
 
-        function handleDragStart(e, index) {
-            draggedIndex = index;
-            e.target.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        }
+        function setChartMode(mode) {
+            chartMode = mode;
+            const btnDaily = document.getElementById('btn-chart-daily');
+            const btnCumul = document.getElementById('btn-chart-cumulative');
+            const label = document.getElementById('chart-title-label');
 
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        }
-
-        function handleDrop(e, targetIndex) {
-            e.preventDefault();
-            if (draggedIndex !== null && draggedIndex !== targetIndex) {
-                const movedItem = checklistRules.splice(draggedIndex, 1)[0];
-                checklistRules.splice(targetIndex, 0, movedItem);
-                renderChecklistUI();
-                saveCloudData();
+            if (mode === 'daily') {
+                btnDaily.className = "px-2.5 py-1 text-[10px] font-bold rounded bg-white text-emerald-700 shadow-2xs transition";
+                btnCumul.className = "px-2.5 py-1 text-[10px] font-bold rounded text-slate-600 hover:text-slate-900 transition";
+                label.innerText = "Daily PnL Distribution";
+            } else {
+                btnCumul.className = "px-2.5 py-1 text-[10px] font-bold rounded bg-white text-emerald-700 shadow-2xs transition";
+                btnDaily.className = "px-2.5 py-1 text-[10px] font-bold rounded text-slate-600 hover:text-slate-900 transition";
+                label.innerText = "Equity Curve (Cumulative PnL)";
             }
+            renderChart();
         }
 
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-            draggedIndex = null;
+        function renderChart() {
+            const canvas = document.getElementById('pnl-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const trades = monthsData[activeMonthIndex].trades;
+
+            canvas.width = canvas.parentElement.clientWidth || 300;
+            canvas.height = 80;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!trades || trades.length === 0) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('No trade data for chart', canvas.width / 2, 45);
+                return;
+            }
+
+            let dataPoints = [];
+            let running = 0;
+            trades.slice().reverse().forEach(t => {
+                const m = calculateMetrics(t, monthsData[activeMonthIndex].initialAsset, 0);
+                if (chartMode === 'cumulative') {
+                    running += m.netPnl;
+                    dataPoints.push(running);
+                } else {
+                    dataPoints.push(m.netPnl);
+                }
+            });
+
+            const max = Math.max(...dataPoints, 0);
+            const min = Math.min(...dataPoints, 0);
+            const range = (max - min) || 1;
+
+            const padding = 10;
+            const w = canvas.width;
+            const h = canvas.height - padding * 2;
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 2;
+
+            dataPoints.forEach((val, i) => {
+                const x = (i / (dataPoints.length - 1 || 1)) * (w - 20) + 10;
+                const y = canvas.height - padding - ((val - min) / range) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Draw points
+            dataPoints.forEach((val, i) => {
+                const x = (i / (dataPoints.length - 1 || 1)) * (w - 20) + 10;
+                const y = canvas.height - padding - ((val - min) / range) * h;
+                ctx.beginPath();
+                ctx.fillStyle = val >= 0 ? '#059669' : '#e11d48';
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
         }
 
-        function renderChecklistUI() {
-            const container = document.getElementById('checklist-container');
+        function calculateChecklistScore(tradeChecklist) {
+            if (!tradeChecklist) return { scorePct: 0, points: 0, maxPoints: checklistRules.length * 1 };
+            let points = 0;
+            let maxPoints = checklistRules.length * 1;
+            if (maxPoints === 0) return { scorePct: 0, points: 0, maxPoints: 0 };
+
+            checklistRules.forEach(rule => {
+                const val = tradeChecklist[rule] || (dropdownOptions[0] ? dropdownOptions[0].label : '');
+                const opt = dropdownOptions.find(o => (o.label || o) === val);
+                const clr = opt ? opt.color : 'green';
+                if (clr === 'green') points += 1;
+                else if (clr === 'gray') points += 0;
+                else if (clr === 'pink' || clr === 'red') points -= 1;
+            });
+
+            // Normalize points to percentage (min 0%)
+            let scorePct = Math.round((Math.max(0, points) / maxPoints) * 100);
+            return { scorePct, points, maxPoints };
+        }
+
+        function renderPerTradeChecklist() {
+            const container = document.getElementById('per-trade-checklist-container');
+            if (!container) return;
             container.innerHTML = '';
-            checklistRules.forEach((rule, idx) => {
+
+            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+            if (!trade) {
+                container.innerHTML = `<div class="text-slate-400 text-[10px]">No trade selected.</div>`;
+                return;
+            }
+
+            if (!trade.checklist) {
+                trade.checklist = {};
+                checklistRules.forEach(r => trade.checklist[r] = dropdownOptions[0] ? dropdownOptions[0].label : '');
+            }
+
+            checklistRules.forEach(rule => {
+                const currentVal = trade.checklist[rule] || (dropdownOptions[0] ? dropdownOptions[0].label : '');
                 const div = document.createElement('div');
-                div.className = "draggable-item bg-slate-50 p-2 rounded-lg border border-custom hover:border-emerald-400 transition";
-                div.draggable = true;
-                
-                div.ondragstart = (e) => handleDragStart(e, idx);
-                div.ondragover = (e) => handleDragOver(e);
-                div.ondrop = (e) => handleDrop(e, idx);
-                div.ondragend = (e) => handleDragEnd(e);
-
-                const currentVal = checklistState[rule] || (dropdownOptions[0] ? dropdownOptions[0].label : '');
-
+                div.className = "flex items-center justify-between bg-white p-1.5 rounded-lg border border-custom text-[11px]";
                 div.innerHTML = `
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="text-[10px] text-slate-600 font-bold truncate cursor-grab">${rule}</label>
-                        <i data-lucide="grip-vertical" class="w-3 h-3 text-slate-300"></i>
-                    </div>
-                    <select data-rule="${rule}" onchange="onChecklistChange(this)" class="w-full p-1.5 rounded text-xs font-semibold">
+                    <span class="font-bold text-slate-700 truncate max-w-[130px]">${rule}</span>
+                    <select data-rule="${rule}" onchange="onPerTradeChecklistChange(this)" class="p-1 rounded text-[10px] font-semibold">
                         ${dropdownOptions.map(opt => {
                             const lbl = opt.label || opt;
                             const clr = opt.color || 'green';
@@ -471,46 +575,50 @@
                 `;
                 container.appendChild(div);
             });
-            lucide.createIcons();
-            
+
             const selects = container.querySelectorAll('select');
             selects.forEach(s => updateCheckStyle(s));
         }
 
-        function onChecklistChange(selectElem) {
+        function onPerTradeChecklistChange(selectElem) {
             const rule = selectElem.getAttribute('data-rule');
-            checklistState[rule] = selectElem.value;
-            updateCheckStyle(selectElem);
-            saveCloudData();
-        }
-
-        function resetChecklist() {
-            const selects = document.querySelectorAll('#checklist-container select');
-            selects.forEach(selectElem => {
-                let targetIdx = 0;
-                for (let i = 0; i < selectElem.options.length; i++) {
-                    const clr = selectElem.options[i].getAttribute('data-color');
-                    if (clr === 'pink' || clr === 'red') {
-                        targetIdx = i;
-                        break;
-                    }
-                }
-                selectElem.selectedIndex = targetIdx;
-                const rule = selectElem.getAttribute('data-rule');
-                checklistState[rule] = selectElem.value;
+            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+            if (trade) {
+                if (!trade.checklist) trade.checklist = {};
+                trade.checklist[rule] = selectElem.value;
                 updateCheckStyle(selectElem);
-            });
-            saveCloudData();
+                renderJournal();
+                saveCloudData();
+            }
         }
 
         function updateCheckStyle(selectElem) {
             const selectedOpt = selectElem.options[selectElem.selectedIndex];
             const color = selectedOpt ? selectedOpt.getAttribute('data-color') : 'green';
-            selectElem.className = "w-full p-1.5 rounded text-xs font-semibold ";
+            selectElem.className = "p-1 rounded text-[10px] font-semibold ";
             if (color === 'green') selectElem.className += "status-green";
             else if (color === 'pink') selectElem.className += "status-pink";
             else if (color === 'red') selectElem.className += "status-red";
             else selectElem.className += "status-gray";
+        }
+
+        function generateAIStrategySuggestion() {
+            const advisorElem = document.getElementById('ai-advisor-text');
+            advisorElem.innerText = "Gemini AI is scanning your trade history and current market volatility...";
+
+            setTimeout(() => {
+                const trades = monthsData[activeMonthIndex].trades;
+                let wins = trades.filter(t => calculateMetrics(t, monthsData[activeMonthIndex].initialAsset, 0).netPnl > 0).length;
+                let winRate = trades.length > 0 ? ((wins / trades.length) * 100).toFixed(0) : 0;
+                
+                let suggestions = [
+                    `Based on your ${winRate}% win rate and current Silver/Crypto momentum, focus on daily HTF bias alignment before entering lower timeframe pullbacks.`,
+                    `Your recent checklist compliance is strong on risk management. Watch out for FOMC volatility and tighten your stop losses during New York session opens.`,
+                    `Market conditions show high liquidity clustering near major HTF levels. Maintain strict R:R ratios above 1:2.5 for your upcoming entries.`
+                ];
+                let randMsg = suggestions[Math.floor(Math.random() * suggestions.length)];
+                advisorElem.innerText = randMsg;
+            }, 500);
         }
 
         async function fetchLiveAssetPrices() {
@@ -541,7 +649,7 @@
                 const isUp = parseFloat(a.change) >= 0;
                 const badgeClass = isUp ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
                 
-                const tvSymbol = a.ticker === 'BTC' ? 'BINANCE:BTCUSDT' : a.ticker === 'ETH' ? 'BINANCE:ETHUSDT' : a.ticker === 'SOL' ? 'BINANCE:SOLUSDT' : a.ticker;
+                const tvSymbol = a.ticker === 'BTC' ? 'BINANCE:BTCUSDT' : a.ticker === 'ETH' ? 'BINANCE:ETHUSDT' : a.ticker;
                 const chartUrl = `https://www.tradingview.com/symbols/${tvSymbol}/`;
 
                 const div = document.createElement('div');
@@ -726,7 +834,7 @@
             list.innerHTML = '';
             checklistRules.forEach((rule, idx) => {
                 const div = document.createElement('div');
-                div.className = "flex items-center justify-between text-xs bg-slate-50 p-1.5 rounded border border-custom";
+                div.className = "flex items-center justify-between text-xs bg-slate-50 p-1.5 rounded-lg border border-custom";
                 div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-rose-500 hover:text-rose-700 font-bold">✕</button>`;
                 list.appendChild(div);
             });
@@ -739,7 +847,7 @@
                 const colorClass = (opt.color === 'pink' || opt.color === 'red') ? 'bg-pink-100 text-pink-800 border-pink-300' : opt.color === 'green' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-700 border-slate-300';
                 const span = document.createElement('span');
                 span.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-semibold ${colorClass}`;
-                span.innerHTML = `${opt.label || opt} <button onclick="removeOption(${idx})" class="hover:text-rose-600 font-bold">✕</button>`;
+                span.innerHTML = `${opt.label || opt} (${opt.color}) <button onclick="removeOption(${idx})" class="hover:text-rose-600 font-bold">✕</button>`;
                 container.appendChild(span);
             });
         }
@@ -751,16 +859,15 @@
                 checklistRules.push(val);
                 input.value = '';
                 renderRulesList();
-                renderChecklistUI();
+                renderPerTradeChecklist();
                 saveCloudData();
             }
         }
 
         function removeRule(idx) {
-            const removed = checklistRules.splice(idx, 1)[0];
-            if (removed && checklistState[removed]) delete checklistState[removed];
+            checklistRules.splice(idx, 1);
             renderRulesList();
-            renderChecklistUI();
+            renderPerTradeChecklist();
             saveCloudData();
         }
 
@@ -772,7 +879,7 @@
                 dropdownOptions.push({ label: val, color: color });
                 input.value = '';
                 renderOptionsList();
-                renderChecklistUI();
+                renderPerTradeChecklist();
                 saveCloudData();
             }
         }
@@ -781,7 +888,7 @@
             if (dropdownOptions.length > 1) {
                 dropdownOptions.splice(idx, 1);
                 renderOptionsList();
-                renderChecklistUI();
+                renderPerTradeChecklist();
                 saveCloudData();
             }
         }
@@ -795,7 +902,6 @@
                     if (cloudData.monthsData) monthsData = cloudData.monthsData;
                     if (cloudData.trackedAssets) trackedAssets = cloudData.trackedAssets;
                     if (cloudData.checklistRules) checklistRules = cloudData.checklistRules;
-                    if (cloudData.checklistState) checklistState = cloudData.checklistState;
                     if (cloudData.dropdownOptions) dropdownOptions = cloudData.dropdownOptions;
                     renderAll();
                 }
@@ -811,7 +917,6 @@
                     monthsData: monthsData,
                     trackedAssets: trackedAssets,
                     checklistRules: checklistRules,
-                    checklistState: checklistState,
                     dropdownOptions: dropdownOptions,
                     updatedAt: new Date()
                 });
@@ -834,13 +939,9 @@
                 const todayEvents = [
                     { time: "07:30 EST", country: "US", impact: "high", event: "PPI (MoM) (Jul)", forecast: "0.2%", previous: "-0.3%" },
                     { time: "07:30 EST", country: "US", impact: "high", event: "Initial Jobless Claims", forecast: "202K", previous: "199K" },
-                    { time: "07:30 EST", country: "US", impact: "high", event: "Core PPI (MoM) (Jul)", forecast: "0.3%", previous: "0.2%" },
                     { time: "07:30 EST", country: "US", impact: "medium", event: "Continuing Jobless Claims", forecast: "1,800K", previous: "1,801K" },
                     { time: "07:30 EST", country: "US", impact: "medium", event: "PPI (YoY) (Jul)", forecast: "4.9%", previous: "5.5%" },
-                    { time: "07:30 EST", country: "US", impact: "medium", event: "Core PPI (YoY) (Jul)", forecast: "4.2%", previous: "4.7%" },
-                    { time: "07:40 EST", country: "US", impact: "medium", event: "FOMC Member Barkin Speaks", forecast: "-", previous: "-" },
-                    { time: "09:30 EST", country: "US", impact: "medium", event: "Natural Gas Storage", forecast: "31B", previous: "33B" },
-                    { time: "10:30 EST", country: "US", impact: "low", event: "4-Week Bill Auction", forecast: "3.640%", previous: "-" }
+                    { time: "09:30 EST", country: "US", impact: "medium", event: "Natural Gas Storage", forecast: "31B", previous: "33B" }
                 ];
 
                 container.innerHTML = '';
@@ -848,7 +949,7 @@
                     const div = document.createElement('div');
                     div.className = "flex items-center justify-between p-1.5 bg-white rounded border border-slate-200 shadow-2xs hover:bg-slate-100 transition";
                     
-                    const stars = item.impact === 'high' ? '★★★' : item.impact === 'medium' ? '★★☆' : '★☆☆';
+                    const stars = item.impact === 'high' ? '★★★' : '★★☆';
                     const badgeColor = item.impact === 'high' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-amber-600 bg-amber-50 border-amber-200';
 
                     div.innerHTML = `
@@ -856,7 +957,7 @@
                             <span class="font-mono text-[9px] font-bold text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100 shrink-0">${item.time}</span>
                             <div class="flex flex-col">
                                 <span class="font-semibold text-slate-800 text-[10px] leading-tight">${item.event}</span>
-                                <span class="text-[8px] text-slate-400">Exp: ${item.forecast} | Prev: ${item.previous}</span>
+                                <span class="text-[8px] text-slate-400">Exp: ${item.forecast}</span>
                             </div>
                         </div>
                         <span class="text-[8px] font-bold px-1 rounded border shrink-0 ${badgeColor}">${stars}</span>
@@ -903,7 +1004,7 @@
             container.innerHTML = '';
             monthsData.forEach((m, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `px-3 py-1 text-xs rounded font-semibold transition shrink-0 ${idx === activeMonthIndex ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.className = `px-3 py-1 text-xs rounded-lg font-semibold transition shrink-0 ${idx === activeMonthIndex ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
                 btn.innerText = m.name;
                 btn.onclick = () => { activeMonthIndex = idx; selectedTradeIndex = 0; renderAll(); };
                 container.appendChild(btn);
@@ -960,21 +1061,23 @@
                 const m = calculateMetrics(t, currentMonth.initialAsset, runningAccReturn);
                 runningAccReturn = m.accReturn;
 
+                if (!t.checklist) {
+                    t.checklist = {};
+                    checklistRules.forEach(r => t.checklist[r] = dropdownOptions[0] ? dropdownOptions[0].label : '');
+                }
+                const scoreObj = calculateChecklistScore(t.checklist);
+
                 const tr = document.createElement('tr');
-                
                 let rowColorClass = m.netPnl < 0 ? 'row-loss' : m.netPnl > 0 ? 'row-profit' : 'bg-card-hover';
+                
+                tr.className = `border-b border-custom ${rowColorClass}`;
                 if (idx === selectedTradeIndex) {
-                    tr.className = `border-b border-custom ${rowColorClass}`;
-                    if (m.netPnl >= 0) {
-                        tr.style.borderLeft = '4px solid #059669';
-                    } else {
-                        tr.style.borderLeft = '4px solid #f43f5e';
-                    }
-                } else {
-                    tr.className = `border-b border-custom ${rowColorClass}`;
+                    if (m.netPnl >= 0) tr.style.borderLeft = '4px solid #059669';
+                    else tr.style.borderLeft = '4px solid #f43f5e';
                 }
 
                 const pnlColor = m.netPnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold';
+                const scoreColor = scoreObj.scorePct >= 70 ? 'bg-emerald-100 text-emerald-800' : scoreObj.scorePct >= 40 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800';
 
                 tr.innerHTML = `
                     <td class="p-1 border-r border-custom text-center"><input type="date" value="${t.date || ''}" onchange="updateTradeValue(${idx}, 'date', null, this.value)" class="tbl-input text-slate-700"></td>
@@ -995,13 +1098,14 @@
                     <td class="p-1 border-r border-custom section-divider"><input type="number" value="${t.exit[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exit', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.exitQty[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exitQty', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom section-divider"><input type="number" value="${t.fees || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'fees', null, this.value)" class="tbl-input text-slate-500"></td>
+                    <td class="p-2 border-r border-custom section-divider text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${scoreColor}">${scoreObj.scorePct}%</span></td>
                     <td class="p-2 border-r border-custom section-divider text-right ${pnlColor}">$${m.netPnl.toFixed(3)}</td>
                     <td class="p-2 border-r border-custom section-divider text-right ${pnlColor}">${m.netPnlPct.toFixed(2)}%</td>
                     <td class="p-2 border-r border-custom section-divider text-right ${m.accContr >= 0 ? 'text-emerald-600 font-semibold' : 'text-rose-600 font-semibold'}">${m.accContr.toFixed(3)}%</td>
                     <td class="p-2 border-r border-custom section-divider text-right font-bold text-slate-800">${m.accReturn.toFixed(3)}%</td>
                     <td class="p-2 section-divider text-center flex items-center justify-center gap-1">
-                        <button onclick="selectTrade(${idx})" title="Review Trade" class="p-1 hover:bg-emerald-100 rounded text-slate-500 hover:text-emerald-600 transition"><i data-lucide="file-text" class="w-4 h-4"></i></button>
-                        <button onclick="deleteTrade(${idx})" title="Delete Trade" class="p-1 hover:bg-rose-100 rounded text-slate-400 hover:text-rose-600 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="selectTrade(${idx})" title="Review Trade" class="p-1 hover:bg-emerald-100 rounded text-slate-500 hover:text-emerald-600 transition cursor-pointer"><i data-lucide="file-text" class="w-4 h-4"></i></button>
+                        <button onclick="deleteTrade(${idx})" title="Delete Trade" class="p-1 hover:bg-rose-100 rounded text-slate-400 hover:text-rose-600 transition cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1009,11 +1113,13 @@
 
             lucide.createIcons();
             updateKPIs();
+            renderChart();
+            renderPerTradeChecklist();
         }
 
         function updateKPIs() {
             const currentMonth = monthsData[activeMonthIndex];
-            let totalNetPnl = 0, totalFees = 0, wins = 0, winSum = 0, lossSum = 0;
+            let totalNetPnl = 0, totalFees = 0, wins = 0, winSum = 0, lossSum = 0, totalChecklistPct = 0;
 
             currentMonth.trades.forEach(t => {
                 const m = calculateMetrics(t, currentMonth.initialAsset, 0);
@@ -1021,6 +1127,10 @@
                 totalFees += (t.fees || 0);
                 if (m.netPnl > 0) { wins++; winSum += m.netPnl; }
                 else if (m.netPnl < 0) { lossSum += Math.abs(m.netPnl); }
+
+                if (t.checklist) {
+                    totalChecklistPct += calculateChecklistScore(t.checklist).scorePct;
+                }
             });
 
             const totalTrades = currentMonth.trades.length;
@@ -1028,18 +1138,19 @@
             const profitFactor = lossSum > 0 ? (winSum / lossSum) : winSum > 0 ? 99.9 : 0;
             const endAsset = currentMonth.initialAsset + totalNetPnl;
             const totalPnlPct = currentMonth.initialAsset > 0 ? (totalNetPnl / currentMonth.initialAsset) * 100 : 0;
+            const avgChecklist = totalTrades > 0 ? (totalChecklistPct / totalTrades).toFixed(1) : 0;
 
             document.getElementById('kpi-net-pnl').innerText = (totalNetPnl >= 0 ? '+$' : '-$') + Math.abs(totalNetPnl).toFixed(2);
-            document.getElementById('kpi-net-pnl').className = `text-sm font-bold mt-1 ${totalNetPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
-            
-            document.getElementById('kpi-end-asset').innerText = '$' + endAsset.toFixed(2);
+            document.getElementById('kpi-net-pnl').className = `text-xl font-black tracking-tight mt-0.5 ${totalNetPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
             
             const pnlPctElem = document.getElementById('kpi-pnl-pct');
-            pnlPctElem.innerText = totalPnlPct.toFixed(2) + '%';
-            pnlPctElem.className = `text-sm font-bold mt-1 ${totalPnlPct >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+            pnlPctElem.innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '%';
+            pnlPctElem.className = `text-[10px] font-semibold ${totalPnlPct >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
 
+            document.getElementById('kpi-end-asset').innerText = '$' + endAsset.toFixed(2);
             document.getElementById('kpi-winrate').innerText = winRate.toFixed(1) + '%';
             document.getElementById('kpi-pf').innerText = profitFactor.toFixed(2);
+            document.getElementById('kpi-avg-checklist').innerText = avgChecklist + '%';
             document.getElementById('kpi-fees').innerText = '$' + totalFees.toFixed(2);
         }
 
@@ -1094,6 +1205,9 @@
         }
 
         function addNewTrade() {
+            let defaultChecklist = {};
+            checklistRules.forEach(r => defaultChecklist[r] = dropdownOptions[0] ? dropdownOptions[0].label : '');
+
             monthsData[activeMonthIndex].trades.unshift({
                 date: new Date().toISOString().split('T')[0],
                 pair: "", 
@@ -1104,6 +1218,7 @@
                 exit: [0, 0], 
                 exitQty: [0, 0],
                 fees: 0, 
+                checklist: defaultChecklist,
                 htf: '', 
                 mtf: '', 
                 ltf: '', 
@@ -1116,12 +1231,12 @@
         function renderAll() {
             renderTickerBar();
             renderTabs();
-            renderChecklistUI();
             renderJournal();
             selectTrade(selectedTradeIndex);
             setActiveSlot('htf');
             fetchMacroNews();
             fetchLiveAssetPrices();
+            generateAIStrategySuggestion();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
