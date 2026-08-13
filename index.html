@@ -30,7 +30,7 @@
         .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; border-left: 4px solid #059669 !important; }
         .row-loss { background-color: rgba(252, 231, 243, 0.35) !important; border-left: 4px solid #f43f5e !important; }
 
-        /* Soft Light Gray Section Dividers */
+        /* Clean Visible Gray Section Dividers */
         .section-divider { border-left: 1px solid #cbd5e1 !important; }
 
         .img-slot-active { border-color: #059669 !important; ring: 2px; ring-color: #a7f3d0; }
@@ -173,7 +173,7 @@
                                 <th class="p-2 border-r border-custom section-divider text-right">Net PnL (%)</th>
                                 <th class="p-2 border-r border-custom section-divider text-right">Acc. Contr (%)</th>
                                 <th class="p-2 border-r border-custom section-divider text-right">Acc. Return (%)</th>
-                                <th class="p-2 border-r border-custom section-divider text-center">Actions</th>
+                                <th class="p-2 section-divider text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="journal-tbody" class="divide-y divide-custom text-slate-700"></tbody>
@@ -999,7 +999,7 @@
                     <td class="p-2 border-r border-custom section-divider text-right ${pnlColor}">${m.netPnlPct.toFixed(2)}%</td>
                     <td class="p-2 border-r border-custom section-divider text-right ${m.accContr >= 0 ? 'text-emerald-600 font-semibold' : 'text-rose-600 font-semibold'}">${m.accContr.toFixed(3)}%</td>
                     <td class="p-2 border-r border-custom section-divider text-right font-bold text-slate-800">${m.accReturn.toFixed(3)}%</td>
-                    <td class="p-2 border-r border-custom section-divider text-center flex items-center justify-center gap-1">
+                    <td class="p-2 section-divider text-center flex items-center justify-center gap-1">
                         <button onclick="selectTrade(${idx})" title="Review Trade" class="p-1 hover:bg-emerald-100 rounded text-slate-500 hover:text-emerald-600 transition"><i data-lucide="file-text" class="w-4 h-4"></i></button>
                         <button onclick="deleteTrade(${idx})" title="Delete Trade" class="p-1 hover:bg-rose-100 rounded text-slate-400 hover:text-rose-600 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
