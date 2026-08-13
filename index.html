@@ -136,7 +136,7 @@
                             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
                         </button>
                     </div>
-                    <span class="text-[11px] text-slate-400">* Click slot on right and Ctrl+V to paste screenshot. Click image to zoom.</span>
+                    <span class="text-[11px] text-slate-400">* Click slot on right & Ctrl+V to paste screenshot. Click image to zoom. Hover to delete.</span>
                 </div>
 
                 <div class="flex-1 overflow-x-auto overflow-y-auto border border-custom rounded-lg">
@@ -189,6 +189,7 @@
                     <span class="text-[10px] text-slate-500 font-medium block mb-1">HTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
                     <div id="slot-htf" onclick="handleSlotClick('htf')" ondblclick="triggerFileInput('htf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
                         <img id="img-htf" class="hidden w-full h-full object-cover">
+                        <button id="del-btn-htf" onclick="deleteSlotImage(event, 'htf')" title="Delete Image" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow z-10">✕</button>
                         <div id="placeholder-htf" class="flex flex-col items-center">
                             <i data-lucide="upload-cloud" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600"></i>
                             <span class="text-[9px] text-slate-500 mt-0.5">Click & Ctrl+V or Double Click File</span>
@@ -199,6 +200,7 @@
                     <span class="text-[10px] text-slate-500 font-medium block mb-1">MTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
                     <div id="slot-mtf" onclick="handleSlotClick('mtf')" ondblclick="triggerFileInput('mtf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
                         <img id="img-mtf" class="hidden w-full h-full object-cover">
+                        <button id="del-btn-mtf" onclick="deleteSlotImage(event, 'mtf')" title="Delete Image" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow z-10">✕</button>
                         <div id="placeholder-mtf" class="flex flex-col items-center">
                             <i data-lucide="upload-cloud" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600"></i>
                             <span class="text-[9px] text-slate-500 mt-0.5">Click & Ctrl+V or Double Click File</span>
@@ -209,6 +211,7 @@
                     <span class="text-[10px] text-slate-500 font-medium block mb-1">LTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
                     <div id="slot-ltf" onclick="handleSlotClick('ltf')" ondblclick="triggerFileInput('ltf')" class="w-full h-20 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group transition">
                         <img id="img-ltf" class="hidden w-full h-full object-cover">
+                        <button id="del-btn-ltf" onclick="deleteSlotImage(event, 'ltf')" title="Delete Image" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow z-10">✕</button>
                         <div id="placeholder-ltf" class="flex flex-col items-center">
                             <i data-lucide="upload-cloud" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600"></i>
                             <span class="text-[9px] text-slate-500 mt-0.5">Click & Ctrl+V or Double Click File</span>
@@ -289,7 +292,6 @@
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
 
-            <!-- Quick Click Popular Assets -->
             <div>
                 <span class="text-[10px] text-slate-400 block mb-1.5 font-medium uppercase tracking-wider">Quick Add Trending Assets</span>
                 <div class="grid grid-cols-2 gap-2">
@@ -381,7 +383,6 @@
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
 
-        // Auto Live Price Fetching for Cryptos via Binance API
         async function fetchLiveAssetPrices() {
             try {
                 const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
@@ -462,6 +463,101 @@
             document.getElementById('asset-change').value = '';
         }
 
+        function deleteSlotImage(event, slot) {
+            event.stopPropagation();
+            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+            if (trade) {
+                trade[slot] = '';
+                setImgPreview('img-' + slot, 'placeholder-' + slot, '');
+                saveCloudData();
+            }
+        }
+
+        function handleSlotClick(slot) {
+            setActiveSlot(slot);
+            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+            if (trade && trade[slot]) {
+                openImageLightbox(trade[slot]);
+            }
+        }
+
+        function openImageLightbox(imgSrc) {
+            const modal = document.getElementById('image-lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            img.src = imgSrc;
+            modal.classList.remove('hidden');
+        }
+
+        function closeImageLightbox() {
+            document.getElementById('image-lightbox-modal').classList.add('hidden');
+        }
+
+        function triggerFileInput(slot) {
+            activeSlot = slot;
+            document.getElementById('file-input-hidden').click();
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processAndSaveImage(file);
+            }
+        }
+
+        function processAndSaveImage(file) {
+            compressAndResizeImage(file, 1000, 1000, 0.7, function(compressedBase64) {
+                const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+                if (trade) {
+                    trade[activeSlot] = compressedBase64;
+                    setImgPreview('img-' + activeSlot, 'placeholder-' + activeSlot, compressedBase64);
+                    saveCloudData();
+                }
+            });
+        }
+
+        function compressAndResizeImage(file, maxWidth, maxHeight, quality, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', quality));
+                };
+            };
+        }
+
+        document.addEventListener('paste', function(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file') {
+                    const blob = item.getAsFile();
+                    processAndSaveImage(blob);
+                }
+            }
+        });
+
         function openChecklistModal() {
             renderRulesList();
             renderOptionsList();
@@ -535,91 +631,6 @@
 
         function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); }
         function closeAddAssetModal() { document.getElementById('add-asset-modal').classList.add('hidden'); }
-
-        function handleSlotClick(slot) {
-            setActiveSlot(slot);
-            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-            if (trade && trade[slot]) {
-                openImageLightbox(trade[slot]);
-            }
-        }
-
-        function openImageLightbox(imgSrc) {
-            const modal = document.getElementById('image-lightbox-modal');
-            const img = document.getElementById('lightbox-img');
-            img.src = imgSrc;
-            modal.classList.remove('hidden');
-        }
-
-        function closeImageLightbox() {
-            document.getElementById('image-lightbox-modal').classList.add('hidden');
-        }
-
-        function triggerFileInput(slot) {
-            activeSlot = slot;
-            document.getElementById('file-input-hidden').click();
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (file) {
-                processAndSaveImage(file);
-            }
-        }
-
-        function processAndSaveImage(file) {
-            compressAndResizeImage(file, 1000, 1000, 0.7, function(compressedBase64) {
-                const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-                if (trade) {
-                    trade[activeSlot] = compressedBase64;
-                    setImgPreview('img-' + activeSlot, compressedBase64);
-                    saveCloudData();
-                }
-            });
-        }
-
-        function compressAndResizeImage(file, maxWidth, maxHeight, quality, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-                    } else {
-                        if (height > maxHeight) {
-                            width = Math.round((width * maxHeight) / height);
-                            height = maxHeight;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', quality));
-                };
-            };
-        }
-
-        document.addEventListener('paste', function(e) {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let index in items) {
-                const item = items[index];
-                if (item.kind === 'file') {
-                    const blob = item.getAsFile();
-                    processAndSaveImage(blob);
-                }
-            }
-        });
 
         async function loadCloudData() {
             if (!isFirebaseActive) return;
@@ -951,7 +962,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderAll();
             loadCloudData();
-            setInterval(fetchLiveAssetPrices, 10000); // Live price auto-refresh every 10s
+            setInterval(fetchLiveAssetPrices, 10000);
         });
     </script>
 </body>
