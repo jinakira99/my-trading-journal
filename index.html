@@ -26,6 +26,13 @@
         .status-red { background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5 !important; }
         .status-gray { background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
 
+        /* Row PnL Background Tints */
+        .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; }
+        .row-loss { background-color: rgba(252, 231, 243, 0.35) !important; }
+
+        /* Split Group Divider */
+        .split-divider { border-left: 2.5px solid #93c5fd !important; }
+
         .img-slot-active { border-color: #059669 !important; ring: 2px; ring-color: #a7f3d0; }
 
         /* Draggable item styles */
@@ -155,11 +162,11 @@
                                 <th class="p-2 border-r border-custom text-center">Lev</th>
                                 <th class="p-2 border-r border-custom text-center">Ent Price 1</th>
                                 <th class="p-2 border-r border-custom text-center">Ent Qty 1</th>
-                                <th class="p-2 border-r border-custom text-center">Ent Price 2</th>
+                                <th class="p-2 border-r border-custom text-center split-divider">Ent Price 2</th>
                                 <th class="p-2 border-r border-custom text-center">Ent Qty 2</th>
                                 <th class="p-2 border-r border-custom text-center">Exit Price 1</th>
                                 <th class="p-2 border-r border-custom text-center">Exit Qty 1</th>
-                                <th class="p-2 border-r border-custom text-center">Exit Price 2</th>
+                                <th class="p-2 border-r border-custom text-center split-divider">Exit Price 2</th>
                                 <th class="p-2 border-r border-custom text-center">Exit Qty 2</th>
                                 <th class="p-2 border-r border-custom text-center">Fees ($)</th>
                                 <th class="p-2 border-r border-custom text-right">Net PnL ($)</th>
@@ -813,8 +820,7 @@
             }
         }
 
-        // Live Dynamic Fetching for Economic Events
-        async function fetchMacroNews() {
+        function fetchMacroNews() {
             const container = document.getElementById('daily-events-container');
             const dateHeader = document.getElementById('today-date-header');
             
@@ -822,49 +828,38 @@
             const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             dateHeader.innerText = `Economic Events (${dateStr})`;
 
-            container.innerHTML = '<div class="text-slate-400 text-center py-2 text-[10px]">Updating live economic events...</div>';
+            const todayEvents = [
+                { time: "07:30 EST", country: "US", impact: "high", event: "PPI (MoM) (Jul)", forecast: "0.2%", previous: "-0.3%" },
+                { time: "07:30 EST", country: "US", impact: "high", event: "Initial Jobless Claims", forecast: "202K", previous: "199K" },
+                { time: "07:30 EST", country: "US", impact: "high", event: "Core PPI (MoM) (Jul)", forecast: "0.3%", previous: "0.2%" },
+                { time: "07:30 EST", country: "US", impact: "medium", event: "Continuing Jobless Claims", forecast: "1,800K", previous: "1,801K" },
+                { time: "07:30 EST", country: "US", impact: "medium", event: "PPI (YoY) (Jul)", forecast: "4.9%", previous: "5.5%" },
+                { time: "07:30 EST", country: "US", impact: "medium", event: "Core PPI (YoY) (Jul)", forecast: "4.2%", previous: "4.7%" },
+                { time: "07:40 EST", country: "US", impact: "medium", event: "FOMC Member Barkin Speaks", forecast: "-", previous: "-" },
+                { time: "09:30 EST", country: "US", impact: "medium", event: "Natural Gas Storage", forecast: "31B", previous: "33B" },
+                { time: "10:30 EST", country: "US", impact: "low", event: "4-Week Bill Auction", forecast: "3.640%", previous: "-" }
+            ];
 
-            try {
-                // Fetch real dynamic economic releases via RSS CORS Proxy
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://nager.date/api/v3/NextPublicHolidaysWorldwide')}`);
-                const data = await res.json();
+            container.innerHTML = '';
+            todayEvents.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-1.5 bg-white rounded border border-slate-200 shadow-2xs hover:bg-slate-100 transition";
                 
-                // Active US Macro Indicators feed for current date
-                const todayEvents = [
-                    { time: "07:30 EST", country: "US", impact: "high", event: "PPI (MoM) (Jul)", forecast: "0.2%", previous: "-0.3%" },
-                    { time: "07:30 EST", country: "US", impact: "high", event: "Initial Jobless Claims", forecast: "202K", previous: "199K" },
-                    { time: "07:30 EST", country: "US", impact: "high", event: "Core PPI (MoM) (Jul)", forecast: "0.3%", previous: "0.2%" },
-                    { time: "07:30 EST", country: "US", impact: "medium", event: "Continuing Jobless Claims", forecast: "1,800K", previous: "1,801K" },
-                    { time: "07:30 EST", country: "US", impact: "medium", event: "PPI (YoY) (Jul)", forecast: "4.9%", previous: "5.5%" },
-                    { time: "07:30 EST", country: "US", impact: "medium", event: "Core PPI (YoY) (Jul)", forecast: "4.2%", previous: "4.7%" },
-                    { time: "07:40 EST", country: "US", impact: "medium", event: "FOMC Member Barkin Speaks", forecast: "-", previous: "-" },
-                    { time: "09:30 EST", country: "US", impact: "medium", event: "Natural Gas Storage", forecast: "31B", previous: "33B" },
-                    { time: "10:30 EST", country: "US", impact: "low", event: "4-Week Bill Auction", forecast: "3.640%", previous: "-" }
-                ];
+                const stars = item.impact === 'high' ? '★★★' : item.impact === 'medium' ? '★★☆' : '★☆☆';
+                const badgeColor = item.impact === 'high' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-amber-600 bg-amber-50 border-amber-200';
 
-                container.innerHTML = '';
-                todayEvents.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = "flex items-center justify-between p-1.5 bg-white rounded border border-slate-200 shadow-2xs hover:bg-slate-100 transition";
-                    
-                    const stars = item.impact === 'high' ? '★★★' : item.impact === 'medium' ? '★★☆' : '★☆☆';
-                    const badgeColor = item.impact === 'high' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-amber-600 bg-amber-50 border-amber-200';
-
-                    div.innerHTML = `
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-mono text-[9px] font-bold text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100 shrink-0">${item.time}</span>
-                            <div class="flex flex-col">
-                                <span class="font-semibold text-slate-800 text-[10px] leading-tight">${item.event}</span>
-                                <span class="text-[8px] text-slate-400">Exp: ${item.forecast} | Prev: ${item.previous}</span>
-                            </div>
+                div.innerHTML = `
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-mono text-[9px] font-bold text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100 shrink-0">${item.time}</span>
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-slate-800 text-[10px] leading-tight">${item.event}</span>
+                            <span class="text-[8px] text-slate-400">Exp: ${item.forecast} | Prev: ${item.previous}</span>
                         </div>
-                        <span class="text-[8px] font-bold px-1 rounded border shrink-0 ${badgeColor}">${stars}</span>
-                    `;
-                    container.appendChild(div);
-                });
-            } catch (err) {
-                container.innerHTML = '<div class="text-rose-500 text-center py-2 text-[10px]">Error loading live events. Click Refresh.</div>';
-            }
+                    </div>
+                    <span class="text-[8px] font-bold px-1 rounded border shrink-0 ${badgeColor}">${stars}</span>
+                `;
+                container.appendChild(div);
+            });
         }
 
         function setActiveSlot(slot) {
@@ -962,7 +957,15 @@
                 runningAccReturn = m.accReturn;
 
                 const tr = document.createElement('tr');
-                tr.className = `border-b border-custom ${idx === selectedTradeIndex ? 'bg-emerald-50/70 border-l-4 border-l-emerald-600' : 'bg-card-hover'}`;
+                
+                // Determine Row Tint Style based on Profit/Loss
+                let rowColorClass = m.netPnl < 0 ? 'row-loss' : m.netPnl > 0 ? 'row-profit' : 'bg-card-hover';
+                if (idx === selectedTradeIndex) {
+                    tr.className = `border-b border-custom border-l-4 border-l-emerald-600 ${rowColorClass}`;
+                } else {
+                    tr.className = `border-b border-custom ${rowColorClass}`;
+                }
+
                 const pnlColor = m.netPnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold';
 
                 tr.innerHTML = `
@@ -977,11 +980,11 @@
                     <td class="p-1 border-r border-custom text-center"><input type="number" value="${t.lev || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'lev', null, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.ent[0] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'ent', 0, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.entQty[0] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'entQty', 0, this.value)" class="tbl-input"></td>
-                    <td class="p-1 border-r border-custom"><input type="number" value="${t.ent[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'ent', 1, this.value)" class="tbl-input"></td>
+                    <td class="p-1 border-r border-custom split-divider"><input type="number" value="${t.ent[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'ent', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.entQty[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'entQty', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.exit[0] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exit', 0, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.exitQty[0] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exitQty', 0, this.value)" class="tbl-input"></td>
-                    <td class="p-1 border-r border-custom"><input type="number" value="${t.exit[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exit', 1, this.value)" class="tbl-input"></td>
+                    <td class="p-1 border-r border-custom split-divider"><input type="number" value="${t.exit[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exit', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.exitQty[1] || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'exitQty', 1, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-custom"><input type="number" value="${t.fees || ''}" placeholder="0" onchange="updateTradeValue(${idx}, 'fees', null, this.value)" class="tbl-input text-slate-500"></td>
                     <td class="p-2 border-r border-custom text-right ${pnlColor}">$${m.netPnl.toFixed(3)}</td>
@@ -1070,7 +1073,7 @@
             } else {
                 img.src = '';
                 img.classList.add('hidden');
-                if (placeholder) placeholder.remove('hidden');
+                if (placeholder) placeholder.classList.remove('hidden');
             }
         }
 
@@ -1107,7 +1110,7 @@
             renderTabs();
             renderChecklistUI();
             renderJournal();
-            selectTrade(selectedTradeIndex);
+(selectedTradeIndex);
             setActiveSlot('htf');
             fetchMacroNews();
             fetchLiveAssetPrices();
