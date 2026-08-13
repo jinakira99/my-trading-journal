@@ -23,6 +23,7 @@
         
         .status-green { background-color: #d1fae5 !important; color: #065f46 !important; border: 1px solid #a7f3d0 !important; }
         .status-pink { background-color: #fce7f3 !important; color: #9d174d !important; border: 1px solid #fbcfe8 !important; }
+        .status-red { background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5 !important; }
         .status-gray { background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
 
         .img-slot-active { border-color: #059669 !important; ring: 2px; ring-color: #a7f3d0; }
@@ -37,18 +38,18 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden text-xs" tabIndex="0">
+<body class="flex flex-col min-h-screen md:h-screen md:overflow-hidden text-xs" tabIndex="0">
 
     <!-- Top Live Asset Ticker Bar -->
-    <div class="bg-slate-900 text-slate-300 border-b border-slate-800 px-6 py-2 flex items-center justify-between flex-shrink-0 text-[11px]">
-        <div class="flex items-center gap-2 mr-4">
+    <div class="bg-slate-900 text-slate-300 border-b border-slate-800 px-4 md:px-6 py-2 flex flex-wrap md:flex-nowrap items-center justify-between flex-shrink-0 text-[11px] gap-2">
+        <div class="flex items-center gap-2">
             <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
             <span class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Market Watch</span>
         </div>
 
-        <div id="ticker-container" class="flex items-center gap-3 overflow-x-auto py-0.5"></div>
+        <div id="ticker-container" class="flex items-center gap-3 overflow-x-auto py-0.5 max-w-full"></div>
 
-        <div class="flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-2 shrink-0 ml-auto md:ml-0">
             <span id="sync-status" class="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 bg-emerald-900/40 rounded border border-emerald-700/50">Cloud Sync Active</span>
             <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-2.5 py-1 rounded flex items-center gap-1 font-semibold transition">
                 <i data-lucide="plus" class="w-3 h-3"></i> Add Asset
@@ -57,32 +58,32 @@
     </div>
 
     <!-- Header & Month Tabs -->
-    <header class="bg-card border-b border-custom px-6 py-2.5 flex items-center justify-between flex-shrink-0 shadow-sm">
-        <div class="flex items-center gap-6">
-            <div class="flex items-center gap-2">
+    <header class="bg-card border-b border-custom px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between flex-shrink-0 shadow-sm gap-2">
+        <div class="flex items-center gap-4 md:gap-6 overflow-x-auto max-w-full">
+            <div class="flex items-center gap-2 shrink-0">
                 <div class="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center font-bold text-white text-sm">E</div>
                 <h1 class="text-sm font-bold text-slate-800 tracking-wide">Trading Dashboard</h1>
             </div>
             
-            <div id="month-tabs" class="flex items-center gap-1 overflow-x-auto"></div>
-            <button onclick="addMonthTab()" class="text-xs text-slate-600 hover:text-emerald-600 bg-slate-100 hover:bg-slate-200 border border-custom px-2.5 py-1 rounded flex items-center gap-1 font-medium transition">
+            <div id="month-tabs" class="flex items-center gap-1 overflow-x-auto shrink-0"></div>
+            <button onclick="addMonthTab()" class="text-xs text-slate-600 hover:text-emerald-600 bg-slate-100 hover:bg-slate-200 border border-custom px-2.5 py-1 rounded flex items-center gap-1 font-medium transition shrink-0">
                 <i data-lucide="plus" class="w-3 h-3"></i> Add Month
             </button>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <div class="flex-1 flex overflow-hidden">
+    <!-- Main Container (Responsive Stack on Mobile) -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         
         <!-- Left Dashboard & Journal Table -->
-        <div class="flex-1 flex flex-col p-4 overflow-y-auto space-y-4">
+        <div class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto space-y-4">
             
             <!-- Pre-Trade Setup Checklist -->
-            <div class="bg-card border border-custom rounded-xl p-4 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
+            <div class="bg-card border border-custom rounded-xl p-3 md:p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
                     <div class="flex items-center gap-2">
                         <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
-                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">A+ Setup Pre-Trade Checklist <span class="text-[10px] text-slate-400 font-normal">(Drag to reorder)</span></h2>
+                        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">A+ Setup Pre-Trade Checklist <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">(Drag to reorder)</span></h2>
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="openChecklistModal()" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-custom px-2.5 py-1 rounded flex items-center gap-1 transition font-medium">
@@ -94,38 +95,38 @@
                     </div>
                 </div>
                 
-                <div id="checklist-container" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
+                <div id="checklist-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5"></div>
             </div>
 
             <!-- KPI Block -->
-            <div class="bg-card border border-custom rounded-xl p-4 shadow-sm">
+            <div class="bg-card border border-custom rounded-xl p-3 md:p-4 shadow-sm">
                 <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Executive Performance Dashboard (KPI)</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-center">
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-custom">
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 text-center">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
                         <div class="text-[10px] text-slate-500 font-medium">Initial Asset ($)</div>
                         <input type="number" id="kpi-initial-input" onchange="updateInitialAsset(this.value)" class="w-full text-center bg-transparent text-sm font-bold text-slate-800 mt-1 border-b border-slate-300 focus:border-emerald-600 outline-none" value="10000">
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-custom">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
                         <div class="text-[10px] text-slate-500 font-medium">Total Net P&L</div>
                         <div id="kpi-net-pnl" class="text-sm font-bold text-emerald-600 mt-1">+$0.00</div>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-custom">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
                         <div class="text-[10px] text-slate-500 font-medium">End Asset</div>
                         <div id="kpi-end-asset" class="text-sm font-bold text-slate-800 mt-1">$10,000.00</div>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-custom">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
                         <div class="text-[10px] text-slate-500 font-medium">Total PnL (%)</div>
                         <div id="kpi-pnl-pct" class="text-sm font-bold text-emerald-600 mt-1">0.00%</div>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-custom">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
                         <div class="text-[10px] text-slate-500 font-medium">Win Rate</div>
                         <div id="kpi-winrate" class="text-sm font-bold text-slate-800 mt-1">0.0%</div>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-custom">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
                         <div class="text-[10px] text-slate-500 font-medium">Profit Factor</div>
                         <div id="kpi-pf" class="text-sm font-bold text-slate-800 mt-1">0.00</div>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-custom">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-custom">
                         <div class="text-[10px] text-slate-500 font-medium">Total Fees Paid</div>
                         <div id="kpi-fees" class="text-sm font-bold text-rose-600 mt-1">$0.00</div>
                     </div>
@@ -133,18 +134,18 @@
             </div>
 
             <!-- Journal Log -->
-            <div class="bg-card border border-custom rounded-xl p-4 flex-1 flex flex-col shadow-sm">
-                <div class="flex items-center justify-between mb-3">
+            <div class="bg-card border border-custom rounded-xl p-3 md:p-4 flex-1 flex flex-col shadow-sm min-h-[300px]">
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
                     <div class="flex items-center gap-3">
                         <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Trading Journal & Execution Log</h2>
                         <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-2.5 py-1 rounded flex items-center gap-1 transition text-[11px] shadow-sm">
                             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
                         </button>
                     </div>
-                    <span class="text-[11px] text-slate-400">* Click slot on right & Ctrl+V to paste screenshot. Click image to zoom. Hover to delete.</span>
+                    <span class="text-[10px] text-slate-400">* Click slot on right & Ctrl+V to paste screenshot. Click image to zoom.</span>
                 </div>
 
-                <div class="flex-1 overflow-x-auto overflow-y-auto border border-custom rounded-lg">
+                <div class="flex-1 overflow-x-auto border border-custom rounded-lg">
                     <table class="w-full text-left whitespace-nowrap border-collapse">
                         <thead class="bg-slate-100 text-slate-600 text-[10px] uppercase sticky top-0 z-10 border-b border-custom">
                             <tr>
@@ -175,8 +176,8 @@
 
         </div>
 
-        <!-- Right Side Trade Review Drawer -->
-        <aside class="w-80 bg-card border-l border-custom p-3 flex flex-col overflow-y-auto flex-shrink-0 space-y-3 shadow-sm">
+        <!-- Right Side Trade Review Drawer (Mobile Responsive: Full Width below main section) -->
+        <aside class="w-full md:w-80 bg-card border-t md:border-t-0 md:border-l border-custom p-3 flex flex-col overflow-y-auto shrink-0 space-y-3 shadow-sm">
             <div class="flex items-center justify-between border-b border-custom pb-2">
                 <h3 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
                     <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-600"></i>
@@ -187,14 +188,13 @@
 
             <input type="file" id="file-input-hidden" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
             
-            <!-- Compact Screenshot Upload Slots (Height reduced to h-12) -->
             <div class="space-y-1.5">
                 <div>
                     <span class="text-[9px] text-slate-500 font-medium block mb-0.5">HTF Screenshot <span class="text-slate-400">(Click & Ctrl+V)</span></span>
                     <div id="slot-htf" onclick="handleSlotClick('htf')" ondblclick="triggerFileInput('htf')" class="w-full h-12 bg-slate-50 border border-dashed border-slate-300 hover:border-emerald-500 rounded-md flex items-center justify-center cursor-pointer overflow-hidden relative group transition">
                         <img id="img-htf" class="hidden w-full h-full object-cover">
                         <button id="del-btn-htf" onclick="deleteSlotImage(event, 'htf')" title="Delete Image" class="hidden group-hover:block absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow z-10">✕</button>
-                        <div id="placeholder-htf" class="flex items-center gap-1 text.slate-400">
+                        <div id="placeholder-htf" class="flex items-center gap-1 text-slate-400">
                             <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600"></i>
                             <span class="text-[9px] text-slate-500">HTF Chart</span>
                         </div>
@@ -224,13 +224,11 @@
                 </div>
             </div>
 
-            <!-- Reflection / Notes -->
             <div class="space-y-1 pt-1.5 border-t border-custom">
                 <label class="text-[10px] text-slate-500 font-medium block">Execution Reflection / Notes</label>
                 <textarea id="review-notes" oninput="saveNotes(this.value)" rows="2" class="w-full p-1.5 rounded input-light text-[11px]" placeholder="Log trade context, mistakes..."></textarea>
             </div>
 
-            <!-- Expanded Macro News & Daily Economic Calendar Area -->
             <div class="pt-2 border-t border-custom space-y-2 flex-1 flex flex-col min-h-0">
                 <div class="flex items-center justify-between">
                     <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1">
@@ -242,7 +240,6 @@
                     </button>
                 </div>
 
-                <!-- Always Visible Fixed Category News Quick Links -->
                 <div class="grid grid-cols-1 gap-1 text-[11px]">
                     <a href="https://www.kitco.com/news/" target="_blank" class="p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded flex items-center justify-between text-amber-900 font-bold transition">
                         <span>🥇 Gold & Silver Market News</span>
@@ -258,12 +255,10 @@
                     </a>
                 </div>
 
-                <!-- Investing.com External Calendar Link -->
                 <a href="https://www.investing.com/economic-calendar/" target="_blank" class="p-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded flex items-center justify-between text-slate-800 font-bold transition text-[11px]">
                     <span>📈 Investing.com Real-time Calendar ↗</span>
                 </a>
 
-                <!-- Today's Real-Time Economic Schedule Block -->
                 <div class="flex-1 bg-slate-50 border border-custom rounded-lg p-2 overflow-y-auto space-y-1.5 min-h-[160px]">
                     <div class="flex items-center justify-between border-b border-slate-200 pb-1">
                         <span id="today-date-header" class="font-bold text-[10px] text-slate-700">Today's Key Economic Events</span>
@@ -286,7 +281,7 @@
 
     <!-- Checklist Modal -->
     <div id="checklist-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-card border border-custom p-5 rounded-xl w-96 space-y-4 shadow-xl">
+        <div class="bg-card border border-custom p-5 rounded-xl w-96 max-w-[90vw] space-y-4 shadow-xl">
             <div class="flex items-center justify-between border-b border-custom pb-2">
                 <h3 class="font-bold text-slate-800 text-xs">Manage Rules & Dropdown Options</h3>
                 <button onclick="closeChecklistModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -306,8 +301,8 @@
                 <div class="flex gap-1.5">
                     <input type="text" id="new-option-name" placeholder="e.g. Partial" class="flex-1 p-2 rounded input-light text-xs">
                     <select id="new-option-color" class="p-1 rounded input-light text-xs font-semibold">
+                        <option value="pink">Pink / Red (분홍/빨강)</option>
                         <option value="green">Green (녹색)</option>
-                        <option value="pink">Pink (분홍색)</option>
                         <option value="gray">Gray (회색)</option>
                     </select>
                     <button onclick="addDropdownOption()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1 rounded text-xs">Add</button>
@@ -321,7 +316,7 @@
 
     <!-- Live Auto Search Asset Modal -->
     <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl w-96 space-y-4 shadow-2xl text-slate-200">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                 <div class="flex items-center gap-2">
                     <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
@@ -393,8 +388,8 @@
 
         let checklistRules = ["Bias Alignment (Daily)", "High POI (LQ Near)", "LQ + MS Confirmation", "Kill Zone Alignment", "Risk to Reward (R:R)"];
         let dropdownOptions = [
-            { label: "Checked", color: "green" },
             { label: "Ignored", color: "pink" },
+            { label: "Confirmed", color: "green" },
             { label: "Not found", color: "gray" }
         ];
 
@@ -465,6 +460,35 @@
                 container.appendChild(div);
             });
             lucide.createIcons();
+            
+            const selects = container.querySelectorAll('select');
+            selects.forEach(s => updateCheckStyle(s));
+        }
+
+        function resetChecklist() {
+            const selects = document.querySelectorAll('#checklist-container select');
+            selects.forEach(selectElem => {
+                let targetIdx = 0;
+                for (let i = 0; i < selectElem.options.length; i++) {
+                    const clr = selectElem.options[i].getAttribute('data-color');
+                    if (clr === 'pink' || clr === 'red') {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+                selectElem.selectedIndex = targetIdx;
+                updateCheckStyle(selectElem);
+            });
+        }
+
+        function updateCheckStyle(selectElem) {
+            const selectedOpt = selectElem.options[selectElem.selectedIndex];
+            const color = selectedOpt ? selectedOpt.getAttribute('data-color') : 'green';
+            selectElem.className = "w-full p-1.5 rounded text-xs font-semibold ";
+            if (color === 'green') selectElem.className += "status-green";
+            else if (color === 'pink') selectElem.className += "status-pink";
+            else if (color === 'red') selectElem.className += "status-red";
+            else selectElem.className += "status-gray";
         }
 
         async function fetchLiveAssetPrices() {
@@ -690,7 +714,7 @@
             const container = document.getElementById('active-options-list');
             container.innerHTML = '';
             dropdownOptions.forEach((opt, idx) => {
-                const colorClass = opt.color === 'green' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : opt.color === 'pink' ? 'bg-pink-100 text-pink-800 border-pink-300' : 'bg-slate-100 text-slate-700 border-slate-300';
+                const colorClass = (opt.color === 'pink' || opt.color === 'red') ? 'bg-pink-100 text-pink-800 border-pink-300' : opt.color === 'green' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-700 border-slate-300';
                 const span = document.createElement('span');
                 span.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-semibold ${colorClass}`;
                 span.innerHTML = `${opt.label || opt} <button onclick="removeOption(${idx})" class="hover:text-rose-600 font-bold">✕</button>`;
@@ -781,7 +805,6 @@
 
             container.innerHTML = '<div class="text-slate-400 text-center py-2 text-[10px]">Loading today\'s events...</div>';
 
-            // Real-time Key Macro Economic Events Data
             const todayEvents = [
                 { time: "08:30 EST", country: "USD", impact: "high", event: "Core CPI (MoM / YoY)", forecast: "0.2%", previous: "0.2%" },
                 { time: "08:30 EST", country: "USD", impact: "high", event: "Initial Jobless Claims", forecast: "235K", previous: "233K" },
@@ -821,17 +844,6 @@
             });
         }
 
-        function updateCheckStyle(selectElem) {
-            const selectedOpt = selectElem.options[selectElem.selectedIndex];
-            const color = selectedOpt.getAttribute('data-color') || 'green';
-            selectElem.className = "w-full p-1.5 rounded text-xs font-semibold ";
-            if (color === 'green') selectElem.className += "status-green";
-            else if (color === 'pink') selectElem.className += "status-pink";
-            else selectElem.className += "status-gray";
-        }
-
-        function resetChecklist() { renderChecklistUI(); }
-
         function calculateMetrics(trade, initialAsset, prevAccReturn = 0) {
             let totalEntVal = 0, totalEntQty = 0;
             trade.ent.forEach((p, i) => {
@@ -860,7 +872,7 @@
             container.innerHTML = '';
             monthsData.forEach((m, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `px-3 py-1 text-xs rounded font-semibold transition ${idx === activeMonthIndex ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.className = `px-3 py-1 text-xs rounded font-semibold transition shrink-0 ${idx === activeMonthIndex ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
                 btn.innerText = m.name;
                 btn.onclick = () => { activeMonthIndex = idx; selectedTradeIndex = 0; renderAll(); };
                 container.appendChild(btn);
