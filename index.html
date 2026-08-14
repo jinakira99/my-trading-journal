@@ -19,12 +19,10 @@
         .tbl-input { background-color: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; text-align: center; width: 100%; min-width: 65px; padding: 4px 6px; border-radius: 6px; }
         .tbl-input:focus { border-color: #059669; outline: none; background-color: #f8fafc; }
         
-        /* Green & Pink Theme Status Colors */
         .status-green { background-color: #d1fae5 !important; color: #065f46 !important; border: 1px solid #a7f3d0 !important; }
         .status-pink { background-color: #fce7f3 !important; color: #9d174d !important; border: 1px solid #fbcfe8 !important; }
         .status-gray { background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
 
-        /* Row PnL Background Tints & Slim Clickable Binders */
         .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; border-left: 4px solid #059669 !important; cursor: pointer; }
         .row-profit:hover { background-color: rgba(209, 250, 229, 0.5) !important; }
         .row-loss { background-color: rgba(252, 231, 243, 0.45) !important; border-left: 4px solid #e11d48 !important; cursor: pointer; }
@@ -32,21 +30,10 @@
 
         .section-divider { border-left: 1px solid #cbd5e1 !important; }
         
-        /* Resizable Splitter Handles */
-        .resizer-left, .resizer-right {
-            width: 5px; cursor: col-resize; background-color: transparent; transition: background-color 0.2s; z-index: 20; flex-shrink: 0;
-        }
-        .resizer-left:hover, .resizer-right:hover, .resizing {
-            background-color: #059669 !important;
-        }
+        .resizer-left, .resizer-right { width: 5px; cursor: col-resize; background-color: transparent; transition: background-color 0.2s; z-index: 20; flex-shrink: 0; }
+        .resizer-left:hover, .resizer-right:hover, .resizing { background-color: #059669 !important; }
 
-        /* Responsive Sidebar overriding for mobile */
-        @media (max-width: 1023px) {
-            #sidebar-left, #sidebar-right {
-                width: 100% !important;
-            }
-        }
-
+        @media (max-width: 1023px) { #sidebar-left, #sidebar-right { width: 100% !important; } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -54,7 +41,6 @@
 </head>
 <body class="flex flex-col min-h-screen lg:h-screen text-xs overflow-x-hidden lg:overflow-hidden">
 
-    <!-- Top Ticker Bar -->
     <div class="bg-slate-900 text-slate-300 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
         <div class="flex items-center gap-2">
             <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
@@ -70,17 +56,12 @@
         </div>
     </div>
 
-    <!-- Main Workspace Layout with Resizable Panels -->
     <div id="workspace-container" class="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden relative">
-        
-        <!-- Left Sidebar News & Live Calendar Stack -->
         <aside id="sidebar-left" class="w-full lg:w-[320px] bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 space-y-4 overflow-y-auto shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 pb-2 flex-shrink-0">
                 <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">News Feeds</span>
             </div>
-
             <div id="news-feeds-container" class="space-y-3 flex-shrink-0"></div>
-
             <div class="pt-2 border-t border-slate-200 flex-shrink-0">
                 <div class="flex items-center justify-between mb-2">
                     <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Live Economic Calendar</span>
@@ -91,20 +72,12 @@
                 <div id="investing-calendar-wrapper" class="w-full bg-slate-50 border border-slate-200 rounded-xl overflow-hidden relative h-96">
                     <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone&countries=5,72,22,17,36,43,10,35,11,26&calType=day&lang=1" width="100%" height="100%" style="position: absolute; top:0; left:0; border:0; width:100%; height:100%;" frameborder="0" allowtransparency="true"></iframe>
                 </div>
-                <div class="mt-2">
-                    <a href="https://www.investing.com/economic-calendar/" target="_blank" class="p-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-900 font-bold transition text-xs shadow-xs">
-                        <span>Open Full Calendar ↗</span>
-                    </a>
-                </div>
             </div>
         </aside>
 
-        <!-- Left Resizer Handle (PC Only) -->
         <div id="resizer-left" class="hidden lg:block resizer-left"></div>
 
-        <!-- Center Main Content -->
         <main class="flex-1 flex flex-col p-4 lg:p-6 gap-6 overflow-y-auto min-w-[300px]">
-            
             <div class="flex items-center justify-between flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-x-auto">
                     <h2 class="text-base font-black text-slate-900 tracking-tight">Trading Dashboard</h2>
@@ -116,7 +89,6 @@
                 </div>
             </div>
 
-            <!-- KPI & Cumulative Chart Panel -->
             <div class="fintech-card p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-shrink-0">
                 <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                     <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200 flex flex-col justify-between">
@@ -157,7 +129,6 @@
                 </div>
             </div>
 
-            <!-- Trading Journal & Execution Log Table -->
             <div class="fintech-card p-5 flex-1 flex flex-col">
                 <div class="flex items-center justify-between mb-4 flex-shrink-0">
                     <div class="flex items-center gap-3">
@@ -166,9 +137,7 @@
                             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
                         </button>
                     </div>
-                    <span class="text-[10px] text-slate-400">* Click the left binder bar of any row to select and inspect trade details.</span>
                 </div>
-
                 <div class="overflow-x-auto border border-slate-200 rounded-xl">
                     <table class="w-full text-left whitespace-nowrap border-collapse">
                         <thead class="bg-slate-100 text-slate-600 text-[10px] uppercase sticky top-0 z-10 border-b border-slate-200">
@@ -198,13 +167,10 @@
                     </table>
                 </div>
             </div>
-
         </main>
 
-        <!-- Right Resizer Handle (PC Only) -->
         <div id="resizer-right" class="hidden lg:block resizer-right"></div>
 
-        <!-- Right Side Inspector Panel -->
         <aside id="sidebar-right" class="w-full lg:w-[380px] bg-white border-t lg:border-t-0 lg:border-l border-slate-200 p-5 flex flex-col space-y-4 overflow-y-auto shadow-sm flex-shrink-0">
             <div class="flex items-center justify-between border-b border-slate-200 pb-3 flex-shrink-0">
                 <h3 class="font-extrabold text-slate-900 text-xs flex items-center gap-2">
@@ -219,7 +185,7 @@
             <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white p-4 rounded-2xl shadow-md border border-slate-800 space-y-2.5 flex-shrink-0">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div class="flex items-center gap-1.5 font-extrabold text-xs text-emerald-400">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i> Gemini Comprehensive AI Advisor
+                        <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i> Gemini AI Advisor
                     </div>
                     <button onclick="generateAIStrategySuggestion()" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-bold transition cursor-pointer">Refresh</button>
                 </div>
@@ -251,14 +217,11 @@
                 <div id="charts-gallery-container" class="grid grid-cols-2 gap-2"></div>
             </div>
 
-            <!-- Notes -->
             <div class="space-y-1.5 pt-2 border-t border-slate-200 flex-shrink-0 pb-4">
                 <label class="text-[10px] text-slate-800 font-extrabold block uppercase">Trade Reflection & Psychology</label>
-                <!-- oninput 시 타이핑할 때마다 클라우드를 마비시키지 않도록 debounce 함수 사용 -->
                 <textarea id="review-notes" oninput="saveNotes(this.value)" rows="5" class="w-full p-2.5 rounded-xl input-fintech text-[11px] leading-relaxed" placeholder="Log trade insights and psychological reflections..."></textarea>
             </div>
         </aside>
-
     </div>
 
     <!-- Modals -->
@@ -330,9 +293,7 @@
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             isFirebaseActive = true;
-        } catch (e) {
-            console.log("Firebase Init Failed:", e);
-        }
+        } catch (e) { console.log("Firebase Init Failed:", e); }
 
         lucide.createIcons();
 
@@ -346,64 +307,66 @@
         ];
 
         let checklistRules = ["Entry Model", "Reasonable RR Ratio", "Order Type", "TP/SL Adjust"];
-        let dropdownOptions = [
-            { label: "Confirmed", color: "green" },
-            { label: "Ignored", color: "pink" },
-            { label: "Not found", color: "gray" }
-        ];
+        let dropdownOptions = [ { label: "Confirmed", color: "green" }, { label: "Ignored", color: "pink" }, { label: "Not found", color: "gray" } ];
 
         let monthsData = [{ name: "2026-07", initialAsset: 10000, trades: [] }];
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
-        let saveTimeout = null; // Debounce Timer
+        let saveTimeout = null; 
 
-        // 클라우드 저장 핵심 로직 (Debounce 적용)
+        // 🌟 초강력 이미지 압축 엔진 (PNG -> JPG 변환 및 리사이징)
+        function compressImage(dataUrl, callback) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // 가로가 800px을 넘어가면 비율 맞춰서 줄임 (용량 대폭 감소)
+                const MAX_WIDTH = 800;
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 0.6 화질의 JPEG로 변환 (눈으로 볼때 차이 없으나 용량 90% 감소)
+                callback(canvas.toDataURL('image/jpeg', 0.6));
+            };
+            img.src = dataUrl;
+        }
+
         async function saveCloudData() {
             const payload = { monthsData, checklistRules, dropdownOptions, updatedAt: new Date() };
-            
-            // 1. 브라우저 로컬 백업 (새로고침 즉각 방어)
-            try {
-                localStorage.setItem('fintech_trading_journal_data', JSON.stringify(payload));
-            } catch (e) {}
+            try { localStorage.setItem('fintech_trading_journal_data', JSON.stringify(payload)); } catch (e) {}
 
             const badge = document.getElementById('cloud-status-badge');
-            
-            // 2. 파이어베이스 용량 제한(1MB) 방어 체계 (900KB 초과 시 경고)
             const payloadSize = JSON.stringify(payload).length;
+            
+            // 용량이 900KB 초과하면 경고
             if (payloadSize > 900000) {
                 alert("데이터 용량이 한계에 도달했습니다! 차트 이미지가 너무 크거나 많습니다. 일부 차트 박스를 ✕로 삭제 후 다시 시도해주세요.");
-                if (badge) {
-                    badge.innerText = "Size Limit Reached";
-                    badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800";
-                }
+                if (badge) { badge.innerText = "Size Limit"; badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800"; }
                 return;
             }
 
             if (!isFirebaseActive) return;
 
-            if (badge) {
-                badge.innerText = "Saving...";
-                badge.className = "text-[10px] text-amber-300 font-semibold px-2.5 py-0.5 bg-amber-950/60 rounded-full border border-amber-800";
-            }
+            if (badge) { badge.innerText = "Saving..."; badge.className = "text-[10px] text-amber-300 font-semibold px-2.5 py-0.5 bg-amber-950/60 rounded-full border border-amber-800"; }
 
-            // 3. 디바운스 (1.5초 이내에 추가 입력이 없어야만 파이어베이스에 최종 전송)
             if (saveTimeout) clearTimeout(saveTimeout);
-            
             saveTimeout = setTimeout(async () => {
                 try {
                     await db.collection("journals").doc("main_journal").set(payload);
-                    if (badge) {
-                        badge.innerText = "Cloud Synced";
-                        badge.className = "text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 bg-emerald-950/60 rounded-full border border-emerald-800";
-                    }
+                    if (badge) { badge.innerText = "Cloud Synced"; badge.className = "text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 bg-emerald-950/60 rounded-full border border-emerald-800"; }
                 } catch (e) {
-                    console.error(e);
-                    if (badge) {
-                        badge.innerText = "Sync Error";
-                        badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800";
-                    }
+                    if (badge) { badge.innerText = "Sync Error"; badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800"; }
                 }
-            }, 1500); 
+            }, 1000); 
         }
 
         async function loadCloudData() {
@@ -417,7 +380,6 @@
                     if (data.dropdownOptions) dropdownOptions = data.dropdownOptions;
                 }
             } catch (e) {
-                // 클라우드 로드 실패 시, 로컬 데이터 복구
                 try {
                     const localSaved = localStorage.getItem('fintech_trading_journal_data');
                     if (localSaved) {
@@ -431,7 +393,7 @@
             renderAll();
         }
 
-        // Global Paste Listener for Ctrl+V Image Upload
+        // 붙여넣기 시 압축 적용
         document.addEventListener('paste', function(e) {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let index in items) {
@@ -441,23 +403,19 @@
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = function(event) {
-                        const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-                        if (trade) {
-                            if (!trade.customCharts) {
-                                trade.customCharts = [
-                                    { key: 'htf', title: 'HTF Chart', img: '' },
-                                    { key: 'ltf', title: 'LTF Chart', img: '' }
-                                ];
+                        compressImage(event.target.result, function(compressedData) {
+                            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+                            if (trade) {
+                                if (!trade.customCharts) trade.customCharts = [ { key: 'htf', title: 'HTF Chart', img: '' }, { key: 'ltf', title: 'LTF Chart', img: '' } ];
+                                let target = trade.customCharts.find(c => !c.img);
+                                if (!target) {
+                                    target = { key: 'chart_' + Date.now(), title: 'Setup Chart ' + (trade.customCharts.length + 1), img: '' };
+                                    trade.customCharts.push(target);
+                                }
+                                target.img = compressedData;
+                                renderChartsGallery(); saveCloudData();
                             }
-                            let target = trade.customCharts.find(c => !c.img);
-                            if (!target) {
-                                target = { key: 'chart_' + Date.now(), title: 'Setup Chart ' + (trade.customCharts.length + 1), img: '' };
-                                trade.customCharts.push(target);
-                            }
-                            target.img = event.target.result;
-                            renderChartsGallery();
-                            saveCloudData();
-                        }
+                        });
                     };
                 }
             }
@@ -494,12 +452,9 @@
                 { category: "Stocks", title: "Tech Indexes Rally on Strong Earnings", summary: "Nasdaq climbs to new weekly highs driven by semiconductor sector momentum and solid cloud revenue.", link: "https://www.investing.com/news/stock-market-news" },
                 { category: "Commodities", title: "Gold Eyes Resistance at $2,460", summary: "Safe-haven demand persists amid ongoing macroeconomic uncertainties and currency fluctuations.", link: "https://www.investing.com/news/commodities-news" }
             ];
-
             container.innerHTML = '';
             feeds.forEach(f => {
-                const a = document.createElement('a');
-                a.href = f.link;
-                a.target = "_blank";
+                const a = document.createElement('a'); a.href = f.link; a.target = "_blank";
                 a.className = "block p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 shadow-2xs hover:bg-slate-100 hover:border-emerald-300 transition cursor-pointer";
                 a.innerHTML = `<div class="flex items-center justify-between"><span class="font-bold text-emerald-700 text-[10px] uppercase">${f.category}</span><span class="text-[8px] text-slate-400 font-mono">Live ↗</span></div><h4 class="font-extrabold text-slate-800 text-xs">${f.title}</h4><p class="text-[10px] text-slate-600 leading-relaxed">${f.summary}</p>`;
                 container.appendChild(a);
@@ -517,8 +472,7 @@
             const ctx = canvas.getContext('2d');
             const trades = monthsData[activeMonthIndex].trades;
 
-            canvas.width = canvas.parentElement.clientWidth || 300;
-            canvas.height = 80;
+            canvas.width = canvas.parentElement.clientWidth || 300; canvas.height = 80;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (!trades || trades.length === 0) {
@@ -549,8 +503,7 @@
             checklistRules.forEach(rule => {
                 const val = tradeChecklist[rule] || (dropdownOptions[0] ? dropdownOptions[0].label : '');
                 const opt = dropdownOptions.find(o => o.label === val);
-                const clr = opt ? opt.color : 'green';
-                if (clr !== 'gray') { validCount++; if (clr === 'green') greenCount++; }
+                if (opt && opt.color !== 'gray') { validCount++; if (opt.color === 'green') greenCount++; }
             });
             if (validCount === 0) return { scorePct: 0 };
             return { scorePct: Math.round((greenCount / validCount) * 100) };
@@ -646,18 +599,21 @@
 
         function triggerChartUpload(key) { activeChartKey = key; document.getElementById('file-input-hidden').click(); }
 
+        // 직접 파일 선택 업로드 시에도 압축 적용
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader(); reader.readAsDataURL(file);
                 reader.onload = function(event) {
-                    const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-                    if (trade) {
-                        if (!trade.customCharts) trade.customCharts = [];
-                        let target = trade.customCharts.find(c => c.key === activeChartKey);
-                        if (target) target.img = event.target.result; else trade.customCharts.push({ key: activeChartKey, title: 'Chart', img: event.target.result });
-                        renderChartsGallery(); saveCloudData();
-                    }
+                    compressImage(event.target.result, function(compressedData) {
+                        const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+                        if (trade) {
+                            if (!trade.customCharts) trade.customCharts = [];
+                            let target = trade.customCharts.find(c => c.key === activeChartKey);
+                            if (target) target.img = compressedData; else trade.customCharts.push({ key: activeChartKey, title: 'Chart', img: compressedData });
+                            renderChartsGallery(); saveCloudData();
+                        }
+                    });
                 };
             }
         }
