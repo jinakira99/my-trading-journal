@@ -36,15 +36,15 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden text-xs">
+<body class="flex flex-col min-h-screen text-xs">
 
     <!-- Top Ticker Bar -->
-    <div class="bg-slate-900 text-slate-300 px-6 py-2 flex items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
+    <div class="bg-slate-900 text-slate-300 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
         <div class="flex items-center gap-2">
             <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
             <span class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Market Watch</span>
         </div>
-        <div id="ticker-container" class="flex items-center gap-4 overflow-x-auto py-0.5 max-w-full"></div>
+        <div id="ticker-container" class="flex items-center gap-3 overflow-x-auto py-0.5 max-w-full"></div>
         <div class="flex items-center gap-2 shrink-0">
             <span class="text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 bg-emerald-950/60 rounded-full border border-emerald-800">Cloud Active</span>
             <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer">
@@ -53,11 +53,11 @@
         </div>
     </div>
 
-    <!-- Main Workspace Layout -->
-    <div class="flex-1 flex overflow-hidden">
+    <!-- Main Workspace Layout (Responsive Flex/Col for Mobile & Desktop) -->
+    <div class="flex-1 flex flex-col lg:flex-row overflow-x-hidden">
         
         <!-- Left Sidebar News & Live Calendar Stack -->
-        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 overflow-y-auto space-y-4 shadow-sm">
+        <aside class="w-full lg:w-80 bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 space-y-4 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                 <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">News Feeds</span>
             </div>
@@ -84,7 +84,7 @@
         </aside>
 
         <!-- Center Main Content -->
-        <main class="flex-1 flex flex-col overflow-hidden p-6 gap-6">
+        <main class="flex-1 flex flex-col p-4 lg:p-6 gap-6 overflow-x-auto">
             
             <!-- Header Bar with Month Tabs -->
             <div class="flex items-center justify-between flex-shrink-0">
@@ -141,7 +141,7 @@
             </div>
 
             <!-- Trading Journal & Execution Log Table -->
-            <div class="fintech-card p-5 flex-1 flex flex-col overflow-hidden">
+            <div class="fintech-card p-5 flex-1 flex flex-col">
                 <div class="flex items-center justify-between mb-4 flex-shrink-0">
                     <div class="flex items-center gap-3">
                         <h3 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Trading Journal Execution Log</h3>
@@ -152,7 +152,7 @@
                     <span class="text-[10px] text-slate-400">* Click the left binder bar of any row to select and inspect trade details.</span>
                 </div>
 
-                <div class="flex-1 overflow-auto border border-slate-200 rounded-xl">
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
                     <table class="w-full text-left whitespace-nowrap border-collapse">
                         <thead class="bg-slate-100 text-slate-600 text-[10px] uppercase sticky top-0 z-10 border-b border-slate-200">
                             <tr>
@@ -185,7 +185,7 @@
         </main>
 
         <!-- Right Side Inspector Panel -->
-        <aside class="w-96 bg-white border-l border-slate-200 p-5 flex flex-col overflow-y-auto shrink-0 space-y-4 shadow-sm">
+        <aside class="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 p-5 flex flex-col space-y-4 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 pb-3">
                 <h3 class="font-extrabold text-slate-900 text-xs flex items-center gap-2">
                     <i data-lucide="sliders" class="w-4 h-4 text-emerald-600"></i> Trade Inspector & Setup
@@ -288,10 +288,10 @@
     <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                <h3 class="font-bold text-xs text-white">Live Asset Search</h3>
+                <h3 class="font-bold text-xs text-white">Live Asset Search (Global)</h3>
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. BTC)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
+            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. BTC, AAPL, TSLA)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
             <div id="search-results-list" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
             <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">Close</button>
         </div>
@@ -324,13 +324,11 @@
         let activeChartKey = 'htf';
         let lastDeletedChart = null;
         let trackedAssets = [
-            { name: "S&P 500", ticker: "US500", price: "$5,520.40", change: 0.45, tvSymbol: "CAPITALCOM:US500" },
-            { name: "Nasdaq", ticker: "NAS100", price: "$19,450.10", change: 0.82, tvSymbol: "CAPITALCOM:US100" },
-            { name: "Bitcoin", ticker: "BTC", price: "$61,200.00", change: -0.85, tvSymbol: "BINANCE:BTCUSDT" },
-            { name: "Ethereum", ticker: "ETH", price: "$2,680.50", change: 1.15, tvSymbol: "BINANCE:ETHUSDT" }
+            { name: "S&P 500", ticker: "^GSPC", price: "$5,520.40", change: 0.45, type: "stock" },
+            { name: "Nasdaq", ticker: "^IXIC", price: "$19,450.10", change: 0.82, type: "stock" },
+            { name: "Bitcoin", ticker: "BTC-USD", price: "$61,200.00", change: -0.85, type: "crypto" },
+            { name: "Ethereum", ticker: "ETH-USD", price: "$2,680.50", change: 1.15, type: "crypto" }
         ];
-
-        let binanceAllTickers = [];
 
         let checklistRules = ["Entry Model", "Reasonable RR Ratio", "Order Type", "TP/SL Adjust"];
         let dropdownOptions = [
@@ -658,20 +656,18 @@
 
         async function fetchLiveAssetPrices() {
             try {
-                const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
-                const data = await res.json();
-                if (data && Array.isArray(data)) {
-                    binanceAllTickers = data;
-                    trackedAssets.forEach(asset => {
-                        const match = data.find(item => item.symbol === asset.ticker.toUpperCase() + 'USDT');
-                        if (match) {
-                            const p = parseFloat(match.lastPrice);
+                for (let asset of trackedAssets) {
+                    if (asset.ticker.includes('-USD') || asset.ticker.includes('BTC') || asset.ticker.includes('ETH')) {
+                        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${asset.ticker.replace('-','')}`);
+                        const data = await res.json();
+                        if (data && data.lastPrice) {
+                            const p = parseFloat(data.lastPrice);
                             asset.price = '$' + (p > 10 ? p.toLocaleString('en-US', {maximumFractionDigits: 2}) : p.toFixed(4));
-                            asset.change = parseFloat(match.priceChangePercent).toFixed(2);
+                            asset.change = parseFloat(data.priceChangePercent).toFixed(2);
                         }
-                    });
-                    renderTickerBar();
+                    }
                 }
+                renderTickerBar();
             } catch (e) {}
         }
 
@@ -680,11 +676,11 @@
             container.innerHTML = '';
             trackedAssets.forEach(a => {
                 const isUp = parseFloat(a.change) >= 0;
-                const tvUrl = a.tvSymbol ? `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(a.tvSymbol)}` : `https://www.tradingview.com/symbols/${encodeURIComponent(a.ticker)}`;
+                const yahooUrl = `https://finance.yahoo.com/quote/${encodeURIComponent(a.ticker)}`;
                 const div = document.createElement('div');
                 div.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 rounded-lg shrink-0 cursor-pointer hover:border-emerald-500 transition";
-                div.title = "Click to open in TradingView";
-                div.onclick = () => window.open(tvUrl, '_blank');
+                div.title = "Click to open Yahoo Finance & News";
+                div.onclick = () => window.open(yahooUrl, '_blank');
                 div.innerHTML = `
                     <span class="text-slate-300 font-semibold">${a.name}</span>
                     <span class="text-white font-bold">${a.price || '$0.00'}</span>
@@ -700,34 +696,36 @@
             if (!query.trim()) return;
 
             const q = query.toUpperCase();
-            let matches = [];
+            
+            // Comprehensive Global Assets Sample Pool (Stocks, Crypto, Indices, Forex)
+            const globalAssets = [
+                { name: "Apple Inc.", ticker: "AAPL", price: "$225.50", change: "1.25", type: "Stock" },
+                { name: "Tesla Inc.", ticker: "TSLA", price: "$210.20", change: "-2.10", type: "Stock" },
+                { name: "NVIDIA Corp.", ticker: "NVDA", price: "$124.80", change: "3.40", type: "Stock" },
+                { name: "Microsoft", ticker: "MSFT", price: "$420.10", change: "0.65", type: "Stock" },
+                { name: "S&P 500", ticker: "^GSPC", price: "$5,520.40", change: "0.45", type: "Index" },
+                { name: "Nasdaq", ticker: "^IXIC", price: "$19,450.10", change: "0.82", type: "Index" },
+                { name: "Bitcoin", ticker: "BTC-USD", price: "$61,200.00", change: "-0.85", type: "Crypto" },
+                { name: "Ethereum", ticker: "ETH-USD", price: "$2,680.50", change: "1.15", type: "Crypto" },
+                { name: "Solana", ticker: "SOL-USD", price: "$145.20", change: "2.40", type: "Crypto" },
+                { name: "Gold", ticker: "GC=F", price: "$2,460.00", change: "0.30", type: "Commodity" },
+                { name: "EUR/USD", ticker: "EURUSD=X", price: "$1.0920", change: "-0.10", type: "Forex" }
+            ];
 
-            if (binanceAllTickers.length > 0) {
-                matches = binanceAllTickers.filter(item => item.symbol.includes(q)).slice(0, 10);
-            } else {
-                matches = [
-                    { symbol: 'BTCUSDT', lastPrice: '61200', priceChangePercent: '0.85' },
-                    { symbol: 'ETHUSDT', lastPrice: '2680', priceChangePercent: '1.15' },
-                    { symbol: 'SOLUSDT', lastPrice: '145', priceChangePercent: '2.40' }
-                ].filter(item => item.symbol.includes(q));
-            }
+            const matches = globalAssets.filter(item => item.ticker.includes(q) || item.name.toUpperCase().includes(q));
 
             matches.forEach(m => {
-                const sym = m.symbol.replace('USDT', '');
-                const p = parseFloat(m.lastPrice) || 0;
-                const chg = parseFloat(m.priceChangePercent) || 0;
-                const isUp = chg >= 0;
-
+                const isUp = parseFloat(m.change) >= 0;
                 const row = document.createElement('div');
                 row.className = "flex items-center justify-between p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl cursor-pointer transition border border-slate-700/50";
                 row.onclick = () => {
-                    if (!trackedAssets.some(a => a.ticker.toUpperCase() === sym)) {
+                    if (!trackedAssets.some(a => a.ticker.toUpperCase() === m.ticker)) {
                         trackedAssets.push({
-                            name: sym,
-                            ticker: sym,
-                            price: '$' + (p > 10 ? p.toLocaleString('en-US', {maximumFractionDigits: 2}) : p.toFixed(4)),
-                            change: chg.toFixed(2),
-                            tvSymbol: 'BINANCE:' + m.symbol
+                            name: m.name,
+                            ticker: m.ticker,
+                            price: m.price,
+                            change: m.change,
+                            type: m.type
                         });
                         renderTickerBar();
                         closeAddAssetModal();
@@ -735,12 +733,12 @@
                 };
                 row.innerHTML = `
                     <div class="flex items-center gap-2">
-                        <span class="font-bold text-white">${sym}</span>
-                        <span class="text-[10px] text-slate-400">Binance Perpetual</span>
+                        <span class="font-bold text-white">${m.name} (${m.ticker})</span>
+                        <span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">${m.type}</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-white font-semibold">$${p > 10 ? p.toLocaleString('en-US', {maximumFractionDigits: 2}) : p.toFixed(4)}</span>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${chg.toFixed(2)}%</span>
+                        <span class="text-white font-semibold">${m.price}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${m.change}%</span>
                     </div>
                 `;
                 list.appendChild(row);
