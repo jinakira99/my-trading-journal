@@ -45,7 +45,7 @@
     <div class="bg-slate-900 text-slate-300 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
         <div class="flex items-center gap-2">
             <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Market Watch</span>
+            <span class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Market Watch (Live)</span>
         </div>
         <div id="ticker-container" class="flex items-center gap-3 overflow-x-auto py-0.5 max-w-full"></div>
         <div class="flex items-center gap-2 shrink-0">
@@ -333,10 +333,10 @@
         let activeChartKey = 'htf';
         let lastDeletedChart = null;
         let trackedAssets = [
-            { name: "Gold Futures", ticker: "GC=F", price: "$2,450.00", change: 0.50, type: "commodity" },
-            { name: "Silver Futures", ticker: "SI=F", price: "$28.50", change: 0.80, type: "commodity" },
-            { name: "S&P 500", ticker: "^GSPC", price: "$5,520.40", change: 0.45, type: "stock" },
-            { name: "Bitcoin", ticker: "BTC-USD", price: "$61,200.00", change: -0.85, type: "crypto" }
+            { name: "Gold Futures", ticker: "GC=F", price: "Loading...", change: 0, type: "commodity" },
+            { name: "Silver Futures", ticker: "SI=F", price: "Loading...", change: 0, type: "commodity" },
+            { name: "S&P 500", ticker: "^GSPC", price: "Loading...", change: 0, type: "stock" },
+            { name: "Bitcoin", ticker: "BTC-USD", price: "Loading...", change: 0, type: "crypto" }
         ];
 
         let checklistRules = ["Entry Model", "Reasonable RR Ratio", "Order Type", "TP/SL Adjust"];
@@ -678,21 +678,40 @@
             }, 400);
         }
 
+        // 🌟 Universal Live Market Price Fetcher (Yahoo Finance + Binance)
         async function fetchLiveAssetPrices() {
-            try {
-                for (let asset of trackedAssets) {
-                    if (asset.type === 'crypto') {
-                        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${asset.ticker.replace('-','')}`);
+            for (let asset of trackedAssets) {
+                try {
+                    if (asset.type === 'crypto' && asset.ticker.includes('-USD')) {
+                        const symbol = asset.ticker.replace('-', '');
+                        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
                         const data = await res.json();
                         if (data && data.lastPrice) {
                             const p = parseFloat(data.lastPrice);
                             asset.price = '$' + (p > 10 ? p.toLocaleString('en-US', {maximumFractionDigits: 2}) : p.toFixed(4));
                             asset.change = parseFloat(data.priceChangePercent).toFixed(2);
                         }
+                    } else {
+                        // Use Yahoo Finance Chart API via CORS proxy for Gold, Silver, Stocks, Indices, Forex
+                        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${asset.ticker}`;
+                        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+                        const res = await fetch(proxyUrl);
+                        const data = await res.json();
+                        const meta = data.chart.result[0].meta;
+                        const currentPrice = meta.regularMarketPrice;
+                        const prevClose = meta.chartPreviousClose || meta.previousClose;
+
+                        asset.price = '$' + (currentPrice > 10 ? currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : currentPrice.toFixed(4));
+                        if (prevClose) {
+                            const changePct = ((currentPrice - prevClose) / prevClose) * 100;
+                            asset.change = changePct.toFixed(2);
+                        }
                     }
+                } catch (e) {
+                    console.log(`Failed to fetch live price for ${asset.ticker}:`, e);
                 }
-                renderTickerBar();
-            } catch (e) {}
+            }
+            renderTickerBar();
         }
 
         function removeAsset(index, event) {
@@ -722,23 +741,22 @@
             if (!query.trim()) return;
             const q = query.toUpperCase();
             
-            // Expanded Global Assets List (Gold, Silver, Oil, Forex, Indices, Stocks, Crypto)
             const globalAssets = [
-                { name: "Gold Futures", ticker: "GC=F", price: "$2,450.00", change: "0.50", type: "Commodity" },
-                { name: "Silver Futures", ticker: "SI=F", price: "$28.50", change: "0.80", type: "Commodity" },
-                { name: "Crude Oil", ticker: "CL=F", price: "$75.00", change: "-1.20", type: "Commodity" },
-                { name: "EUR/USD", ticker: "EURUSD=X", price: "$1.0920", change: "0.15", type: "Forex" },
-                { name: "GBP/USD", ticker: "GBPUSD=X", price: "$1.2850", change: "-0.20", type: "Forex" },
-                { name: "USD/JPY", ticker: "USDJPY=X", price: "$155.40", change: "0.45", type: "Forex" },
-                { name: "Apple Inc.", ticker: "AAPL", price: "$225.50", change: "1.25", type: "Stock" },
-                { name: "Tesla Inc.", ticker: "TSLA", price: "$210.20", change: "-2.10", type: "Stock" },
-                { name: "NVIDIA Corp.", ticker: "NVDA", price: "$124.80", change: "3.40", type: "Stock" },
-                { name: "Microsoft", ticker: "MSFT", price: "$420.10", change: "0.65", type: "Stock" },
-                { name: "S&P 500", ticker: "^GSPC", price: "$5,520.40", change: "0.45", type: "Index" },
-                { name: "Nasdaq", ticker: "^IXIC", price: "$19,450.10", change: "0.82", type: "Index" },
-                { name: "Bitcoin", ticker: "BTC-USD", price: "$61,200.00", change: "-0.85", type: "Crypto" },
-                { name: "Ethereum", ticker: "ETH-USD", price: "$2,680.50", change: "1.15", type: "Crypto" },
-                { name: "Solana", ticker: "SOL-USD", price: "$145.20", change: "2.40", type: "Crypto" }
+                { name: "Gold Futures", ticker: "GC=F", price: "0", change: 0, type: "Commodity" },
+                { name: "Silver Futures", ticker: "SI=F", price: "0", change: 0, type: "Commodity" },
+                { name: "Crude Oil", ticker: "CL=F", price: "0", change: 0, type: "Commodity" },
+                { name: "EUR/USD", ticker: "EURUSD=X", price: "0", change: 0, type: "Forex" },
+                { name: "GBP/USD", ticker: "GBPUSD=X", price: "0", change: 0, type: "Forex" },
+                { name: "USD/JPY", ticker: "USDJPY=X", price: "0", change: 0, type: "Forex" },
+                { name: "Apple Inc.", ticker: "AAPL", price: "0", change: 0, type: "Stock" },
+                { name: "Tesla Inc.", ticker: "TSLA", price: "0", change: 0, type: "Stock" },
+                { name: "NVIDIA Corp.", ticker: "NVDA", price: "0", change: 0, type: "Stock" },
+                { name: "Microsoft", ticker: "MSFT", price: "0", change: 0, type: "Stock" },
+                { name: "S&P 500", ticker: "^GSPC", price: "0", change: 0, type: "Index" },
+                { name: "Nasdaq", ticker: "^IXIC", price: "0", change: 0, type: "Index" },
+                { name: "Bitcoin", ticker: "BTC-USD", price: "0", change: 0, type: "Crypto" },
+                { name: "Ethereum", ticker: "ETH-USD", price: "0", change: 0, type: "Crypto" },
+                { name: "Solana", ticker: "SOL-USD", price: "0", change: 0, type: "Crypto" }
             ];
 
             const matches = globalAssets.filter(item => item.ticker.toUpperCase().includes(q) || item.name.toUpperCase().includes(q) || item.type.toUpperCase().includes(q));
@@ -755,11 +773,11 @@
                 row.onclick = () => {
                     if (!trackedAssets.some(a => a.ticker.toUpperCase() === m.ticker.toUpperCase())) { 
                         trackedAssets.push(m); 
-                        renderTickerBar(); 
+                        fetchLiveAssetPrices();
                         closeAddAssetModal(); 
                     }
                 };
-                row.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-white">${m.name} (${m.ticker})</span><span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">${m.type}</span></div><div class="flex items-center gap-2"><span class="text-white font-semibold">${m.price}</span><span class="text-[10px] px-1.5 py-0.5 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${m.change}%</span></div>`;
+                row.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-white">${m.name} (${m.ticker})</span><span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">${m.type}</span></div><div class="flex items-center gap-2"><span class="text-white font-semibold">${m.price || 'Live'}</span></div>`;
                 list.appendChild(row);
             });
         }
