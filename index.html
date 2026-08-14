@@ -24,10 +24,10 @@
         .status-pink { background-color: #fce7f3 !important; color: #9d174d !important; border: 1px solid #fbcfe8 !important; }
         .status-gray { background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
 
-        /* Row PnL Background Tints & Thick Clickable Binders */
-        .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; border-left: 10px solid #059669 !important; cursor: pointer; }
+        /* Row PnL Background Tints & Slim Clickable Binders (4px) */
+        .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; border-left: 4px solid #059669 !important; cursor: pointer; }
         .row-profit:hover { background-color: rgba(209, 250, 229, 0.5) !important; }
-        .row-loss { background-color: rgba(252, 231, 243, 0.45) !important; border-left: 10px solid #e11d48 !important; cursor: pointer; }
+        .row-loss { background-color: rgba(252, 231, 243, 0.45) !important; border-left: 4px solid #e11d48 !important; cursor: pointer; }
         .row-loss:hover { background-color: rgba(252, 231, 243, 0.7) !important; }
 
         .section-divider { border-left: 1px solid #cbd5e1 !important; }
@@ -89,8 +89,8 @@
                         <div class="text-[10px] text-slate-500 font-medium">Initial Capital</div>
                         <input type="number" id="kpi-initial-input" onchange="updateInitialAsset(this.value)" class="w-full text-center bg-transparent text-sm font-extrabold text-slate-900 mt-1 border-b border-slate-300 focus:border-emerald-600 outline-none">
                     </div>
-                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2">
-                        <div class="text-[10px] text-emerald-200 font-semibold uppercase tracking-wider">Total Net P&L</div>
+                    <div id="kpi-net-pnl-card" class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all">
+                        <div id="kpi-net-pnl-title" class="text-[10px] text-emerald-200 font-semibold uppercase tracking-wider">Total Net P&L</div>
                         <div id="kpi-net-pnl" class="text-2xl font-black tracking-tight mt-0.5">$0.00</div>
                         <div id="kpi-pnl-pct" class="text-[10px] font-bold text-emerald-100">0.00% Return</div>
                     </div>
@@ -218,10 +218,10 @@
                 <div id="charts-gallery-container" class="grid grid-cols-2 gap-2"></div>
             </div>
 
-            <!-- Notes -->
-            <div class="space-y-1 pt-2 border-t border-slate-200">
+            <!-- Notes (Expanded rows for better usability) -->
+            <div class="space-y-1.5 pt-2 border-t border-slate-200">
                 <label class="text-[10px] text-slate-800 font-extrabold block uppercase">Trade Reflection & Psychology</label>
-                <textarea id="review-notes" oninput="saveNotes(this.value)" rows="2" class="w-full p-2.5 rounded-xl input-fintech text-[11px]" placeholder="Log trade insights..."></textarea>
+                <textarea id="review-notes" oninput="saveNotes(this.value)" rows="5" class="w-full p-2.5 rounded-xl input-fintech text-[11px] leading-relaxed" placeholder="Log trade insights and psychological reflections..."></textarea>
             </div>
         </aside>
 
@@ -231,7 +231,7 @@
     <div id="image-lightbox-modal" onclick="closeImageLightbox()" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center" onclick="event.stopPropagation()">
             <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-slate-700 object-contain">
-            <button onclick="closeImageLightbox()" class="absolute -top-10 right-0 text-white hover:text-rose-400 font-bold text-sm bg-slate-800 px-3 py-1 rounded-full">Close ✕</button>
+            <button onclick="closeImageLightbox()" class="absolute -top-10 right-0 text-white hover:text-pink-400 font-bold text-sm bg-slate-800 px-3 py-1 rounded-full">Close ✕</button>
         </div>
     </div>
 
@@ -768,7 +768,7 @@
             }
         }
 
-        // Render Journal Table with Thick Clickable Binders & Pink Theme for Losses
+        // Render Journal Table with Slim Clickable Binders & Pink Theme for Losses
         function renderJournal() {
             const currentMonth = monthsData[activeMonthIndex];
             document.getElementById('kpi-initial-input').value = currentMonth.initialAsset;
@@ -852,7 +852,18 @@
             const avgChecklist = totalTrades > 0 ? (totalChecklist / totalTrades).toFixed(1) : 0;
 
             const netPnlElem = document.getElementById('kpi-net-pnl');
+            const netPnlCard = document.getElementById('kpi-net-pnl-card');
+            const netPnlTitle = document.getElementById('kpi-net-pnl-title');
+
             netPnlElem.innerText = (totalNetPnl >= 0 ? '+$' : '-$') + Math.abs(totalNetPnl).toFixed(2);
+
+            if (totalNetPnl < 0) {
+                netPnlCard.className = "bg-gradient-to-br from-pink-600 to-rose-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all";
+                netPnlTitle.className = "text-[10px] text-pink-200 font-semibold uppercase tracking-wider";
+            } else {
+                netPnlCard.className = "bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all";
+                netPnlTitle.className = "text-[10px] text-emerald-200 font-semibold uppercase tracking-wider";
+            }
 
             document.getElementById('kpi-pnl-pct').innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '% Return';
             document.getElementById('kpi-winrate').innerText = winRate.toFixed(1) + '%';
