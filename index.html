@@ -107,11 +107,11 @@
                         <div id="kpi-pnl-pct" class="text-[10px] font-bold text-emerald-100">0.00% Return</div>
                     </div>
 
-                    <!-- 2. Total Asset Card (col-span-2) - Added next to Net PnL with same size -->
-                    <div id="kpi-total-asset-card" class="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all border border-slate-700">
-                        <div class="text-[10px] text-slate-300 font-semibold uppercase tracking-wider">Total Asset</div>
+                    <!-- 2. Total Asset Card (col-span-2) -->
+                    <div id="kpi-total-asset-card" class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all">
+                        <div id="kpi-asset-title" class="text-[10px] text-emerald-200 font-semibold uppercase tracking-wider">Total Asset</div>
                         <div id="kpi-total-asset" class="text-2xl font-black tracking-tight mt-0.5">$0.00</div>
-                        <div id="kpi-asset-subtitle" class="text-[10px] font-bold text-slate-300">Initial Capital + Net P&L</div>
+                        <div id="kpi-asset-subtitle" class="text-[10px] font-bold text-emerald-100">Initial Capital + Net P&L</div>
                     </div>
 
                     <!-- 3. Initial Capital -->
@@ -138,7 +138,7 @@
                         <div id="kpi-avg-checklist" class="text-sm font-extrabold text-emerald-600 mt-1">0%</div>
                     </div>
 
-                    <!-- 7. Total Fees (Full span row for symmetry) -->
+                    <!-- 7. Total Fees -->
                     <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200 flex flex-col justify-between col-span-2 sm:col-span-4">
                         <div class="flex items-center justify-between px-2">
                             <span class="text-[10px] text-slate-500 font-medium">Total Fees</span>
@@ -879,12 +879,22 @@
             const avgChecklist = totalTrades > 0 ? (totalChecklist / totalTrades).toFixed(1) : 0;
             const totalAsset = currentMonth.initialAsset + totalNetPnl;
 
+            // Net PnL Card update
             document.getElementById('kpi-net-pnl').innerText = (totalNetPnl >= 0 ? '+$' : '-$') + Math.abs(totalNetPnl).toFixed(2);
-            document.getElementById('kpi-total-asset').innerText = '$' + totalAsset.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            
             document.getElementById('kpi-net-pnl-card').className = totalNetPnl < 0 ? "bg-gradient-to-br from-pink-600 to-rose-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all" : "bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all";
             document.getElementById('kpi-net-pnl-title').className = totalNetPnl < 0 ? "text-[10px] text-pink-200 font-semibold uppercase tracking-wider" : "text-[10px] text-emerald-200 font-semibold uppercase tracking-wider";
             document.getElementById('kpi-pnl-pct').innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '% Return';
+
+            // Total Asset Card update (Conditional Color: Pink if < initialAsset, Green if >= initialAsset)
+            document.getElementById('kpi-total-asset').innerText = '$' + totalAsset.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            const isAssetLess = totalAsset < currentMonth.initialAsset;
+            document.getElementById('kpi-total-asset-card').className = isAssetLess 
+                ? "bg-gradient-to-br from-pink-600 to-rose-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all" 
+                : "bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all";
+            document.getElementById('kpi-asset-title').className = isAssetLess ? "text-[10px] text-pink-200 font-semibold uppercase tracking-wider" : "text-[10px] text-emerald-200 font-semibold uppercase tracking-wider";
+            document.getElementById('kpi-asset-subtitle').className = isAssetLess ? "text-[10px] font-bold text-pink-100" : "text-[10px] font-bold text-emerald-100";
+            document.getElementById('kpi-asset-subtitle').innerText = isAssetLess ? "Below Initial Capital" : "Initial Capital + Net P&L";
+
             document.getElementById('kpi-winrate').innerText = winRate.toFixed(1) + '%';
             document.getElementById('kpi-pf').innerText = profitFactor.toFixed(2);
             document.getElementById('kpi-avg-checklist').innerText = avgChecklist + '%';
