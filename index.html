@@ -27,8 +27,8 @@
         /* Row PnL Background Tints & Thick Clickable Binders */
         .row-profit { background-color: rgba(209, 250, 229, 0.25) !important; border-left: 10px solid #059669 !important; cursor: pointer; }
         .row-profit:hover { background-color: rgba(209, 250, 229, 0.5) !important; }
-        .row-loss { background-color: rgba(252, 231, 243, 0.35) !important; border-left: 10px solid #e11d48 !important; cursor: pointer; }
-        .row-loss:hover { background-color: rgba(252, 231, 243, 0.6) !important; }
+        .row-loss { background-color: rgba(252, 231, 243, 0.45) !important; border-left: 10px solid #e11d48 !important; cursor: pointer; }
+        .row-loss:hover { background-color: rgba(252, 231, 243, 0.7) !important; }
 
         .section-divider { border-left: 1px solid #cbd5e1 !important; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -346,25 +346,27 @@
 
         function renderNewsFeeds(container) {
             const feeds = [
-                { category: "Crypto", title: "Bitcoin Holds Support Near $61K", summary: "Institutional spot inflows stabilize BTC as volatility tightens ahead of upcoming US CPI releases." },
-                { category: "Stocks", title: "Tech Indexes Rally on Strong Earnings", summary: "Nasdaq climbs to new weekly highs driven by semiconductor sector momentum and solid cloud revenue." },
-                { category: "Commodities", title: "Gold Eyes Resistance at $2,460", summary: "Safe-haven demand persists amid ongoing macroeconomic uncertainties and currency fluctuations." }
+                { category: "Crypto", title: "Bitcoin Holds Support Near $61K", summary: "Institutional spot inflows stabilize BTC as volatility tightens ahead of upcoming US CPI releases.", link: "https://www.investing.com/news/cryptocurrency-news" },
+                { category: "Stocks", title: "Tech Indexes Rally on Strong Earnings", summary: "Nasdaq climbs to new weekly highs driven by semiconductor sector momentum and solid cloud revenue.", link: "https://www.investing.com/news/stock-market-news" },
+                { category: "Commodities", title: "Gold Eyes Resistance at $2,460", summary: "Safe-haven demand persists amid ongoing macroeconomic uncertainties and currency fluctuations.", link: "https://www.investing.com/news/commodities-news" }
             ];
 
             container.innerHTML = '<div class="space-y-3"></div>';
             const inner = container.querySelector('div');
             feeds.forEach(f => {
-                const div = document.createElement('div');
-                div.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 shadow-2xs hover:bg-slate-100 transition";
-                div.innerHTML = `
+                const a = document.createElement('a');
+                a.href = f.link;
+                a.target = "_blank";
+                a.className = "block p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 shadow-2xs hover:bg-slate-100 hover:border-emerald-300 transition cursor-pointer";
+                a.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="font-bold text-emerald-700 text-[10px] uppercase">${f.category}</span>
-                        <span class="text-[8px] text-slate-400 font-mono">Live</span>
+                        <span class="text-[8px] text-slate-400 font-mono">Live ↗</span>
                     </div>
                     <h4 class="font-extrabold text-slate-800 text-xs">${f.title}</h4>
                     <p class="text-[10px] text-slate-600 leading-relaxed">${f.summary}</p>
                 `;
-                inner.appendChild(div);
+                inner.appendChild(a);
             });
         }
 
@@ -382,8 +384,8 @@
                         <p class="text-[9px] text-slate-500">Market volatility alert for USD pairs.</p>
                     </div>
                     <div class="pt-2">
-                        <a href="https://www.investing.com/economic-calendar/" target="_blank" class="p-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-900 font-bold transition text-xs">
-                            <span>Open Investing.com ↗</span>
+                        <a href="https://www.investing.com/economic-calendar/" target="_blank" class="p-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-900 font-bold transition text-xs shadow-xs">
+                            <span>Open Investing.com Calendar ↗</span>
                         </a>
                     </div>
                 </div>
@@ -488,7 +490,7 @@
                 card.className = `p-2.5 rounded-xl border flex flex-col justify-between gap-1.5 transition shadow-2xs ${bgClass}`;
                 card.innerHTML = `
                     <span class="font-extrabold text-[10px] truncate">${rule}</span>
-                    <select data-rule="${rule}" onchange="onCheckerboardChange(this)" class="w-full p-1 rounded text-[10px] font-bold bg-white/80 border border-slate-300 text-slate-900 outline-none cursor-pointer">
+                    <select data-rule="${rule}" onchange="onCheckerboardChange(this)" class="w-full p-1 rounded text-[10px] font-bold bg-white/85 border border-slate-300 text-slate-900 outline-none cursor-pointer">
                         ${dropdownOptions.map(o => `<option value="${o.label}" ${o.label === currentVal ? 'selected' : ''}>${o.label}</option>`).join('')}
                     </select>
                 `;
@@ -697,7 +699,7 @@
                 div.innerHTML = `
                     <span class="text-slate-300 font-semibold">${a.name}</span>
                     <span class="text-white font-bold">${a.price || '$0.00'}</span>
-                    <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}">${isUp ? '+' : ''}${a.change || 0}%</span>
+                    <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${a.change || 0}%</span>
                 `;
                 container.appendChild(div);
             });
@@ -766,7 +768,7 @@
             }
         }
 
-        // Render Journal Table with Thick Clickable Binders
+        // Render Journal Table with Thick Clickable Binders & Pink Theme for Losses
         function renderJournal() {
             const currentMonth = monthsData[activeMonthIndex];
             document.getElementById('kpi-initial-input').value = currentMonth.initialAsset;
@@ -789,15 +791,15 @@
                 tr.className = `border-b border-slate-200 ${rowColorClass}`;
                 tr.onclick = () => selectTrade(idx);
 
-                const pnlColor = m.netPnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold';
-                const scoreColor = scoreObj.scorePct >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                const pnlColor = m.netPnl >= 0 ? 'text-emerald-600 font-bold' : 'text-pink-600 font-bold';
+                const scoreColor = scoreObj.scorePct >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-pink-100 text-pink-800';
 
                 tr.innerHTML = `
                     <td class="p-2 text-center font-extrabold text-slate-400 hover:text-slate-700 bg-slate-50/50 cursor-pointer border-r border-slate-200" title="Click to Select Trade" onclick="selectTrade(${idx})">||</td>
                     <td class="p-1 border-r border-slate-200 text-center" onclick="event.stopPropagation()"><input type="date" value="${t.date || ''}" onchange="updateTradeValue(${idx}, 'date', null, this.value)" class="tbl-input"></td>
                     <td class="p-1 border-r border-slate-200 section-divider text-center" onclick="event.stopPropagation()"><input type="text" value="${t.pair || ''}" placeholder="TICKER" onchange="updateTradeValue(${idx}, 'pair', null, this.value)" class="tbl-input font-bold uppercase"></td>
                     <td class="p-1 border-r border-slate-200 section-divider text-center" onclick="event.stopPropagation()">
-                        <select onchange="updateTradeValue(${idx}, 'dir', null, this.value)" class="tbl-input font-bold ${t.dir === 'Long' ? 'text-emerald-600' : 'text-rose-600'}">
+                        <select onchange="updateTradeValue(${idx}, 'dir', null, this.value)" class="tbl-input font-bold ${t.dir === 'Long' ? 'text-emerald-600' : 'text-pink-600'}">
                             <option value="Long" ${t.dir === 'Long' ? 'selected' : ''}>Long</option>
                             <option value="Short" ${t.dir === 'Short' ? 'selected' : ''}>Short</option>
                         </select>
@@ -817,7 +819,7 @@
                     <td class="p-2 border-r border-slate-200 section-divider text-right ${pnlColor}">${m.netPnlPct.toFixed(2)}%</td>
                     <td class="p-2 border-r border-slate-200 section-divider text-right font-bold text-slate-900">${m.accReturn.toFixed(3)}%</td>
                     <td class="p-2 section-divider text-center" onclick="event.stopPropagation()">
-                        <button onclick="deleteTrade(${idx})" title="Delete" class="p-1.5 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600 transition cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="deleteTrade(${idx})" title="Delete" class="p-1.5 hover:bg-pink-50 rounded-lg text-slate-400 hover:text-pink-600 transition cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -931,7 +933,7 @@
             checklistRules.forEach((rule, idx) => {
                 const div = document.createElement('div');
                 div.className = "flex items-center justify-between text-xs bg-slate-50 p-2 rounded-xl border border-slate-200";
-                div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-rose-600 font-bold cursor-pointer">✕</button>`;
+                div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-pink-600 font-bold cursor-pointer">✕</button>`;
                 list.appendChild(div);
             });
         }
@@ -961,7 +963,7 @@
                 const colorClass = opt.color === 'pink' || opt.color === 'red' ? 'bg-pink-100 text-pink-800' : opt.color === 'green' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700';
                 const span = document.createElement('span');
                 span.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-semibold ${colorClass}`;
-                span.innerHTML = `${opt.label} <button onclick="removeOption(${idx})" class="hover:text-rose-600 font-bold cursor-pointer">✕</button>`;
+                span.innerHTML = `${opt.label} <button onclick="removeOption(${idx})" class="hover:text-pink-600 font-bold cursor-pointer">✕</button>`;
                 container.appendChild(span);
             });
         }
