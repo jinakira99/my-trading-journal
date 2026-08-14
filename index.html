@@ -56,17 +56,31 @@
     <!-- Main Workspace Layout -->
     <div class="flex-1 flex overflow-hidden">
         
-        <!-- Left Sidebar News & Calendar Tab View -->
+        <!-- Left Sidebar News & Live Calendar Stack -->
         <aside class="w-80 bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 overflow-y-auto space-y-4 shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-                <div class="flex items-center gap-2">
-                    <button onclick="switchSidebarTab('news')" id="tab-news-btn" class="px-3 py-1 font-extrabold text-xs text-emerald-700 bg-emerald-50 rounded-lg transition cursor-pointer">News Feeds</button>
-                    <button onclick="switchSidebarTab('calendar')" id="tab-cal-btn" class="px-3 py-1 font-bold text-xs text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer">Live Calendar</button>
-                </div>
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">News Feeds</span>
             </div>
 
-            <!-- Sidebar Dynamic Container -->
-            <div id="sidebar-tab-content" class="space-y-3 flex-1 flex flex-col"></div>
+            <!-- News Feeds Container -->
+            <div id="news-feeds-container" class="space-y-3"></div>
+
+            <div class="pt-2 border-t border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Live Economic Calendar</span>
+                    <button onclick="refreshCalendarWidget()" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-lg transition flex items-center gap-1 cursor-pointer shadow-2xs">
+                        <i data-lucide="rotate-cw" class="w-3 h-3"></i> Reload
+                    </button>
+                </div>
+                <div id="investing-calendar-wrapper" class="w-full bg-slate-50 border border-slate-200 rounded-xl overflow-hidden relative h-96">
+                    <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone&countries=5,72,22,17,36,43,10,35,11,26&calType=day&lang=1" width="100%" height="100%" style="position: absolute; top:0; left:0; border:0; width:100%; height:100%;" frameborder="0" allowtransparency="true"></iframe>
+                </div>
+                <div class="mt-2">
+                    <a href="https://www.investing.com/economic-calendar/" target="_blank" class="p-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-900 font-bold transition text-xs shadow-xs">
+                        <span>Open Full Calendar ↗</span>
+                    </a>
+                </div>
+            </div>
         </aside>
 
         <!-- Center Main Content -->
@@ -220,7 +234,7 @@
                 <div id="charts-gallery-container" class="grid grid-cols-2 gap-2"></div>
             </div>
 
-            <!-- Notes (Expanded rows for better usability) -->
+            <!-- Notes -->
             <div class="space-y-1.5 pt-2 border-t border-slate-200">
                 <label class="text-[10px] text-slate-800 font-extrabold block uppercase">Trade Reflection & Psychology</label>
                 <textarea id="review-notes" oninput="saveNotes(this.value)" rows="5" class="w-full p-2.5 rounded-xl input-fintech text-[11px] leading-relaxed" placeholder="Log trade insights and psychological reflections..."></textarea>
@@ -277,7 +291,7 @@
                 <h3 class="font-bold text-xs text-white">Live Asset Search</h3>
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
+            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. BTC)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
             <div id="search-results-list" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
             <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">Close</button>
         </div>
@@ -310,11 +324,13 @@
         let activeChartKey = 'htf';
         let lastDeletedChart = null;
         let trackedAssets = [
-            { name: "S&P 500", ticker: "US500", price: "$5,520.40", change: 0.45 },
-            { name: "Nasdaq", ticker: "NAS100", price: "$19,450.10", change: 0.82 },
-            { name: "Bitcoin", ticker: "BTC", price: "$61,200.00", change: -0.85 },
-            { name: "Ethereum", ticker: "ETH", price: "$2,680.50", change: 1.15 }
+            { name: "S&P 500", ticker: "US500", price: "$5,520.40", change: 0.45, tvSymbol: "CAPITALCOM:US500" },
+            { name: "Nasdaq", ticker: "NAS100", price: "$19,450.10", change: 0.82, tvSymbol: "CAPITALCOM:US100" },
+            { name: "Bitcoin", ticker: "BTC", price: "$61,200.00", change: -0.85, tvSymbol: "BINANCE:BTCUSDT" },
+            { name: "Ethereum", ticker: "ETH", price: "$2,680.50", change: 1.15, tvSymbol: "BINANCE:ETHUSDT" }
         ];
+
+        let binanceAllTickers = [];
 
         let checklistRules = ["Entry Model", "Reasonable RR Ratio", "Order Type", "TP/SL Adjust"];
         let dropdownOptions = [
@@ -326,35 +342,17 @@
         let monthsData = [{ name: "2026-07", initialAsset: 10000, trades: [] }];
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
-        let currentSidebarTab = 'news';
 
-        // Sidebar Tabs Switcher (News vs Live Calendar)
-        function switchSidebarTab(tab) {
-            currentSidebarTab = tab;
-            const newsBtn = document.getElementById('tab-news-btn');
-            const calBtn = document.getElementById('tab-cal-btn');
-            const container = document.getElementById('sidebar-tab-content');
-
-            if (tab === 'news') {
-                newsBtn.className = "px-3 py-1 font-extrabold text-xs text-emerald-700 bg-emerald-50 rounded-lg transition cursor-pointer";
-                calBtn.className = "px-3 py-1 font-bold text-xs text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer";
-                renderNewsFeeds(container);
-            } else {
-                calBtn.className = "px-3 py-1 font-extrabold text-xs text-emerald-700 bg-emerald-50 rounded-lg transition cursor-pointer";
-                newsBtn.className = "px-3 py-1 font-bold text-xs text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer";
-                renderLiveCalendar(container);
-            }
-        }
-
-        function renderNewsFeeds(container) {
+        function renderNewsFeeds() {
+            const container = document.getElementById('news-feeds-container');
+            if (!container) return;
             const feeds = [
                 { category: "Crypto", title: "Bitcoin Holds Support Near $61K", summary: "Institutional spot inflows stabilize BTC as volatility tightens ahead of upcoming US CPI releases.", link: "https://www.investing.com/news/cryptocurrency-news" },
                 { category: "Stocks", title: "Tech Indexes Rally on Strong Earnings", summary: "Nasdaq climbs to new weekly highs driven by semiconductor sector momentum and solid cloud revenue.", link: "https://www.investing.com/news/stock-market-news" },
                 { category: "Commodities", title: "Gold Eyes Resistance at $2,460", summary: "Safe-haven demand persists amid ongoing macroeconomic uncertainties and currency fluctuations.", link: "https://www.investing.com/news/commodities-news" }
             ];
 
-            container.innerHTML = '<div class="space-y-3"></div>';
-            const inner = container.querySelector('div');
+            container.innerHTML = '';
             feeds.forEach(f => {
                 const a = document.createElement('a');
                 a.href = f.link;
@@ -368,28 +366,8 @@
                     <h4 class="font-extrabold text-slate-800 text-xs">${f.title}</h4>
                     <p class="text-[10px] text-slate-600 leading-relaxed">${f.summary}</p>
                 `;
-                inner.appendChild(a);
+                container.appendChild(a);
             });
-        }
-
-        function renderLiveCalendar(container) {
-            container.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase">Live Economic Feed</span>
-                    <button onclick="refreshCalendarWidget()" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold px-2 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer shadow-2xs">
-                        <i data-lucide="rotate-cw" class="w-3 h-3"></i> Reload
-                    </button>
-                </div>
-                <div id="investing-calendar-wrapper" class="flex-1 w-full bg-white border border-slate-200 rounded-xl overflow-hidden relative min-h-[450px]">
-                    <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone&countries=5,72,22,17,36,43,10,35,11,26&calType=day&lang=1" width="100%" height="100%" style="position: absolute; top:0; left:0; border:0; width:100%; height:100%;" frameborder="0" allowtransparency="true"></iframe>
-                </div>
-                <div class="pt-2">
-                    <a href="https://www.investing.com/economic-calendar/" target="_blank" class="p-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-900 font-bold transition text-xs shadow-xs">
-                        <span>Open Full Investing.com Calendar ↗</span>
-                    </a>
-                </div>
-            `;
-            lucide.createIcons();
         }
 
         function refreshCalendarWidget() {
@@ -683,6 +661,7 @@
                 const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
                 const data = await res.json();
                 if (data && Array.isArray(data)) {
+                    binanceAllTickers = data;
                     trackedAssets.forEach(asset => {
                         const match = data.find(item => item.symbol === asset.ticker.toUpperCase() + 'USDT');
                         if (match) {
@@ -701,14 +680,70 @@
             container.innerHTML = '';
             trackedAssets.forEach(a => {
                 const isUp = parseFloat(a.change) >= 0;
+                const tvUrl = a.tvSymbol ? `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(a.tvSymbol)}` : `https://www.tradingview.com/symbols/${encodeURIComponent(a.ticker)}`;
                 const div = document.createElement('div');
-                div.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 rounded-lg shrink-0";
+                div.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 rounded-lg shrink-0 cursor-pointer hover:border-emerald-500 transition";
+                div.title = "Click to open in TradingView";
+                div.onclick = () => window.open(tvUrl, '_blank');
                 div.innerHTML = `
                     <span class="text-slate-300 font-semibold">${a.name}</span>
                     <span class="text-white font-bold">${a.price || '$0.00'}</span>
                     <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${a.change || 0}%</span>
                 `;
                 container.appendChild(div);
+            });
+        }
+
+        function filterAssetSearchResults(query) {
+            const list = document.getElementById('search-results-list');
+            list.innerHTML = '';
+            if (!query.trim()) return;
+
+            const q = query.toUpperCase();
+            let matches = [];
+
+            if (binanceAllTickers.length > 0) {
+                matches = binanceAllTickers.filter(item => item.symbol.includes(q)).slice(0, 10);
+            } else {
+                matches = [
+                    { symbol: 'BTCUSDT', lastPrice: '61200', priceChangePercent: '0.85' },
+                    { symbol: 'ETHUSDT', lastPrice: '2680', priceChangePercent: '1.15' },
+                    { symbol: 'SOLUSDT', lastPrice: '145', priceChangePercent: '2.40' }
+                ].filter(item => item.symbol.includes(q));
+            }
+
+            matches.forEach(m => {
+                const sym = m.symbol.replace('USDT', '');
+                const p = parseFloat(m.lastPrice) || 0;
+                const chg = parseFloat(m.priceChangePercent) || 0;
+                const isUp = chg >= 0;
+
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl cursor-pointer transition border border-slate-700/50";
+                row.onclick = () => {
+                    if (!trackedAssets.some(a => a.ticker.toUpperCase() === sym)) {
+                        trackedAssets.push({
+                            name: sym,
+                            ticker: sym,
+                            price: '$' + (p > 10 ? p.toLocaleString('en-US', {maximumFractionDigits: 2}) : p.toFixed(4)),
+                            change: chg.toFixed(2),
+                            tvSymbol: 'BINANCE:' + m.symbol
+                        });
+                        renderTickerBar();
+                        closeAddAssetModal();
+                    }
+                };
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-white">${sym}</span>
+                        <span class="text-[10px] text-slate-400">Binance Perpetual</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-white font-semibold">$${p > 10 ? p.toLocaleString('en-US', {maximumFractionDigits: 2}) : p.toFixed(4)}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${chg.toFixed(2)}%</span>
+                    </div>
+                `;
+                list.appendChild(row);
             });
         }
 
@@ -1009,12 +1044,12 @@
         }
 
         function renderAll() {
+            renderNewsFeeds();
             renderTickerBar();
             renderTabs();
             renderJournal();
             selectTrade(selectedTradeIndex);
             fetchLiveAssetPrices();
-            switchSidebarTab(currentSidebarTab);
             generateAIStrategySuggestion();
         }
 
