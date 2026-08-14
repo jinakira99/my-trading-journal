@@ -41,6 +41,7 @@
 </head>
 <body class="flex flex-col min-h-screen lg:h-screen text-xs overflow-x-hidden lg:overflow-hidden">
 
+    <!-- Top Ticker Bar -->
     <div class="bg-slate-900 text-slate-300 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
         <div class="flex items-center gap-2">
             <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
@@ -49,6 +50,12 @@
         <div id="ticker-container" class="flex items-center gap-3 overflow-x-auto py-0.5 max-w-full"></div>
         <div class="flex items-center gap-2 shrink-0">
             <span id="cloud-status-badge" class="text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 bg-emerald-950/60 rounded-full border border-emerald-800">Cloud Synced</span>
+            
+            <!-- 용량 확보용 초기화 버튼 -->
+            <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-900 text-rose-400 border border-rose-900 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer" title="Delete all heavy images to free up space">
+                <i data-lucide="trash-2" class="w-3 h-3"></i> Clear Images
+            </button>
+            
             <button onclick="forceSyncData()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2 py-0.5 rounded font-semibold transition cursor-pointer text-[10px]" title="Reload Data">Reload</button>
             <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer">
                 <i data-lucide="plus" class="w-3 h-3"></i> Add Asset
@@ -314,7 +321,25 @@
         let selectedTradeIndex = 0;
         let saveTimeout = null; 
 
-        // 🌟 초강력 이미지 압축 엔진 (PNG -> JPG 변환 및 리사이징)
+        // 🌟 용량 확보용 초기화 함수 (모든 이미지 일괄 삭제)
+        function clearAllImages() {
+            if (confirm("저장 공간 900KB 제한을 해결하기 위해 모든 차트 이미지를 삭제하시겠습니까?\n\n(※ 입력하신 숫자 데이터와 텍스트는 100% 안전하게 유지됩니다.)")) {
+                monthsData.forEach(month => {
+                    month.trades.forEach(trade => {
+                        if (trade.customCharts) {
+                            trade.customCharts.forEach(chart => {
+                                chart.img = '';
+                            });
+                        }
+                    });
+                });
+                renderAll();
+                saveCloudData();
+                alert("이미지가 모두 정리되어 저장 공간이 넉넉하게 확보되었습니다!");
+            }
+        }
+
+        // 🌟 초강력 이미지 압축 엔진
         function compressImage(dataUrl, callback) {
             const img = new Image();
             img.onload = function() {
@@ -322,7 +347,6 @@
                 let width = img.width;
                 let height = img.height;
                 
-                // 가로가 800px을 넘어가면 비율 맞춰서 줄임 (용량 대폭 감소)
                 const MAX_WIDTH = 800;
                 if (width > MAX_WIDTH) {
                     height *= MAX_WIDTH / width;
@@ -333,8 +357,6 @@
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                
-                // 0.6 화질의 JPEG로 변환 (눈으로 볼때 차이 없으나 용량 90% 감소)
                 callback(canvas.toDataURL('image/jpeg', 0.6));
             };
             img.src = dataUrl;
@@ -347,10 +369,12 @@
             const badge = document.getElementById('cloud-status-badge');
             const payloadSize = JSON.stringify(payload).length;
             
-            // 용량이 900KB 초과하면 경고
+            // 용량 초과 시 Alert 창을 띄우지 않고, 뱃지 텍스트만 붉은색으로 변경 (화면 가림 방지)
             if (payloadSize > 900000) {
-                alert("데이터 용량이 한계에 도달했습니다! 차트 이미지가 너무 크거나 많습니다. 일부 차트 박스를 ✕로 삭제 후 다시 시도해주세요.");
-                if (badge) { badge.innerText = "Size Limit"; badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800"; }
+                if (badge) { 
+                    badge.innerText = "Size Limit! (Click Clear Images)"; 
+                    badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800"; 
+                }
                 return;
             }
 
@@ -393,7 +417,6 @@
             renderAll();
         }
 
-        // 붙여넣기 시 압축 적용
         document.addEventListener('paste', function(e) {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let index in items) {
@@ -599,7 +622,6 @@
 
         function triggerChartUpload(key) { activeChartKey = key; document.getElementById('file-input-hidden').click(); }
 
-        // 직접 파일 선택 업로드 시에도 압축 적용
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (file) {
@@ -780,7 +802,12 @@
 
                 const tr = document.createElement('tr');
                 tr.className = `border-b border-slate-200 ${m.netPnl < 0 ? 'row-loss' : 'row-profit'}`;
-                tr.onclick = () => selectTrade(idx);
+                
+                // 🌟 클릭 방해(포커스) 버그 해결: input이나 select 클릭 시 행 선택 이벤트 취소
+                tr.onclick = (e) => {
+                    if (e.target.closest('input, select, button')) return; 
+                    selectTrade(idx);
+                };
 
                 const pnlColor = m.netPnl >= 0 ? 'text-emerald-600 font-bold' : 'text-pink-600 font-bold';
                 const scoreColor = scoreObj.scorePct >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-pink-100 text-pink-800';
@@ -809,7 +836,7 @@
                     <td class="p-2 border-r border-slate-200 section-divider text-right ${pnlColor}">$${m.netPnl.toFixed(3)}</td>
                     <td class="p-2 border-r border-slate-200 section-divider text-right ${pnlColor}">${m.netPnlPct.toFixed(2)}%</td>
                     <td class="p-2 border-r border-slate-200 section-divider text-right font-bold text-slate-900">${m.accReturn.toFixed(3)}%</td>
-                    <td class="p-2 section-divider text-center"><button onclick="event.stopPropagation(); deleteTrade(${idx})" title="Delete" class="p-1.5 hover:bg-pink-50 rounded-lg text-slate-400 hover:text-pink-600 transition cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                    <td class="p-2 section-divider text-center"><button onclick="deleteTrade(${idx})" title="Delete" class="p-1.5 hover:bg-pink-50 rounded-lg text-slate-400 hover:text-pink-600 transition cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 `;
                 tbody.appendChild(tr);
             });
