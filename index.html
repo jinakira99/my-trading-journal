@@ -302,7 +302,7 @@
                 <h3 class="font-bold text-xs text-white">Live Asset Search (Global)</h3>
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. Gold, Silver, BTC, AAPL)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
+            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. XAUUSD, XAGUSD, BTC)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
             <div id="search-results-list" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
             <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">Close</button>
         </div>
@@ -333,9 +333,9 @@
         let activeChartKey = 'htf';
         let lastDeletedChart = null;
         let trackedAssets = [
-            { name: "Gold Futures", ticker: "GC=F", price: "Loading...", change: 0, type: "commodity" },
-            { name: "Silver Futures", ticker: "SI=F", price: "Loading...", change: 0, type: "commodity" },
-            { name: "S&P 500", ticker: "^GSPC", price: "Loading...", change: 0, type: "stock" },
+            { name: "Spot Gold (XAUUSD)", ticker: "XAU=X", price: "Loading...", change: 0, type: "Forex" },
+            { name: "Spot Silver (XAGUSD)", ticker: "XAG=X", price: "Loading...", change: 0, type: "Forex" },
+            { name: "S&P 500", ticker: "^GSPC", price: "Loading...", change: 0, type: "Index" },
             { name: "Bitcoin", ticker: "BTC-USD", price: "Loading...", change: 0, type: "crypto" }
         ];
 
@@ -678,7 +678,6 @@
             }, 400);
         }
 
-        // 🌟 Universal Live Market Price Fetcher (Yahoo Finance + Binance)
         async function fetchLiveAssetPrices() {
             for (let asset of trackedAssets) {
                 try {
@@ -692,7 +691,6 @@
                             asset.change = parseFloat(data.priceChangePercent).toFixed(2);
                         }
                     } else {
-                        // Use Yahoo Finance Chart API via CORS proxy for Gold, Silver, Stocks, Indices, Forex
                         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${asset.ticker}`;
                         const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
                         const res = await fetch(proxyUrl);
@@ -742,6 +740,8 @@
             const q = query.toUpperCase();
             
             const globalAssets = [
+                { name: "Spot Gold (XAUUSD)", ticker: "XAU=X", price: "0", change: 0, type: "Forex" },
+                { name: "Spot Silver (XAGUSD)", ticker: "XAG=X", price: "0", change: 0, type: "Forex" },
                 { name: "Gold Futures", ticker: "GC=F", price: "0", change: 0, type: "Commodity" },
                 { name: "Silver Futures", ticker: "SI=F", price: "0", change: 0, type: "Commodity" },
                 { name: "Crude Oil", ticker: "CL=F", price: "0", change: 0, type: "Commodity" },
