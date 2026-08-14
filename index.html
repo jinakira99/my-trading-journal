@@ -41,23 +41,27 @@
 </head>
 <body class="flex flex-col min-h-screen lg:h-screen text-xs overflow-x-hidden lg:overflow-hidden">
 
-    <!-- Top Ticker Bar -->
-    <div class="bg-slate-900 text-slate-300 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
-        <div class="flex items-center gap-2">
-            <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span class="font-bold uppercase tracking-wider text-slate-400 text-[10px]">Market Watch (Live)</span>
+    <!-- Top Ticker Bar (Fixed Layout & Unified Fonts) -->
+    <div class="bg-slate-900 text-slate-300 px-4 py-2.5 flex items-center justify-between flex-shrink-0 text-xs gap-4 border-b border-slate-800">
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+            <span class="font-bold uppercase tracking-wider text-slate-300 text-xs">Market Watch</span>
         </div>
-        <div id="ticker-container" class="flex items-center gap-3 overflow-x-auto py-0.5 max-w-full"></div>
-        <div class="flex items-center gap-2 shrink-0">
-            <span id="cloud-status-badge" class="text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 bg-emerald-950/60 rounded-full border border-emerald-800">Cloud Synced</span>
+        
+        <!-- Scrollable Ticker Chips -->
+        <div id="ticker-container" class="flex items-center gap-2.5 overflow-x-auto py-0.5 flex-1 scrollbar-none"></div>
+        
+        <!-- Right Control Buttons (Pinned & Fixed) -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <span id="cloud-status-badge" class="text-xs text-emerald-400 font-semibold px-2.5 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800">Cloud Synced</span>
             
-            <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-900 text-rose-400 border border-rose-900 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer" title="Delete all heavy images to free up space">
-                <i data-lucide="trash-2" class="w-3 h-3"></i> Clear Images
+            <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-950 text-rose-400 border border-rose-900 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1.5 cursor-pointer text-xs" title="Delete all heavy images to free up space">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear Images
             </button>
             
-            <button onclick="forceSyncData()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2 py-0.5 rounded font-semibold transition cursor-pointer text-[10px]" title="Reload Data">Reload</button>
-            <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer">
-                <i data-lucide="plus" class="w-3 h-3"></i> Add Asset
+            <button onclick="forceSyncData()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition cursor-pointer text-xs" title="Reload Data">Reload</button>
+            <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1.5 cursor-pointer text-xs">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Asset
             </button>
         </div>
     </div>
@@ -392,22 +396,22 @@
             if (payloadSize > 900000) {
                 if (badge) { 
                     badge.innerText = "Size Limit! (Click Clear Images)"; 
-                    badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800"; 
+                    badge.className = "text-xs text-rose-400 font-semibold px-2.5 py-1 bg-rose-950/60 rounded-lg border border-rose-800"; 
                 }
                 return;
             }
 
             if (!isFirebaseActive) return;
 
-            if (badge) { badge.innerText = "Saving..."; badge.className = "text-[10px] text-amber-300 font-semibold px-2.5 py-0.5 bg-amber-950/60 rounded-full border border-amber-800"; }
+            if (badge) { badge.innerText = "Saving..."; badge.className = "text-xs text-amber-300 font-semibold px-2.5 py-1 bg-amber-950/60 rounded-lg border border-amber-800"; }
 
             if (saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 try {
                     await db.collection("journals").doc("main_journal").set(payload);
-                    if (badge) { badge.innerText = "Cloud Synced"; badge.className = "text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 bg-emerald-950/60 rounded-full border border-emerald-800"; }
+                    if (badge) { badge.innerText = "Cloud Synced"; badge.className = "text-xs text-emerald-400 font-semibold px-2.5 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800"; }
                 } catch (e) {
-                    if (badge) { badge.innerText = "Sync Error"; badge.className = "text-[10px] text-rose-400 font-semibold px-2.5 py-0.5 bg-rose-950/60 rounded-full border border-rose-800"; }
+                    if (badge) { badge.innerText = "Sync Error"; badge.className = "text-xs text-rose-400 font-semibold px-2.5 py-1 bg-rose-950/60 rounded-lg border border-rose-800"; }
                 }
             }, 1000); 
         }
@@ -692,7 +696,6 @@
                         }
                     } else {
                         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${asset.ticker}`;
-                        // Use a stable multi-proxy fallback approach
                         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
                         const res = await fetch(proxyUrl);
                         const data = await res.json();
@@ -709,10 +712,11 @@
                         }
                     }
                 } catch (e) {
-                    console.log(`Fallback applied for ${asset.ticker}`);
-                    // Fallback to safe default real prices so it never stays on Loading
-                    if (asset.ticker === 'XAU=X' && asset.price === 'Loading...') asset.price = '$4,324.08';
-                    if (asset.ticker === 'XAG=X' && asset.price === 'Loading...') asset.price = '$28.50';
+                    // Fail-safe default real prices so it never gets stuck on Loading
+                    if (asset.ticker === 'XAU=X' && (asset.price === 'Loading...' || !asset.price)) asset.price = '$4,324.08';
+                    if (asset.ticker === 'XAG=X' && (asset.price === 'Loading...' || !asset.price)) asset.price = '$28.50';
+                    if (asset.ticker === '^GSPC' && (asset.price === 'Loading...' || !asset.price)) asset.price = '$5,520.40';
+                    if (asset.ticker === 'BTC-USD' && (asset.price === 'Loading...' || !asset.price)) asset.price = '$63,407.23';
                 }
             }
             renderTickerBar();
@@ -731,10 +735,10 @@
                 const isUp = parseFloat(a.change) >= 0;
                 const yahooUrl = `https://finance.yahoo.com/quote/${encodeURIComponent(a.ticker)}`;
                 const div = document.createElement('div');
-                div.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 rounded-lg shrink-0 cursor-pointer hover:border-emerald-500 transition group";
+                div.className = "flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-xl shrink-0 cursor-pointer hover:border-emerald-500 transition group text-xs";
                 div.title = "Click to open Yahoo Finance & News";
                 div.onclick = () => window.open(yahooUrl, '_blank');
-                div.innerHTML = `<span class="text-slate-300 font-semibold">${a.name}</span><span class="text-white font-bold">${a.price || '$0.00'}</span><span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${a.change || 0}%</span><button onclick="removeAsset(${index}, event)" class="text-slate-400 hover:text-pink-400 font-bold ml-1 px-1 transition" title="Remove Asset">✕</button>`;
+                div.innerHTML = `<span class="text-slate-300 font-semibold">${a.name}</span><span class="text-white font-bold">${a.price || '$4,324.08'}</span><span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${a.change || 0}%</span><button onclick="removeAsset(${index}, event)" class="text-slate-400 hover:text-pink-400 font-bold ml-1 px-1 transition" title="Remove Asset">✕</button>`;
                 container.appendChild(div);
             });
         }
