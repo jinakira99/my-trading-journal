@@ -302,7 +302,7 @@
                 <h3 class="font-bold text-xs text-white">Live Asset Search (Global)</h3>
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. BTC, AAPL, TSLA)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
+            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. Gold, Silver, BTC, AAPL)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 outline-none">
             <div id="search-results-list" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
             <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">Close</button>
         </div>
@@ -333,10 +333,10 @@
         let activeChartKey = 'htf';
         let lastDeletedChart = null;
         let trackedAssets = [
+            { name: "Gold Futures", ticker: "GC=F", price: "$2,450.00", change: 0.50, type: "commodity" },
+            { name: "Silver Futures", ticker: "SI=F", price: "$28.50", change: 0.80, type: "commodity" },
             { name: "S&P 500", ticker: "^GSPC", price: "$5,520.40", change: 0.45, type: "stock" },
-            { name: "Nasdaq", ticker: "^IXIC", price: "$19,450.10", change: 0.82, type: "stock" },
-            { name: "Bitcoin", ticker: "BTC-USD", price: "$61,200.00", change: -0.85, type: "crypto" },
-            { name: "Ethereum", ticker: "ETH-USD", price: "$2,680.50", change: 1.15, type: "crypto" }
+            { name: "Bitcoin", ticker: "BTC-USD", price: "$61,200.00", change: -0.85, type: "crypto" }
         ];
 
         let checklistRules = ["Entry Model", "Reasonable RR Ratio", "Order Type", "TP/SL Adjust"];
@@ -722,8 +722,14 @@
             if (!query.trim()) return;
             const q = query.toUpperCase();
             
+            // Expanded Global Assets List (Gold, Silver, Oil, Forex, Indices, Stocks, Crypto)
             const globalAssets = [
                 { name: "Gold Futures", ticker: "GC=F", price: "$2,450.00", change: "0.50", type: "Commodity" },
+                { name: "Silver Futures", ticker: "SI=F", price: "$28.50", change: "0.80", type: "Commodity" },
+                { name: "Crude Oil", ticker: "CL=F", price: "$75.00", change: "-1.20", type: "Commodity" },
+                { name: "EUR/USD", ticker: "EURUSD=X", price: "$1.0920", change: "0.15", type: "Forex" },
+                { name: "GBP/USD", ticker: "GBPUSD=X", price: "$1.2850", change: "-0.20", type: "Forex" },
+                { name: "USD/JPY", ticker: "USDJPY=X", price: "$155.40", change: "0.45", type: "Forex" },
                 { name: "Apple Inc.", ticker: "AAPL", price: "$225.50", change: "1.25", type: "Stock" },
                 { name: "Tesla Inc.", ticker: "TSLA", price: "$210.20", change: "-2.10", type: "Stock" },
                 { name: "NVIDIA Corp.", ticker: "NVDA", price: "$124.80", change: "3.40", type: "Stock" },
@@ -735,13 +741,23 @@
                 { name: "Solana", ticker: "SOL-USD", price: "$145.20", change: "2.40", type: "Crypto" }
             ];
 
-            const matches = globalAssets.filter(item => item.ticker.includes(q) || item.name.toUpperCase().includes(q));
+            const matches = globalAssets.filter(item => item.ticker.toUpperCase().includes(q) || item.name.toUpperCase().includes(q) || item.type.toUpperCase().includes(q));
+            
+            if (matches.length === 0) {
+                list.innerHTML = `<div class="text-slate-400 text-center p-2 text-[10px]">No matching assets found.</div>`;
+                return;
+            }
+
             matches.forEach(m => {
                 const isUp = parseFloat(m.change) >= 0;
                 const row = document.createElement('div');
                 row.className = "flex items-center justify-between p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl cursor-pointer transition border border-slate-700/50";
                 row.onclick = () => {
-                    if (!trackedAssets.some(a => a.ticker.toUpperCase() === m.ticker)) { trackedAssets.push(m); renderTickerBar(); closeAddAssetModal(); }
+                    if (!trackedAssets.some(a => a.ticker.toUpperCase() === m.ticker.toUpperCase())) { 
+                        trackedAssets.push(m); 
+                        renderTickerBar(); 
+                        closeAddAssetModal(); 
+                    }
                 };
                 row.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-white">${m.name} (${m.ticker})</span><span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">${m.type}</span></div><div class="flex items-center gap-2"><span class="text-white font-semibold">${m.price}</span><span class="text-[10px] px-1.5 py-0.5 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${m.change}%</span></div>`;
                 list.appendChild(row);
@@ -880,13 +896,11 @@
             const avgChecklist = totalTrades > 0 ? (totalChecklist / totalTrades).toFixed(1) : 0;
             const totalAsset = currentMonth.initialAsset + totalNetPnl;
 
-            // Net PnL Card update
             document.getElementById('kpi-net-pnl').innerText = (totalNetPnl >= 0 ? '+$' : '-$') + Math.abs(totalNetPnl).toFixed(2);
             document.getElementById('kpi-net-pnl-card').className = totalNetPnl < 0 ? "bg-gradient-to-br from-pink-600 to-rose-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all" : "bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3 rounded-xl shadow-md flex flex-col justify-between col-span-2 transition-all";
             document.getElementById('kpi-net-pnl-title').className = totalNetPnl < 0 ? "text-[10px] text-pink-200 font-semibold uppercase tracking-wider" : "text-[10px] text-emerald-200 font-semibold uppercase tracking-wider";
             document.getElementById('kpi-pnl-pct').innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '% Return';
 
-            // Total Asset Card update (Conditional Color: Pink if < initialAsset, Green if >= initialAsset)
             document.getElementById('kpi-total-asset').innerText = '$' + totalAsset.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             const isAssetLess = totalAsset < currentMonth.initialAsset;
             document.getElementById('kpi-total-asset-card').className = isAssetLess 
