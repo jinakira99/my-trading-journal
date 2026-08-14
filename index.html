@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
-        body { background-color: #f8fafc; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+        body { background-color: #f8fafc; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .fintech-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04); }
         .input-fintech { background-color: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; border-radius: 8px; }
         .input-fintech:focus { border-color: #059669; outline: none; background-color: #ffffff; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1); }
@@ -31,12 +31,26 @@
         .row-loss:hover { background-color: rgba(252, 231, 243, 0.7) !important; }
 
         .section-divider { border-left: 1px solid #cbd5e1 !important; }
+        
+        /* Resizable Splitter Handles */
+        .resizer-left, .resizer-right {
+            width: 5px;
+            cursor: col-resize;
+            background-color: transparent;
+            transition: background-color 0.2s;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+        .resizer-left:hover, .resizer-right:hover, .resizing {
+            background-color: #059669 !important;
+        }
+
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="flex flex-col h-screen text-xs">
+<body class="flex flex-col min-h-screen lg:h-screen text-xs overflow-x-hidden lg:overflow-hidden">
 
     <!-- Top Ticker Bar -->
     <div class="bg-slate-900 text-slate-300 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between flex-shrink-0 text-[11px] gap-2 border-b border-slate-800">
@@ -53,11 +67,11 @@
         </div>
     </div>
 
-    <!-- Main Workspace Layout (Flex row with independent scrollable areas) -->
-    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+    <!-- Main Workspace Layout with Resizable Panels -->
+    <div id="workspace-container" class="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden relative">
         
-        <!-- Left Sidebar News & Live Calendar Stack (Scrollable) -->
-        <aside class="w-full lg:w-80 bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 space-y-4 overflow-y-auto shadow-sm h-full">
+        <!-- Left Sidebar News & Live Calendar Stack -->
+        <aside id="sidebar-left" style="width: 320px;" class="w-full lg:w-[320px] bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 space-y-4 overflow-y-auto shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 pb-2 flex-shrink-0">
                 <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">News Feeds</span>
             </div>
@@ -83,8 +97,11 @@
             </div>
         </aside>
 
+        <!-- Left Resizer Handle (PC Only) -->
+        <div id="resizer-left" class="hidden lg:block resizer-left"></div>
+
         <!-- Center Main Content -->
-        <main class="flex-1 flex flex-col p-4 lg:p-6 gap-6 overflow-y-auto h-full">
+        <main class="flex-1 flex flex-col p-4 lg:p-6 gap-6 overflow-y-auto min-w-[300px]">
             
             <!-- Header Bar with Month Tabs -->
             <div class="flex items-center justify-between flex-shrink-0">
@@ -184,8 +201,11 @@
 
         </main>
 
-        <!-- Right Side Inspector Panel (Scrollable) -->
-        <aside class="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 p-5 flex flex-col space-y-4 overflow-y-auto shadow-sm h-full">
+        <!-- Right Resizer Handle (PC Only) -->
+        <div id="resizer-right" class="hidden lg:block resizer-right"></div>
+
+        <!-- Right Side Inspector Panel -->
+        <aside id="sidebar-right" style="width: 380px;" class="w-full lg:w-[380px] bg-white border-t lg:border-t-0 lg:border-l border-slate-200 p-5 flex flex-col space-y-4 overflow-y-auto shadow-sm flex-shrink-0">
             <div class="flex items-center justify-between border-b border-slate-200 pb-3 flex-shrink-0">
                 <h3 class="font-extrabold text-slate-900 text-xs flex items-center gap-2">
                     <i data-lucide="sliders" class="w-4 h-4 text-emerald-600"></i> Trade Inspector & Setup
@@ -216,7 +236,7 @@
                         <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-600"></i> A+ Setup Checkerboard
                     </span>
                     <button onclick="openChecklistModal()" class="text-[10px] text-emerald-600 hover:underline font-bold flex items-center gap-1 cursor-pointer">
-                        <i data-lucide="settings" class="w-3 u-3"></i> Manage Rules
+                        <i data-lucide="settings" class="w-3 h-3"></i> Manage Rules
                     </button>
                 </div>
                 <div id="checkerboard-checklist-container" class="grid grid-cols-2 gap-2"></div>
@@ -341,11 +361,62 @@
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
 
+        // Resizable Splitter Logic for Laptop/PC Dragging
+        document.addEventListener('DOMContentLoaded', () => {
+            const leftResizer = document.getElementById('resizer-left');
+            const rightResizer = document.getElementById('resizer-right');
+            const sidebarLeft = document.getElementById('sidebar-left');
+            const sidebarRight = document.getElementById('sidebar-right');
+
+            if (leftResizer && sidebarLeft) {
+                let isResizing = false;
+                leftResizer.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    document.body.classList.add('resizing');
+                    e.preventDefault();
+                });
+                window.addEventListener('mousemove', (e) => {
+                    if (!isResizing) return;
+                    let newWidth = e.clientX;
+                    if (newWidth > 200 && newWidth < 600) {
+                        sidebarLeft.style.width = newWidth + 'px';
+                    }
+                });
+                window.addEventListener('mouseup', () => {
+                    isResizing = false;
+                    document.body.classList.remove('resizing');
+                });
+            }
+
+            if (rightResizer && sidebarRight) {
+                let isResizing = false;
+                rightResizer.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    document.body.classList.add('resizing');
+                    e.preventDefault();
+                });
+                window.addEventListener('mousemove', (e) => {
+                    if (!isResizing) return;
+                    let newWidth = window.innerWidth - e.clientX;
+                    if (newWidth > 250 && newWidth < 600) {
+                        sidebarRight.style.width = newWidth + 'px';
+                    }
+                });
+                window.addEventListener('mouseup', () => {
+                    isResizing = false;
+                    document.body.classList.remove('resizing');
+                });
+            }
+
+            renderAll();
+            loadCloudData();
+        });
+
         function renderNewsFeeds() {
             const container = document.getElementById('news-feeds-container');
             if (!container) return;
             const feeds = [
-                { category: "Crypto", title: "Bitcoin Holds Support Near $61K", summary: "Institutional spot inflows stabilize BTC as volatility tames ahead of upcoming US CPI releases.", link: "https://www.investing.com/news/cryptocurrency-news" },
+                { category: "Crypto", title: "Bitcoin Holds Support Near $61K", summary: "Institutional spot inflows stabilize BTC as volatility tightens ahead of upcoming US CPI releases.", link: "https://www.investing.com/news/cryptocurrency-news" },
                 { category: "Stocks", title: "Tech Indexes Rally on Strong Earnings", summary: "Nasdaq climbs to new weekly highs driven by semiconductor sector momentum and solid cloud revenue.", link: "https://www.investing.com/news/stock-market-news" },
                 { category: "Commodities", title: "Gold Eyes Resistance at $2,460", summary: "Safe-haven demand persists amid ongoing macroeconomic uncertainties and currency fluctuations.", link: "https://www.investing.com/news/commodities-news" }
             ];
@@ -1058,11 +1129,6 @@
             fetchLiveAssetPrices();
             generateAIStrategySuggestion();
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderAll();
-            loadCloudData();
-        });
     </script>
 </body>
 </html>
