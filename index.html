@@ -33,42 +33,46 @@
         .resizer-left, .resizer-right { width: 5px; cursor: col-resize; background-color: transparent; transition: background-color 0.2s; z-index: 20; flex-shrink: 0; }
         .resizer-left:hover, .resizer-right:hover, .resizing { background-color: #059669 !important; }
 
+        /* Mobile Scrollbar Hide */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         @media (max-width: 1023px) { #sidebar-left, #sidebar-right { width: 100% !important; } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen lg:h-screen text-xs overflow-x-hidden lg:overflow-hidden">
+<body class="flex flex-col min-h-screen text-xs overflow-x-hidden">
 
-    <!-- Top Ticker Bar (Fixed Layout & Unified Fonts) -->
-    <div class="bg-slate-900 text-slate-300 px-4 py-2.5 flex items-center justify-between flex-shrink-0 text-xs gap-4 border-b border-slate-800">
+    <!-- Top Ticker Bar (Mobile Optimized & No Wrap) -->
+    <div class="bg-slate-900 text-slate-300 px-3 py-2 flex items-center justify-between flex-shrink-0 text-xs gap-3 border-b border-slate-800 overflow-x-auto no-scrollbar">
         <div class="flex items-center gap-2 flex-shrink-0">
             <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
-            <span class="font-bold uppercase tracking-wider text-slate-300 text-xs">Market Watch</span>
+            <span class="font-bold uppercase tracking-wider text-slate-300 text-xs whitespace-nowrap">Market Watch</span>
         </div>
         
         <!-- Scrollable Ticker Chips -->
-        <div id="ticker-container" class="flex items-center gap-2.5 overflow-x-auto py-0.5 flex-1 scrollbar-none"></div>
+        <div id="ticker-container" class="flex items-center gap-2 overflow-x-auto py-0.5 flex-1 no-scrollbar"></div>
         
-        <!-- Right Control Buttons (Pinned & Fixed) -->
-        <div class="flex items-center gap-2 flex-shrink-0">
-            <span id="cloud-status-badge" class="text-xs text-emerald-400 font-semibold px-2.5 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800">Cloud Synced</span>
+        <!-- Right Control Buttons (Pinned & No Wrap) -->
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+            <span id="cloud-status-badge" class="text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap">Synced</span>
             
-            <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-950 text-rose-400 border border-rose-900 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1.5 cursor-pointer text-xs" title="Delete all heavy images to free up space">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear Images
+            <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-950 text-rose-400 border border-rose-900 px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer text-[11px] whitespace-nowrap" title="Delete all heavy images to free up space">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Clear Images</span>
             </button>
             
-            <button onclick="forceSyncData()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition cursor-pointer text-xs" title="Reload Data">Reload</button>
-            <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1.5 cursor-pointer text-xs">
+            <button onclick="forceSyncData()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer text-[11px] whitespace-nowrap">Reload</button>
+            <button onclick="openAddAssetModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer text-[11px] whitespace-nowrap">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Asset
             </button>
         </div>
     </div>
 
     <!-- Main Workspace Layout -->
-    <div id="workspace-container" class="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden relative">
-        <aside id="sidebar-left" class="w-full lg:w-[320px] bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 space-y-4 overflow-y-auto shadow-sm">
+    <div id="workspace-container" class="flex-1 flex flex-col lg:flex-row relative">
+        <aside id="sidebar-left" class="w-full lg:w-[320px] bg-white border-r border-slate-200 flex flex-col p-4 flex-shrink-0 space-y-4 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 pb-2 flex-shrink-0">
                 <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">News Feeds</span>
             </div>
@@ -88,13 +92,13 @@
 
         <div id="resizer-left" class="hidden lg:block resizer-left"></div>
 
-        <main class="flex-1 flex flex-col p-4 lg:p-6 gap-6 overflow-y-auto min-w-[300px]">
+        <main class="flex-1 flex flex-col p-4 lg:p-6 gap-6 min-w-[300px]">
             <div class="flex items-center justify-between flex-shrink-0">
-                <div class="flex items-center gap-3 overflow-x-auto">
-                    <h2 class="text-base font-black text-slate-900 tracking-tight">Trading Dashboard</h2>
+                <div class="flex items-center gap-3 overflow-x-auto no-scrollbar">
+                    <h2 class="text-base font-black text-slate-900 tracking-tight whitespace-nowrap">Trading Dashboard</h2>
                     <div class="h-5 w-[1px] bg-slate-300"></div>
-                    <div id="month-tabs" class="flex items-center gap-1.5 overflow-x-auto"></div>
-                    <button onclick="addMonthTab()" class="text-xs text-emerald-600 hover:bg-emerald-50 bg-white border border-emerald-200 px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer">
+                    <div id="month-tabs" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar"></div>
+                    <button onclick="addMonthTab()" class="text-xs text-emerald-600 hover:bg-emerald-50 bg-white border border-emerald-200 px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer whitespace-nowrap">
                         <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Month
                     </button>
                 </div>
@@ -168,7 +172,7 @@
                 <div class="flex items-center justify-between mb-4 flex-shrink-0">
                     <div class="flex items-center gap-3">
                         <h3 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Trading Journal Execution Log</h3>
-                        <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition text-xs shadow-md cursor-pointer">
+                        <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition text-xs shadow-md cursor-pointer whitespace-nowrap">
                             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
                         </button>
                     </div>
@@ -207,7 +211,7 @@
         <div id="resizer-right" class="hidden lg:block resizer-right"></div>
 
         <!-- Right Side Inspector Panel -->
-        <aside id="sidebar-right" class="w-full lg:w-[380px] bg-white border-t lg:border-t-0 lg:border-l border-slate-200 p-5 flex flex-col space-y-4 overflow-y-auto shadow-sm flex-shrink-0">
+        <aside id="sidebar-right" class="w-full lg:w-[380px] bg-white border-t lg:border-t-0 lg:border-l border-slate-200 p-5 flex flex-col space-y-4 shadow-sm flex-shrink-0">
             <div class="flex items-center justify-between border-b border-slate-200 pb-3 flex-shrink-0">
                 <h3 class="font-extrabold text-slate-900 text-xs flex items-center gap-2">
                     <i data-lucide="sliders" class="w-4 h-4 text-emerald-600"></i> Trade Inspector & Setup
@@ -395,23 +399,23 @@
             
             if (payloadSize > 900000) {
                 if (badge) { 
-                    badge.innerText = "Size Limit! (Click Clear Images)"; 
-                    badge.className = "text-xs text-rose-400 font-semibold px-2.5 py-1 bg-rose-950/60 rounded-lg border border-rose-800"; 
+                    badge.innerText = "Size Limit!"; 
+                    badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; 
                 }
                 return;
             }
 
             if (!isFirebaseActive) return;
 
-            if (badge) { badge.innerText = "Saving..."; badge.className = "text-xs text-amber-300 font-semibold px-2.5 py-1 bg-amber-950/60 rounded-lg border border-amber-800"; }
+            if (badge) { badge.innerText = "Saving..."; badge.className = "text-[11px] text-amber-300 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
 
             if (saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 try {
                     await db.collection("journals").doc("main_journal").set(payload);
-                    if (badge) { badge.innerText = "Cloud Synced"; badge.className = "text-xs text-emerald-400 font-semibold px-2.5 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800"; }
+                    if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
                 } catch (e) {
-                    if (badge) { badge.innerText = "Sync Error"; badge.className = "text-xs text-rose-400 font-semibold px-2.5 py-1 bg-rose-950/60 rounded-lg border border-rose-800"; }
+                    if (badge) { badge.innerText = "Error"; badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; }
                 }
             }, 1000); 
         }
@@ -712,7 +716,6 @@
                         }
                     }
                 } catch (e) {
-                    // Fail-safe default real prices so it never gets stuck on Loading
                     if (asset.ticker === 'XAU=X' && (asset.price === 'Loading...' || !asset.price)) asset.price = '$4,324.08';
                     if (asset.ticker === 'XAG=X' && (asset.price === 'Loading...' || !asset.price)) asset.price = '$28.50';
                     if (asset.ticker === '^GSPC' && (asset.price === 'Loading...' || !asset.price)) asset.price = '$5,520.40';
@@ -735,7 +738,7 @@
                 const isUp = parseFloat(a.change) >= 0;
                 const yahooUrl = `https://finance.yahoo.com/quote/${encodeURIComponent(a.ticker)}`;
                 const div = document.createElement('div');
-                div.className = "flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-xl shrink-0 cursor-pointer hover:border-emerald-500 transition group text-xs";
+                div.className = "flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-xl shrink-0 cursor-pointer hover:border-emerald-500 transition group text-xs whitespace-nowrap";
                 div.title = "Click to open Yahoo Finance & News";
                 div.onclick = () => window.open(yahooUrl, '_blank');
                 div.innerHTML = `<span class="text-slate-300 font-semibold">${a.name}</span><span class="text-white font-bold">${a.price || '$4,324.08'}</span><span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${isUp ? '+' : ''}${a.change || 0}%</span><button onclick="removeAsset(${index}, event)" class="text-slate-400 hover:text-pink-400 font-bold ml-1 px-1 transition" title="Remove Asset">✕</button>`;
