@@ -38,6 +38,10 @@
         .draggable-card:active { cursor: grabbing; }
         .draggable-card.dragging { opacity: 0.4; transform: scale(0.96); border: 2px dashed #059669 !important; }
 
+        .draggable-badge { cursor: grab; user-select: none; transition: transform 0.15s ease, opacity 0.15s ease; }
+        .draggable-badge:active { cursor: grabbing; }
+        .draggable-badge.dragging { opacity: 0.3; transform: scale(0.95); border: 1px dashed #475569 !important; }
+
         /* Mobile Scrollbar Hide */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -396,6 +400,7 @@
         let saveTimeout = null; 
 
         let draggedIndex = null; // Track index during Drag & Drop
+        let draggedOptionIndex = null; // Track option index during Drag & Drop
 
         function clearAllImages() {
             if (confirm("저장 공간 900KB 제한을 해결하기 위해 모든 차트 이미지를 삭제하시겠습니까?\n\n(※ 입력하신 숫자 데이터와 텍스트는 100% 안전하게 유지됩니다.)")) {
@@ -1112,12 +1117,51 @@
             const container = document.getElementById('active-options-list');
             container.innerHTML = '';
             dropdownOptions.forEach((opt, idx) => {
-                const colorClass = opt.color === 'pink' || opt.color === 'red' ? 'bg-pink-100 text-pink-800' : opt.color === 'green' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700';
+                const colorClass = opt.color === 'pink' || opt.color === 'red' ? 'bg-pink-100 text-pink-800 border-pink-200' : opt.color === 'green' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200';
                 const span = document.createElement('span');
-                span.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-semibold ${colorClass}`;
-                span.innerHTML = `${opt.label} <button onclick="removeOption(${idx})" class="hover:text-pink-600 font-bold cursor-pointer">✕</button>`;
+                span.className = `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold ${colorClass} draggable-badge`;
+                span.draggable = true;
+                span.dataset.index = idx;
+                
+                span.innerHTML = `
+                    <i data-lucide="grip-vertical" class="w-3 h-3 text-slate-400 cursor-grab flex-shrink-0"></i>
+                    <span>${opt.label}</span>
+                    <button onclick="removeOption(${idx})" class="hover:text-pink-600 font-bold cursor-pointer ml-0.5">✕</button>
+                `;
+
+                // Badge Drag & Drop Event Listeners
+                span.addEventListener('dragstart', (e) => {
+                    draggedOptionIndex = idx;
+                    span.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                span.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                });
+
+                span.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const targetIndex = parseInt(span.dataset.index);
+                    if (draggedOptionIndex !== null && draggedOptionIndex !== targetIndex) {
+                        const movedOption = dropdownOptions.splice(draggedOptionIndex, 1)[0];
+                        dropdownOptions.splice(targetIndex, 0, movedOption);
+                        renderOptionsList();
+                        renderCheckerboardChecklist();
+                        renderJournal();
+                        saveCloudData();
+                    }
+                });
+
+                span.addEventListener('dragend', () => {
+                    span.classList.remove('dragging');
+                    draggedOptionIndex = null;
+                });
+
                 container.appendChild(span);
             });
+            lucide.createIcons();
         }
 
         function addDropdownOption() {
