@@ -10,7 +10,6 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
     <style>
         body { background-color: #f8fafc; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -83,7 +82,7 @@
                 <i data-lucide="percent" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Compound Calc</span>
             </button>
 
-            <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-950 text-rose-400 border border-rose-900 px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer text-[11px] whitespace-nowrap" title="Clear all image URLs">
+            <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-950 text-rose-400 border border-rose-900 px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer text-[11px] whitespace-nowrap" title="Delete all heavy images to free up space">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Clear Images</span>
             </button>
             
@@ -398,13 +397,11 @@
         };
 
         let db;
-        let storage;
         let isFirebaseActive = false;
 
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
-            storage = firebase.storage();
             isFirebaseActive = true;
         } catch (e) { console.log("Firebase Init Failed:", e); }
 
@@ -433,7 +430,7 @@
         let draggedOptionIndex = null; 
 
         function clearAllImages() {
-            if (confirm("모든 차트 이미지 링크를 정리하시겠습니까?\n\n(※ 작성하신 숫자 데이터와 텍스트 메모는 100% 안전하게 유지됩니다.)")) {
+            if (confirm("저장 공간 900KB 제한을 해결하기 위해 모든 차트 이미지를 삭제하시겠습니까?\n\n(※ 입력하신 숫자 데이터와 텍스트는 100% 안전하게 유지됩니다.)")) {
                 monthsData.forEach(month => {
                     month.trades.forEach(trade => {
                         if (trade.customCharts) {
@@ -443,35 +440,28 @@
                 });
                 renderAll();
                 saveCloudData();
-                alert("차트 이미지 링크가 모두 정리되었습니다!");
+                alert("이미지가 모두 정리되어 저장 공간이 넉넉하게 확보되었습니다!");
             }
         }
 
-        async function uploadImageToStorage(file, callback) {
-            if (!isFirebaseActive || !storage) {
-                // Storage 비활성화 시 호환성 유지용 Fallback
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => callback(e.target.result);
-                return;
-            }
-
-            const badge = document.getElementById('cloud-status-badge');
-            if (badge) { badge.innerText = "Uploading Image..."; badge.className = "text-[11px] text-amber-300 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
-
-            const fileName = `charts/chart_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.jpg`;
-            const storageRef = storage.ref().child(fileName);
-
-            try {
-                const snapshot = await storageRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
-                callback(downloadURL);
-            } catch (e) {
-                console.error("Storage upload error:", e);
-                alert("이미지 클라우드 업로드에 실패했습니다.");
-                if (badge) { badge.innerText = "Error"; badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; }
-            }
+        function compressImage(dataUrl, callback) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 800;
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                callback(canvas.toDataURL('image/jpeg', 0.6));
+            };
+            img.src = dataUrl;
         }
 
         async function saveCloudData() {
@@ -562,19 +552,23 @@
                 const item = items[index];
                 if (item.kind === 'file') {
                     const file = item.getAsFile();
-                    uploadImageToStorage(file, function(uploadedUrl) {
-                        const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-                        if (trade) {
-                            if (!trade.customCharts) trade.customCharts = [ { key: 'htf', title: 'HTF Chart', img: '', caption: '' }, { key: 'ltf', title: 'LTF Chart', img: '', caption: '' } ];
-                            let target = trade.customCharts.find(c => !c.img);
-                            if (!target) {
-                                target = { key: 'chart_' + Date.now(), title: 'Setup Chart ' + (trade.customCharts.length + 1), img: '', caption: '' };
-                                trade.customCharts.push(target);
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function(event) {
+                        compressImage(event.target.result, function(compressedData) {
+                            const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+                            if (trade) {
+                                if (!trade.customCharts) trade.customCharts = [ { key: 'htf', title: 'HTF Chart', img: '', caption: '' }, { key: 'ltf', title: 'LTF Chart', img: '', caption: '' } ];
+                                let target = trade.customCharts.find(c => !c.img);
+                                if (!target) {
+                                    target = { key: 'chart_' + Date.now(), title: 'Setup Chart ' + (trade.customCharts.length + 1), img: '', caption: '' };
+                                    trade.customCharts.push(target);
+                                }
+                                target.img = compressedData;
+                                renderChartsGallery(); saveCloudData();
                             }
-                            target.img = uploadedUrl;
-                            renderChartsGallery(); saveCloudData();
-                        }
-                    });
+                        });
+                    };
                 }
             }
         });
@@ -802,15 +796,18 @@
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (file) {
-                uploadImageToStorage(file, function(uploadedUrl) {
-                    const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-                    if (trade) {
-                        if (!trade.customCharts) trade.customCharts = [];
-                        let target = trade.customCharts.find(c => c.key === activeChartKey);
-                        if (target) target.img = uploadedUrl; else trade.customCharts.push({ key: activeChartKey, title: 'Chart', img: uploadedUrl, caption: '' });
-                        renderChartsGallery(); saveCloudData();
-                    }
-                });
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = function(event) {
+                    compressImage(event.target.result, function(compressedData) {
+                        const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
+                        if (trade) {
+                            if (!trade.customCharts) trade.customCharts = [];
+                            let target = trade.customCharts.find(c => c.key === activeChartKey);
+                            if (target) target.img = compressedData; else trade.customCharts.push({ key: activeChartKey, title: 'Chart', img: compressedData, caption: '' });
+                            renderChartsGallery(); saveCloudData();
+                        }
+                    });
+                };
             }
         }
 
@@ -974,7 +971,7 @@
 
             let grossPnl = trade.dir === 'Long' ? (avgExit - avgEnt) * totalExitQty : (avgEnt - avgExit) * totalExitQty;
             let netPnl = grossPnl - (trade.fees || 0);
-            let margin = (avgEnt * totalExitQty) / (trade.lev || 1);
+            let margin = (avgEnt * totalEntQty) / (trade.lev || 1);
             let netPnlPct = margin > 0 ? (netPnl / margin) * 100 : 0;
             let accContr = initialAsset > 0 ? (netPnl / initialAsset) * 100 : 0;
             let accReturn = prevAccReturn + accContr;
