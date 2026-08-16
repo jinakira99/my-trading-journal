@@ -196,7 +196,9 @@
                     <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
                         <div class="flex items-center gap-2">
                             <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i>
+                            <button onclick="changeCalendarMonth(-1)" class="px-2 py-0.5 text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer transition border border-slate-200" title="Previous Month">&lt;</button>
                             <h3 id="calendar-month-title" class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">DAILY RETURN CALENDAR</h3>
+                            <button onclick="changeCalendarMonth(1)" class="px-2 py-0.5 text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer transition border border-slate-200" title="Next Month">&gt;</button>
                         </div>
                         <div class="flex items-center gap-1">
                             <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">Green (+)</span>
@@ -462,6 +464,7 @@
 
         let draggedIndex = null; 
         let draggedOptionIndex = null; 
+        let selectedCalendarMonth = null; // null일 경우 최신 거래일 월로 자동 설정
 
         function clearAllImages() {
             if (confirm("모든 차트 이미지 링크를 삭제하시겠습니까?\n\n(※ 작성하신 숫자 데이터와 텍스트 메모는 100% 안전하게 유지됩니다.)")) {
@@ -571,6 +574,7 @@
                     }
                 } catch (err) {}
             }
+            selectedCalendarMonth = null; // 로드 완료 후 최신일 기준 자동 감지
             renderAll();
         }
 
@@ -667,6 +671,48 @@
             if (wrapper) wrapper.innerHTML = `<iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone&countries=5,72,22,17,36,43,10,35,11,26&calType=day&lang=1&time=${Date.now()}" width="100%" height="100%" style="position: absolute; top:0; left:0; border:0; width:100%; height:100%;" frameborder="0" allowtransparency="true"></iframe>`;
         }
 
+        /* --- Daily Return Calendar Helper Functions --- */
+        function normalizeDateStr(dateStr) {
+            if (!dateStr) return '';
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+                }
+            }
+            return dateStr;
+        }
+
+        function getEffectiveCalendarMonth() {
+            if (selectedCalendarMonth) return selectedCalendarMonth;
+            
+            const currentMonthObj = monthsData[activeMonthIndex];
+            if (currentMonthObj && currentMonthObj.trades && currentMonthObj.trades.length > 0) {
+                let latestDate = '';
+                currentMonthObj.trades.forEach(t => {
+                    const norm = normalizeDateStr(t.date);
+                    if (norm && norm > latestDate) {
+                        latestDate = norm;
+                    }
+                });
+                if (latestDate && latestDate.length >= 7) {
+                    return latestDate.substring(0, 7);
+                }
+            }
+            
+            return currentMonthObj ? currentMonthObj.name : "2026-08";
+        }
+
+        function changeCalendarMonth(delta) {
+            const currentStr = getEffectiveCalendarMonth();
+            const [y, m] = currentStr.split('-').map(Number);
+            const targetDate = new Date(y, m - 1 + delta, 1);
+            const targetY = targetDate.getFullYear();
+            const targetM = String(targetDate.getMonth() + 1).padStart(2, '0');
+            selectedCalendarMonth = `${targetY}-${targetM}`;
+            renderDailyReturnCalendar();
+        }
+
         /* --- Daily Return Calendar Rendering --- */
         function renderDailyReturnCalendar() {
             const container = document.getElementById('calendar-grid');
@@ -674,26 +720,27 @@
             if (!container) return;
 
             container.innerHTML = '';
-            const currentMonthObj = monthsData[activeMonthIndex];
-            const monthStr = currentMonthObj ? currentMonthObj.name : "2026-07"; // Format: YYYY-MM
+            const monthStr = getEffectiveCalendarMonth(); // Format: YYYY-MM
             
             if (titleElem) titleElem.innerText = `DAILY RETURN CALENDAR (${monthStr})`;
 
             const [yearStr, monthNumStr] = monthStr.split('-');
             const year = parseInt(yearStr) || 2026;
-            const month = parseInt(monthNumStr) || 7; // 1-indexed
+            const month = parseInt(monthNumStr) || 8;
 
             // Calculate daily profits/losses aggregated from trades
             const dailyStats = {};
+            const currentMonthObj = monthsData[activeMonthIndex];
             if (currentMonthObj && currentMonthObj.trades) {
                 currentMonthObj.trades.forEach(t => {
-                    if (t.date) {
+                    const normDate = normalizeDateStr(t.date);
+                    if (normDate) {
                         const m = calculateMetrics(t, currentMonthObj.initialAsset, 0);
-                        if (!dailyStats[t.date]) {
-                            dailyStats[t.date] = { pnl: 0, count: 0 };
+                        if (!dailyStats[normDate]) {
+                            dailyStats[normDate] = { pnl: 0, count: 0 };
                         }
-                        dailyStats[t.date].pnl += m.netPnl;
-                        dailyStats[t.date].count++;
+                        dailyStats[normDate].pnl += m.netPnl;
+                        dailyStats[normDate].count++;
                     }
                 });
             }
@@ -1124,14 +1171,14 @@
                 const btn = document.createElement('button');
                 btn.className = `px-3 py-1.5 text-xs rounded-xl font-bold transition shrink-0 cursor-pointer ${idx === activeMonthIndex ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}`;
                 btn.innerText = m.name;
-                btn.onclick = () => { activeMonthIndex = idx; selectedTradeIndex = 0; renderAll(); };
+                btn.onclick = () => { activeMonthIndex = idx; selectedTradeIndex = 0; selectedCalendarMonth = null; renderAll(); };
                 container.appendChild(btn);
             });
         }
 
         function addMonthTab() {
             monthsData.push({ name: `2026-0${monthsData.length + 7}`, initialAsset: 10000, trades: [] });
-            activeMonthIndex = monthsData.length - 1; renderAll(); saveCloudData();
+            activeMonthIndex = monthsData.length - 1; selectedCalendarMonth = null; renderAll(); saveCloudData();
         }
 
         function updateTradeValue(tIdx, field, subIdx, val) {
@@ -1278,6 +1325,7 @@
                 date: new Date().toISOString().split('T')[0], pair: "", dir: "Long", lev: 20, ent: [0, 0], entQty: [0, 0], exit: [0, 0], exitQty: [0, 0],
                 fees: 0, checklist: defaultChecklist, customCharts: [{ key: 'htf', title: 'HTF Chart', img: '', caption: '' }, { key: 'ltf', title: 'LTF Chart', img: '', caption: '' }], notes: ""
             });
+            selectedCalendarMonth = null;
             selectTrade(0); saveCloudData();
         }
 
