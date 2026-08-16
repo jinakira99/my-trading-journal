@@ -82,7 +82,6 @@
                 <i data-lucide="percent" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Calc</span>
             </button>
 
-            <!-- 상단 전체 이미지 삭제 버튼 (지우개/빗자루 아이콘) -->
             <button onclick="clearAllImages()" class="bg-slate-800 hover:bg-rose-950 text-rose-400 border border-rose-900 px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 cursor-pointer text-[11px] whitespace-nowrap" title="전체 차트 이미지 지우기">
                 <i data-lucide="eraser" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Clear All Images</span>
             </button>
@@ -330,19 +329,13 @@
                 <div id="checkerboard-checklist-container" class="grid grid-cols-2 gap-2"></div>
             </div>
 
-            <!-- Execution Charts Gallery with Ctrl+V & Eraser/Broom Icon -->
+            <!-- Execution Charts Gallery -->
             <div class="space-y-2 flex-shrink-0">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] text-slate-800 font-extrabold uppercase tracking-wider">Charts Gallery (Ctrl+V)</span>
-                    <div class="flex items-center gap-1">
-                        <!-- 선택한 트레이드 차트 이미지 지우개(빗자루) 버튼 -->
-                        <button onclick="clearCurrentTradeImages()" class="text-[10px] bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-lg border border-rose-200 transition cursor-pointer flex items-center gap-1" title="현재 트레이드 차트 이미지 모두 지우기">
-                            <i data-lucide="eraser" class="w-3 h-3"></i> Clear Img
-                        </button>
-                        <button onclick="addCustomChartSlot()" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-lg border border-emerald-200 transition cursor-pointer flex items-center gap-1">
-                            <i data-lucide="plus" class="w-3 h-3"></i> Add Box
-                        </button>
-                    </div>
+                    <button onclick="addCustomChartSlot()" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-lg border border-emerald-200 transition cursor-pointer flex items-center gap-1">
+                        <i data-lucide="plus" class="w-3 h-3"></i> Add Box
+                    </button>
                 </div>
                 <input type="file" id="file-input-hidden" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
                 <div id="charts-gallery-container" class="grid grid-cols-2 gap-2"></div>
@@ -625,7 +618,7 @@
             }
         });
 
-        // Cash Flow (Deposit / Withdrawal) Modal & Delete Functions
+        // Cash Flow Modal
         function openCashFlowModal(dateStr) {
             const dateInput = document.getElementById('cf-date');
             dateInput.value = dateStr || new Date().toISOString().split('T')[0];
@@ -692,7 +685,7 @@
             saveCloudData();
         }
 
-        // Helper Functions for Data Sorting
+        // Helper Functions
         function getAllTradesSorted() {
             let all = [];
             monthsData.forEach((mObj, mIdx) => {
@@ -766,7 +759,7 @@
             saveCloudData();
         }
 
-        // Daily Return Calendar Rendering
+        // Daily Return Calendar
         function renderDailyReturnCalendar() {
             const container = document.getElementById('calendar-grid');
             const titleElem = document.getElementById('calendar-month-title');
@@ -883,7 +876,7 @@
             renderDailyReturnCalendar();
         }
 
-        // Advanced Equity Curve Rendering
+        // Advanced Equity Curve Rendering (Updated ALL Mode to Include Pre-First-Trade Baseline Date)
         function setCurveMode(mode) {
             curveMode = mode;
             document.getElementById('curve-mode-pnl').className = mode === 'pnl' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-2xs" : "px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900";
@@ -953,8 +946,14 @@
                     filteredDates.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
                 }
             } else {
+                // ALL: 첫 매매 발생 전 날(시작점 $0)부터 오늘까지 연결
                 if (allDatesSorted.length > 0) {
-                    filteredDates = [...allDatesSorted];
+                    const firstDateParts = allDatesSorted[0].split('-').map(Number);
+                    const earliestDate = new Date(firstDateParts[0], firstDateParts[1] - 1, firstDateParts[2]);
+                    earliestDate.setDate(earliestDate.getDate() - 1);
+                    const startDateStr = `${earliestDate.getFullYear()}-${String(earliestDate.getMonth() + 1).padStart(2, '0')}-${String(earliestDate.getDate()).padStart(2, '0')}`;
+
+                    filteredDates = [startDateStr, ...allDatesSorted];
                     if (!filteredDates.includes(todayStr)) filteredDates.push(todayStr);
                 } else {
                     filteredDates = [todayStr];
@@ -1292,6 +1291,7 @@
             }
         }
 
+        // Render Charts Gallery with Individual Eraser Icon Per Slot
         function renderChartsGallery() {
             const container = document.getElementById('charts-gallery-container');
             if (!container) return;
@@ -1308,7 +1308,13 @@
                 div.innerHTML = `
                     <div class="flex items-center justify-between">
                         <input type="text" value="${chart.title}" onchange="updateChartTitle(${idx}, this.value)" class="text-[9px] font-extrabold text-slate-700 bg-transparent outline-none w-20">
-                        <button onclick="removeChartSlot(${idx})" class="text-slate-400 hover:text-rose-600 text-[9px] font-bold">✕</button>
+                        <div class="flex items-center gap-1">
+                            <!-- 각 칸 전용 개별 지우개 버튼 -->
+                            <button onclick="clearSingleChartImage(event, ${idx})" class="text-slate-400 hover:text-rose-600 transition p-0.5" title="이 칸의 이미지 지우기">
+                                <i data-lucide="eraser" class="w-3 h-3"></i>
+                            </button>
+                            <button onclick="removeChartSlot(${idx})" class="text-slate-400 hover:text-rose-600 text-[9px] font-bold p-0.5" title="슬롯 삭제">✕</button>
+                        </div>
                     </div>
                     <div onclick="${chart.img ? `openImageLightbox(${idx})` : `triggerChartUpload('${chart.key}')`}" class="w-full h-14 bg-white border border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden">
                         ${chart.img ? `<img src="${chart.img}" class="w-full h-full object-cover">` : `<span class="text-[8px] text-slate-400 font-bold">Click / Ctrl+V Paste</span>`}
@@ -1340,15 +1346,14 @@
             if (trade && trade.customCharts) { trade.customCharts.splice(idx, 1); renderChartsGallery(); saveCloudData(); }
         }
 
-        // 현재 선택된 트레이드의 차트 이미지만 지우는 함수 (슬롯 틀은 유지)
-        function clearCurrentTradeImages() {
+        // 특정 차트 칸 하나만의 이미지만 지우는 함수
+        function clearSingleChartImage(e, idx) {
+            if (e) e.stopPropagation();
             const trade = monthsData[activeMonthIndex].trades[selectedTradeIndex];
-            if (trade && trade.customCharts) {
-                if (confirm("현재 트레이드의 모든 차트 이미지를 삭제하시겠습니까?")) {
-                    trade.customCharts.forEach(c => c.img = '');
-                    renderChartsGallery();
-                    saveCloudData();
-                }
+            if (trade && trade.customCharts && trade.customCharts[idx]) {
+                trade.customCharts[idx].img = '';
+                renderChartsGallery();
+                saveCloudData();
             }
         }
 
