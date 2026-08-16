@@ -593,7 +593,7 @@
 
         let checklistRules = ["Entry Model", "Reasonable RR Ratio", "Order Type", "TP/SL Adjust"];
         let dropdownOptions = [ { label: "Confirmed", color: "green" }, { label: "Ignored", color: "pink" }, { label: "Not found", color: "gray" } ];
-        let compoundSettings = { initial: 600, rate: 7, days: 20 };
+        let compoundSettings = { initial: 400, rate: 1.5, days: 30 };
 
         let trackedAssets = [
             { name: "Spot Gold (XAUUSD)", ticker: "XAU=X", price: "$4,324.08", change: 0.50 },
@@ -694,7 +694,7 @@
                         badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap";
                     }
                 }
-            }, 400); // 400ms 딜레이를 주어 타이핑/입력 시 렉(Lag)과 과도한 클라우드 요청을 방지합니다.
+            }, 400);
         }
 
         async function loadCloudData() {
@@ -1616,8 +1616,28 @@ Provide concise, sharp, and actionable professional advice based on the provided
         }
 
         function closeImageLightbox() { document.getElementById('image-lightbox-modal').classList.add('hidden'); }
-        function openCompoundCalcModal() { document.getElementById('compound-calc-modal').classList.remove('hidden'); }
+        
+        function openCompoundCalcModal() { 
+            document.getElementById('cc-initial').value = compoundSettings.initial;
+            document.getElementById('cc-rate').value = compoundSettings.rate;
+            document.getElementById('cc-days').value = compoundSettings.days;
+            calculateCompound();
+            document.getElementById('compound-calc-modal').classList.remove('hidden'); 
+        }
         function closeCompoundCalcModal() { document.getElementById('compound-calc-modal').classList.add('hidden'); }
+
+        function calculateCompound() {
+            const initial = parseFloat(document.getElementById('cc-initial').value) || 0;
+            const rate = parseFloat(document.getElementById('cc-rate').value) || 0;
+            const days = parseInt(document.getElementById('cc-days').value) || 0;
+
+            compoundSettings = { initial, rate, days };
+
+            const result = initial * Math.pow(1 + (rate / 100), days);
+            document.getElementById('cc-result').innerText = '$' + result.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            saveCloudData();
+        }
+
         function openChecklistModal() { document.getElementById('checklist-modal').classList.remove('hidden'); renderRulesList(); renderDropdownOptionsList(); }
         function closeChecklistModal() { document.getElementById('checklist-modal').classList.add('hidden'); }
         function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); renderTrackedAssetsManageList(); filterAssetSearchResults(''); }
