@@ -464,10 +464,9 @@
         </div>
     </div>
 
-    <!-- Rule Checklist & Layout Management Modal (Redesigned & Improved UX) -->
+    <!-- Rule Checklist & Layout Management Modal -->
     <div id="checklist-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
         <div class="bg-white border border-slate-200 rounded-2xl w-[460px] max-w-[95vw] max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <!-- Modal Header -->
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/70">
                 <div class="flex items-center gap-2">
                     <i data-lucide="sliders-horizontal" class="w-4 h-4 text-emerald-600"></i>
@@ -478,10 +477,7 @@
                 </button>
             </div>
 
-            <!-- Modal Body (Scrollable) -->
             <div class="p-5 overflow-y-auto space-y-6 flex-1">
-                
-                <!-- Section 1: Dropdown Options Order & Management -->
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -491,7 +487,6 @@
                     
                     <div id="dropdown-options-list" class="space-y-2 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 max-h-40 overflow-y-auto"></div>
 
-                    <!-- Add New Dropdown Option Form -->
                     <div class="flex gap-2 bg-slate-100/70 p-2.5 rounded-xl border border-slate-200">
                         <input type="text" id="new-option-label" placeholder="Option label (e.g. Perfect)" class="flex-1 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-600">
                         <select id="new-option-color" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-bold text-slate-800 outline-none focus:border-emerald-600">
@@ -505,7 +500,6 @@
 
                 <div class="border-t border-slate-100"></div>
 
-                <!-- Section 2: Checkerboard Rules Order & Management -->
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -515,16 +509,13 @@
 
                     <div id="active-rules-list" class="space-y-2 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 max-h-44 overflow-y-auto"></div>
 
-                    <!-- Add New Rule Form -->
                     <div class="flex gap-2 bg-slate-100/70 p-2.5 rounded-xl border border-slate-200">
                         <input type="text" id="new-rule-name" placeholder="Rule name (e.g. Volume Spike, Liquidity Sweep)" class="flex-1 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-600">
                         <button onclick="addChecklistItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-1.5 rounded-lg text-xs transition cursor-pointer shadow-2xs whitespace-nowrap">Add Rule</button>
                     </div>
                 </div>
-
             </div>
 
-            <!-- Modal Footer -->
             <div class="px-5 py-3 border-t border-slate-100 bg-slate-50/70 flex justify-end">
                 <button onclick="closeChecklistModal()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer shadow-md">Done & Save</button>
             </div>
@@ -549,7 +540,7 @@
             </div>
 
             <div class="border-t border-slate-800 pt-2">
-                <label class="text-[10px] text-slate-400 font-medium mb-1 block">현재 상단 트커 에셋 목록 (관리 및 삭제)</label>
+                <label class="text-[10px] text-slate-400 font-medium mb-1 block">현재 상단 티커 에셋 목록 (관리 및 삭제)</label>
                 <div id="tracked-assets-manage-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
             </div>
 
@@ -595,7 +586,7 @@
         let selectedTradeIndex = 0;
 
         let userGeminiApiKey = localStorage.getItem('gemini_api_key') || '';
-        let selectedCalendarMonth = localStorage.getItem('last_calendar_month') || new Date().toISOString().slice(0, 7);
+        let selectedCalendarMonth = new Date().toISOString().slice(0, 7);
 
         let curveMode = 'pnl';
         let curveTimeframe = 'ALL';
@@ -667,60 +658,68 @@
             if (data.trackedAssets) trackedAssets = data.trackedAssets;
         }
 
+        let saveTimeout = null;
         async function saveCloudData() {
-            const payload = { 
-                globalInitialCapital, 
-                cashFlows, 
-                monthsData, 
-                checklistRules, 
-                dropdownOptions, 
-                compoundSettings, 
-                trackedAssets,
-                updatedAt: new Date().toISOString() 
-            };
-            
-            try { localStorage.setItem('fintech_trading_journal_data', JSON.stringify(payload)); } catch (e) {}
-
             const badge = document.getElementById('cloud-status-badge');
-            if (!isFirebaseActive) return;
-
-            if (badge) { badge.innerText = "Syncing..."; badge.className = "text-[11px] text-amber-400 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
-
-            try {
-                await db.collection("journals").doc("main_journal").set(payload);
-                if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
-            } catch (e) {
-                console.error("Cloud save error:", e);
-                if (badge) { badge.innerText = "Sync Fail"; badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; }
+            if (badge) {
+                badge.innerText = "Saving...";
+                badge.className = "text-[11px] text-amber-400 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap";
             }
+
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                const payload = { 
+                    globalInitialCapital, 
+                    cashFlows, 
+                    monthsData, 
+                    checklistRules, 
+                    dropdownOptions, 
+                    compoundSettings, 
+                    trackedAssets,
+                    updatedAt: new Date().toISOString() 
+                };
+                
+                if (!isFirebaseActive) return;
+
+                try {
+                    await db.collection("journals").doc("main_journal").set(payload);
+                    if (badge) {
+                        badge.innerText = "Synced";
+                        badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap";
+                    }
+                } catch (e) {
+                    console.error("Cloud save error:", e);
+                    if (badge) {
+                        badge.innerText = "Sync Fail";
+                        badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap";
+                    }
+                }
+            }, 400); // 400ms 딜레이를 주어 타이핑/입력 시 렉(Lag)과 과도한 클라우드 요청을 방지합니다.
         }
 
         async function loadCloudData() {
             const badge = document.getElementById('cloud-status-badge');
-            if (badge) { badge.innerText = "Loading..."; badge.className = "text-[11px] text-blue-400 font-semibold px-2 py-1 bg-blue-950/60 rounded-lg border border-blue-800 whitespace-nowrap"; }
+            if (badge) {
+                badge.innerText = "Loading...";
+                badge.className = "text-[11px] text-blue-400 font-semibold px-2 py-1 bg-blue-950/60 rounded-lg border border-blue-800 whitespace-nowrap";
+            }
 
             if (isFirebaseActive) {
                 try {
                     const doc = await db.collection("journals").doc("main_journal").get();
                     if (doc.exists) {
-                        const data = doc.data();
-                        applyLoadedData(data);
-                        localStorage.setItem('fintech_trading_journal_data', JSON.stringify(data));
+                        applyLoadedData(doc.data());
                     }
                 } catch (e) {
                     console.error("Cloud load error:", e);
                 }
             }
 
-            try {
-                const localSaved = localStorage.getItem('fintech_trading_journal_data');
-                if (localSaved) {
-                    applyLoadedData(JSON.parse(localSaved));
-                }
-            } catch (err) {}
-
             renderAll();
-            if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
+            if (badge) {
+                badge.innerText = "Synced";
+                badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap";
+            }
         }
 
         function forceSyncData() { loadCloudData(); }
@@ -1015,8 +1014,6 @@
             const targetDate = new Date(y, m - 1 + delta, 1);
             
             selectedCalendarMonth = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
-            localStorage.setItem('last_calendar_month', selectedCalendarMonth);
-            
             renderDailyReturnCalendar();
         }
 
@@ -1626,7 +1623,6 @@ Provide concise, sharp, and actionable professional advice based on the provided
         function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); renderTrackedAssetsManageList(); filterAssetSearchResults(''); }
         function closeAddAssetModal() { document.getElementById('add-asset-modal').classList.add('hidden'); }
 
-        // A+ Rules & Options Management & Reordering Functions
         function renderRulesList() {
             const list = document.getElementById('active-rules-list');
             list.innerHTML = '';
@@ -1730,7 +1726,6 @@ Provide concise, sharp, and actionable professional advice based on the provided
             saveCloudData();
         }
 
-        // Asset Search, Add, Delete & External Link Functions
         function renderTrackedAssetsManageList() {
             const list = document.getElementById('tracked-assets-manage-list');
             if (!list) return;
