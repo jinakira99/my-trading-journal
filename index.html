@@ -40,19 +40,19 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Calendar Styling */
+        /* Calendar Cell Styling - Enhanced Font Sizes & Height */
         .cal-day-box {
-            min-height: 46px;
+            min-height: 56px;
             transition: all 0.2s ease;
             cursor: pointer;
         }
         .cal-day-box:hover {
             transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         .cal-day-profit { background-color: #10b981; color: #ffffff; border: 1px solid #059669; }
         .cal-day-loss { background-color: #f43f5e; color: #ffffff; border: 1px solid #e11d48; }
-        .cal-day-empty { background-color: #f8fafc; color: #94a3b8; border: 1px solid #f1f5f9; }
+        .cal-day-empty { background-color: #f8fafc; color: #64748b; border: 1px solid #f1f5f9; }
 
         @media (max-width: 1023px) { #sidebar-left, #sidebar-right { width: 100% !important; } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -75,7 +75,7 @@
         <div class="flex items-center gap-1.5 flex-shrink-0">
             <span id="cloud-status-badge" class="text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap">Synced</span>
             
-            <button onclick="openCashFlowModal(null)" class="bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer text-[11px] whitespace-nowrap">
+            <button onclick="openCashFlowModal(null)" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer text-xs whitespace-nowrap shadow-sm">
                 <i data-lucide="wallet" class="w-3.5 h-3.5"></i> Deposit/Withdraw
             </button>
 
@@ -121,7 +121,7 @@
             <div class="flex items-center justify-between flex-shrink-0">
                 <div class="flex items-center gap-2">
                     <h2 class="text-base font-black text-slate-900 tracking-tight">GLOBAL ALL-TIME DASHBOARD</h2>
-                    <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">Overall Performance</span>
+                    <span class="text-xs font-bold px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">Overall Performance</span>
                 </div>
             </div>
 
@@ -130,44 +130,44 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3.5 items-stretch">
                     
                     <!-- Total Net PnL Card -->
-                    <div id="kpi-net-pnl-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px]">
-                        <div id="kpi-net-pnl-title" class="text-[10px] text-emerald-100 font-bold uppercase tracking-wider">ALL-TIME NET PnL</div>
-                        <div id="kpi-net-pnl" class="text-xl font-black tracking-tight my-0.5">$0.00</div>
-                        <div id="kpi-pnl-pct" class="text-[11px] font-bold text-emerald-100">+0.00% Overall Return</div>
+                    <div id="kpi-net-pnl-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[95px]">
+                        <div id="kpi-net-pnl-title" class="text-xs text-emerald-100 font-bold uppercase tracking-wider">ALL-TIME NET PnL</div>
+                        <div id="kpi-net-pnl" class="text-2xl font-black tracking-tight my-0.5">$0.00</div>
+                        <div id="kpi-pnl-pct" class="text-xs font-bold text-emerald-100">+0.00% Overall Return</div>
                     </div>
 
                     <!-- Total Asset Card -->
-                    <div id="kpi-total-asset-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px]">
-                        <div id="kpi-asset-title" class="text-[10px] text-emerald-100 font-bold uppercase tracking-wider">CURRENT TOTAL ASSET</div>
-                        <div id="kpi-total-asset" class="text-xl font-black tracking-tight my-0.5">$0.00</div>
-                        <div id="kpi-asset-subtitle" class="text-[10px] font-medium text-emerald-100">Initial Capital + Net PnL + Net Cash Flow</div>
+                    <div id="kpi-total-asset-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[95px]">
+                        <div id="kpi-asset-title" class="text-xs text-emerald-100 font-bold uppercase tracking-wider">CURRENT TOTAL ASSET</div>
+                        <div id="kpi-total-asset" class="text-2xl font-black tracking-tight my-0.5">$0.00</div>
+                        <div id="kpi-asset-subtitle" class="text-xs font-medium text-emerald-100">Initial Capital + Net PnL + Net Cash Flow</div>
                     </div>
 
                     <!-- Mini KPI Matrix -->
                     <div class="lg:col-span-4 grid grid-cols-3 gap-2">
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
-                            <span class="text-[9px] text-slate-500 font-semibold truncate">Initial Capital</span>
-                            <input type="number" id="kpi-initial-input" onchange="updateInitialCapital(this.value)" class="w-full text-center bg-transparent text-xs font-black text-slate-900 border-b border-slate-300 focus:border-emerald-600 outline-none p-0 mt-0.5">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                            <span class="text-[10px] text-slate-500 font-bold truncate">Initial Capital</span>
+                            <input type="number" id="kpi-initial-input" onchange="updateInitialCapital(this.value)" class="w-full text-center bg-transparent text-sm font-black text-slate-900 border-b border-slate-300 focus:border-emerald-600 outline-none p-0 mt-0.5">
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
-                            <span class="text-[9px] text-slate-500 font-semibold truncate">All-Time Win Rate</span>
-                            <div id="kpi-winrate" class="text-xs font-black text-slate-900 mt-0.5">0.0%</div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                            <span class="text-[10px] text-slate-500 font-bold truncate">Win Rate</span>
+                            <div id="kpi-winrate" class="text-sm font-black text-slate-900 mt-0.5">0.0%</div>
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
-                            <span class="text-[9px] text-slate-500 font-semibold truncate">Profit Factor</span>
-                            <div id="kpi-pf" class="text-xs font-black text-slate-900 mt-0.5">0.00</div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                            <span class="text-[10px] text-slate-500 font-bold truncate">Profit Factor</span>
+                            <div id="kpi-pf" class="text-sm font-black text-slate-900 mt-0.5">0.00</div>
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
-                            <span class="text-[9px] text-slate-500 font-semibold truncate">Checklist Score</span>
-                            <div id="kpi-avg-checklist" class="text-xs font-black text-emerald-600 mt-0.5">0%</div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                            <span class="text-[10px] text-slate-500 font-bold truncate">Checklist Score</span>
+                            <div id="kpi-avg-checklist" class="text-sm font-black text-emerald-600 mt-0.5">0%</div>
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs col-span-2">
-                            <span class="text-[9px] text-slate-500 font-semibold truncate">TOTAL FEES</span>
-                            <div id="kpi-fees" class="text-xs font-black text-rose-600 mt-0.5">$0.00</div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs col-span-2">
+                            <span class="text-[10px] text-slate-500 font-bold truncate">TOTAL FEES</span>
+                            <div id="kpi-fees" class="text-sm font-black text-rose-600 mt-0.5">$0.00</div>
                         </div>
                     </div>
 
@@ -178,51 +178,51 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-shrink-0">
                 
                 <!-- Daily Return Calendar Card -->
-                <div class="lg:col-span-6 fintech-card p-3.5 flex flex-col">
-                    <div class="flex items-center justify-between mb-2 border-b border-slate-100 pb-1.5">
-                        <div class="flex items-center gap-1.5">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i>
-                            <button onclick="changeCalendarMonth(-1)" class="px-1.5 py-0.5 text-[10px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded cursor-pointer transition border border-slate-200">&lt;</button>
-                            <h3 id="calendar-month-title" class="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider">DAILY RETURN CALENDAR</h3>
-                            <button onclick="changeCalendarMonth(1)" class="px-1.5 py-0.5 text-[10px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded cursor-pointer transition border border-slate-200">&gt;</button>
+                <div class="lg:col-span-6 fintech-card p-4 flex flex-col">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i>
+                            <button onclick="changeCalendarMonth(-1)" class="px-2 py-0.5 text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded cursor-pointer transition border border-slate-200">&lt;</button>
+                            <h3 id="calendar-month-title" class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">DAILY RETURN CALENDAR</h3>
+                            <button onclick="changeCalendarMonth(1)" class="px-2 py-0.5 text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded cursor-pointer transition border border-slate-200">&gt;</button>
                         </div>
-                        <div class="flex items-center gap-1 text-[8px] font-bold">
-                            <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Green (+)</span>
-                            <span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">Pink (-)</span>
-                            <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">📥 CashFlow</span>
+                        <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Green (+)</span>
+                            <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">Pink (-)</span>
+                            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800">📥 CashFlow</span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-7 gap-1 text-center font-bold text-[9px] text-slate-500 py-0.5 mb-1 border-b border-slate-100">
+                    <div class="grid grid-cols-7 gap-1 text-center font-extrabold text-xs text-slate-600 py-1 mb-1 border-b border-slate-100">
                         <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                     </div>
 
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 flex-1"></div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 flex-1"></div>
                 </div>
 
                 <!-- Advanced Equity Curve Card -->
-                <div class="lg:col-span-6 fintech-card p-3.5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-2 gap-2 flex-wrap">
+                <div class="lg:col-span-6 fintech-card p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2 gap-2 flex-wrap">
                         <div class="flex items-center gap-2">
-                            <h3 class="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider">EQUITY CURVE ANALYTICS</h3>
+                            <h3 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">EQUITY CURVE ANALYTICS</h3>
                             
                             <!-- Pure PnL vs Total Asset Toggle -->
-                            <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10px] font-bold">
-                                <button id="curve-mode-pnl" onclick="setCurveMode('pnl')" class="px-2 py-0.5 rounded-md bg-white text-emerald-700 shadow-2xs">Pure PnL</button>
-                                <button id="curve-mode-asset" onclick="setCurveMode('asset')" class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900">Total Asset</button>
+                            <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-bold">
+                                <button id="curve-mode-pnl" onclick="setCurveMode('pnl')" class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-2xs">Pure PnL</button>
+                                <button id="curve-mode-asset" onclick="setCurveMode('asset')" class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900">Total Asset</button>
                             </div>
                         </div>
 
                         <!-- Timeframe Filter Buttons (D, W, M, ALL) -->
-                        <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10px] font-bold gap-0.5">
-                            <button id="tf-d" onclick="setCurveTimeframe('D')" class="px-1.5 py-0.5 rounded hover:bg-white text-slate-600">D</button>
-                            <button id="tf-w" onclick="setCurveTimeframe('W')" class="px-1.5 py-0.5 rounded hover:bg-white text-slate-600">W</button>
-                            <button id="tf-m" onclick="setCurveTimeframe('M')" class="px-1.5 py-0.5 rounded hover:bg-white text-slate-600">M</button>
-                            <button id="tf-all" onclick="setCurveTimeframe('ALL')" class="px-1.5 py-0.5 rounded bg-white text-emerald-700 shadow-2xs">ALL</button>
+                        <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-bold gap-0.5">
+                            <button id="tf-d" onclick="setCurveTimeframe('D')" class="px-2 py-1 rounded hover:bg-white text-slate-600">D</button>
+                            <button id="tf-w" onclick="setCurveTimeframe('W')" class="px-2 py-1 rounded hover:bg-white text-slate-600">W</button>
+                            <button id="tf-m" onclick="setCurveTimeframe('M')" class="px-2 py-1 rounded hover:bg-white text-slate-600">M</button>
+                            <button id="tf-all" onclick="setCurveTimeframe('ALL')" class="px-2 py-1 rounded bg-white text-emerald-700 shadow-2xs">ALL</button>
                         </div>
                     </div>
 
-                    <div class="flex-1 min-h-[150px] relative w-full flex items-center justify-center">
+                    <div class="flex-1 min-h-[170px] relative w-full flex items-center justify-center">
                         <canvas id="pnl-canvas" class="w-full h-full"></canvas>
                     </div>
                 </div>
@@ -241,9 +241,9 @@
 
                     <!-- Month Selector Tabs for Journal Filters -->
                     <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                        <span class="text-[10px] font-bold text-slate-400">Log Month Filter:</span>
+                        <span class="text-xs font-bold text-slate-400">Log Month Filter:</span>
                         <div id="month-tabs" class="flex items-center gap-1 overflow-x-auto no-scrollbar"></div>
-                        <button onclick="addMonthTab()" class="text-[10px] text-emerald-600 hover:bg-emerald-50 bg-white border border-emerald-200 px-2 py-1 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer whitespace-nowrap">
+                        <button onclick="addMonthTab()" class="text-xs text-emerald-600 hover:bg-emerald-50 bg-white border border-emerald-200 px-2 py-1 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer whitespace-nowrap">
                             <i data-lucide="plus" class="w-3 h-3"></i> Add Month
                         </button>
                     </div>
@@ -350,19 +350,27 @@
         </aside>
     </div>
 
-    <!-- Deposit/Withdrawal Cash Flow Modal -->
+    <!-- Deposit/Withdrawal Cash Flow Management Modal -->
     <div id="cashflow-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                 <h3 id="cashflow-modal-title" class="font-bold text-xs text-white flex items-center gap-1.5">
-                    <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i> 입출금 기록 (Deposit / Withdrawal)
+                    <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i> 입출금 관리 (Deposit / Withdrawal)
                 </h3>
                 <button onclick="closeCashFlowModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
+
+            <!-- Existing Cash Flow Records List with Delete Options -->
+            <div id="existing-cashflow-container" class="space-y-2 hidden">
+                <label class="text-[10px] text-slate-400 font-bold uppercase block">등록된 입출금 내역 (Existing Records)</label>
+                <div id="existing-cashflow-list" class="space-y-1.5 max-h-32 overflow-y-auto pr-1"></div>
+                <div class="border-t border-slate-800 my-2"></div>
+            </div>
+
             <div class="space-y-3">
                 <div>
                     <label class="text-[10px] text-slate-400 font-medium block mb-1">날짜 (Date)</label>
-                    <input type="date" id="cf-date" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-emerald-500">
+                    <input type="date" id="cf-date" onchange="renderExistingCashFlowsInModal()" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-emerald-500">
                 </div>
                 <div>
                     <label class="text-[10px] text-slate-400 font-medium block mb-1">유형 (Type)</label>
@@ -381,8 +389,8 @@
                 </div>
             </div>
             <div class="flex gap-2 pt-2">
-                <button onclick="saveCashFlowRecord()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">저장 (Save)</button>
-                <button onclick="closeCashFlowModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">취소</button>
+                <button onclick="saveCashFlowRecord()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">추가 (Add Record)</button>
+                <button onclick="closeCashFlowModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">닫기</button>
             </div>
         </div>
     </div>
@@ -491,7 +499,7 @@
         let globalInitialCapital = 10000;
         let cashFlows = {}; // YYYY-MM-DD -> [ { type: 'deposit'|'withdrawal', amount: number, note: string } ]
         let monthsData = [{ name: "2026-08", trades: [] }, { name: "2026-07", trades: [] }];
-        let activeMonthFilter = 'ALL'; // 'ALL' or '2026-08'
+        let activeMonthFilter = 'ALL';
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
 
@@ -511,7 +519,6 @@
 
         let activeChartKey = 'htf';
         let activeChartIdx = null;
-        let lastDeletedChart = null;
         let saveTimeout = null;
         let selectedCalendarMonth = null;
 
@@ -571,17 +578,55 @@
             renderAll();
         }
 
-        // Cash Flow (Deposit / Withdrawal) Modal Functions
+        // Cash Flow (Deposit / Withdrawal) Modal & Delete Functions
         function openCashFlowModal(dateStr) {
             const dateInput = document.getElementById('cf-date');
             dateInput.value = dateStr || new Date().toISOString().split('T')[0];
             document.getElementById('cf-amount').value = '';
             document.getElementById('cf-note').value = '';
+            renderExistingCashFlowsInModal();
             document.getElementById('cashflow-modal').classList.remove('hidden');
         }
 
         function closeCashFlowModal() {
             document.getElementById('cashflow-modal').classList.add('hidden');
+        }
+
+        function renderExistingCashFlowsInModal() {
+            const dateStr = document.getElementById('cf-date').value;
+            const container = document.getElementById('existing-cashflow-container');
+            const list = document.getElementById('existing-cashflow-list');
+            list.innerHTML = '';
+
+            if (cashFlows[dateStr] && cashFlows[dateStr].length > 0) {
+                container.classList.remove('hidden');
+                cashFlows[dateStr].forEach((item, idx) => {
+                    const isDeposit = item.type === 'deposit';
+                    const div = document.createElement('div');
+                    div.className = "flex items-center justify-between bg-slate-800 p-2 rounded-xl text-xs border border-slate-700";
+                    div.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold ${isDeposit ? 'text-emerald-400' : 'text-rose-400'}">${isDeposit ? '📥 입금' : '📤 출금'}</span>
+                            <span class="font-black text-white">$${item.amount.toLocaleString()}</span>
+                            ${item.note ? `<span class="text-[10px] text-slate-400">(${item.note})</span>` : ''}
+                        </div>
+                        <button onclick="deleteCashFlowRecord('${dateStr}', ${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-1.5 py-0.5 rounded hover:bg-rose-950/50 transition cursor-pointer" title="삭제">✕ 삭제</button>
+                    `;
+                    list.appendChild(div);
+                });
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function deleteCashFlowRecord(dateStr, idx) {
+            if (cashFlows[dateStr]) {
+                cashFlows[dateStr].splice(idx, 1);
+                if (cashFlows[dateStr].length === 0) delete cashFlows[dateStr];
+                renderExistingCashFlowsInModal();
+                renderAll();
+                saveCloudData();
+            }
         }
 
         function saveCashFlowRecord() {
@@ -600,7 +645,7 @@
             saveCloudData();
         }
 
-        // Helper: Get all trades sorted chronologically
+        // Helper Functions for Data Sorting
         function getAllTradesSorted() {
             let all = [];
             monthsData.forEach((mObj, mIdx) => {
@@ -619,6 +664,16 @@
                 if (parts.length === 3) return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
             }
             return dateStr;
+        }
+
+        function getISOWeek(dateStr) {
+            const d = new Date(dateStr);
+            if (isNaN(d)) return dateStr;
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+            return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
         }
 
         // All-Time Global KPI Update
@@ -658,8 +713,8 @@
             document.getElementById('kpi-pnl-pct').innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '% Overall Return';
 
             document.getElementById('kpi-net-pnl-card').className = totalNetPnL < 0 
-                ? "lg:col-span-4 bg-gradient-to-br from-pink-600 to-rose-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px]"
-                : "lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px]";
+                ? "lg:col-span-4 bg-gradient-to-br from-pink-600 to-rose-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[95px]"
+                : "lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[95px]";
 
             document.getElementById('kpi-total-asset').innerText = '$' + currentTotalAsset.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('kpi-winrate').innerText = winRate.toFixed(1) + '%';
@@ -674,7 +729,7 @@
             saveCloudData();
         }
 
-        // Daily Return Calendar Rendering with Daily Balance Start/End Computation
+        // Daily Return Calendar Rendering
         function renderDailyReturnCalendar() {
             const container = document.getElementById('calendar-grid');
             const titleElem = document.getElementById('calendar-month-title');
@@ -690,7 +745,6 @@
             const year = parseInt(yearStr) || 2026;
             const month = parseInt(monthNumStr) || 8;
 
-            // Map trades by day
             const dailyPnL = {};
             monthsData.forEach(mObj => {
                 mObj.trades.forEach(t => {
@@ -712,19 +766,11 @@
                 container.appendChild(emptyCell);
             }
 
-            // Calculate starting balance up to this month
             let runningBalance = globalInitialCapital;
-            
-            // Fast-forward running balance for all days prior to this month
-            const firstDateOfMonthStr = `${year}-${String(month).padStart(2, '0')}-01`;
-            for (let d = 1; d <= 31; d++) {
-                // simple chronological scan
-            }
 
             for (let d = 1; d <= totalDaysInMonth; d++) {
                 const dayString = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 
-                // Check Cash Flows on this day
                 let dayDeposit = 0, dayWithdrawal = 0;
                 if (cashFlows[dayString]) {
                     cashFlows[dayString].forEach(r => {
@@ -741,36 +787,36 @@
                 runningBalance = startOfDayBalance + pnl;
 
                 const dayCell = document.createElement('div');
-                dayCell.className = "cal-day-box rounded-lg p-1 flex flex-col justify-between shadow-2xs font-sans";
+                dayCell.className = "cal-day-box rounded-lg p-1.5 flex flex-col justify-between shadow-2xs font-sans";
                 dayCell.onclick = () => openCashFlowModal(dayString);
 
                 let cashBadgeHTML = '';
-                if (dayDeposit > 0) cashBadgeHTML += `<span class="text-[7px] bg-blue-500 text-white font-bold px-1 rounded">+$${dayDeposit}</span>`;
-                if (dayWithdrawal > 0) cashBadgeHTML += `<span class="text-[7px] bg-rose-500 text-white font-bold px-1 rounded">-$${dayWithdrawal}</span>`;
+                if (dayDeposit > 0) cashBadgeHTML += `<span class="text-[9px] bg-blue-500 text-white font-bold px-1 rounded">+$${dayDeposit}</span>`;
+                if (dayWithdrawal > 0) cashBadgeHTML += `<span class="text-[9px] bg-rose-500 text-white font-bold px-1 rounded">-$${dayWithdrawal}</span>`;
 
                 if (hasPnL && pnl !== 0) {
                     if (pnl > 0) {
                         dayCell.className += " cal-day-profit";
                         dayCell.innerHTML = `
                             <div class="flex items-center justify-between">
-                                <span class="text-[9px] font-black opacity-90 leading-none">${d}</span>
+                                <span class="text-xs font-black opacity-90 leading-none">${d}</span>
                                 <div class="flex gap-0.5">${cashBadgeHTML}</div>
                             </div>
                             <div class="text-center my-auto">
-                                <div class="text-[10px] font-black tracking-tight leading-tight">+$${pnl >= 1000 ? (pnl/1000).toFixed(1) + 'K' : pnl.toFixed(1)}</div>
-                                <div class="text-[8px] font-bold opacity-90 leading-none">+${pct.toFixed(1)}%</div>
+                                <div class="text-xs font-black tracking-tight leading-tight">+$${pnl >= 1000 ? (pnl/1000).toFixed(1) + 'K' : pnl.toFixed(1)}</div>
+                                <div class="text-[10px] font-bold opacity-90 leading-none">+${pct.toFixed(1)}%</div>
                             </div>
                         `;
                     } else {
                         dayCell.className += " cal-day-loss";
                         dayCell.innerHTML = `
                             <div class="flex items-center justify-between">
-                                <span class="text-[9px] font-black opacity-90 leading-none">${d}</span>
+                                <span class="text-xs font-black opacity-90 leading-none">${d}</span>
                                 <div class="flex gap-0.5">${cashBadgeHTML}</div>
                             </div>
                             <div class="text-center my-auto">
-                                <div class="text-[10px] font-black tracking-tight leading-tight">-$${Math.abs(pnl) >= 1000 ? (Math.abs(pnl)/1000).toFixed(1) + 'K' : Math.abs(pnl).toFixed(1)}</div>
-                                <div class="text-[8px] font-bold opacity-90 leading-none">${pct.toFixed(1)}%</div>
+                                <div class="text-xs font-black tracking-tight leading-tight">-$${Math.abs(pnl) >= 1000 ? (Math.abs(pnl)/1000).toFixed(1) + 'K' : Math.abs(pnl).toFixed(1)}</div>
+                                <div class="text-[10px] font-bold opacity-90 leading-none">${pct.toFixed(1)}%</div>
                             </div>
                         `;
                     }
@@ -778,11 +824,11 @@
                     dayCell.className += " cal-day-empty";
                     dayCell.innerHTML = `
                         <div class="flex items-center justify-between">
-                            <span class="text-[9px] font-bold text-slate-400 leading-none">${d}</span>
+                            <span class="text-xs font-bold text-slate-500 leading-none">${d}</span>
                             <div class="flex gap-0.5">${cashBadgeHTML}</div>
                         </div>
                         <div class="text-center my-auto">
-                            ${dayDeposit || dayWithdrawal ? `<span class="text-[8px] font-bold text-slate-600">Cash Flow</span>` : ''}
+                            ${dayDeposit || dayWithdrawal ? `<span class="text-[9px] font-bold text-slate-700">Cash Flow</span>` : ''}
                         </div>
                     `;
                 }
@@ -800,11 +846,11 @@
             renderDailyReturnCalendar();
         }
 
-        // Advanced Equity Curve Rendering (Pure PnL vs Total Asset, Timeframe Filters, Grid Lines & Zero Line)
+        // Advanced Equity Curve Rendering (Integrated Cash Flows & Dynamic Timeframe Grouping)
         function setCurveMode(mode) {
             curveMode = mode;
-            document.getElementById('curve-mode-pnl').className = mode === 'pnl' ? "px-2 py-0.5 rounded-md bg-white text-emerald-700 shadow-2xs" : "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900";
-            document.getElementById('curve-mode-asset').className = mode === 'asset' ? "px-2 py-0.5 rounded-md bg-white text-emerald-700 shadow-2xs" : "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900";
+            document.getElementById('curve-mode-pnl').className = mode === 'pnl' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-2xs" : "px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900";
+            document.getElementById('curve-mode-asset').className = mode === 'asset' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-2xs" : "px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900";
             renderChart();
         }
 
@@ -812,7 +858,7 @@
             curveTimeframe = tf;
             ['d', 'w', 'm', 'all'].forEach(t => {
                 const btn = document.getElementById(`tf-${t}`);
-                if (btn) btn.className = t.toUpperCase() === tf ? "px-1.5 py-0.5 rounded bg-white text-emerald-700 shadow-2xs font-bold" : "px-1.5 py-0.5 rounded hover:bg-white text-slate-600 font-bold";
+                if (btn) btn.className = t.toUpperCase() === tf ? "px-2 py-1 rounded bg-white text-emerald-700 shadow-2xs font-bold" : "px-2 py-1 rounded hover:bg-white text-slate-600 font-bold";
             });
             renderChart();
         }
@@ -823,72 +869,146 @@
             const ctx = canvas.getContext('2d');
 
             canvas.width = canvas.parentElement.clientWidth || 300;
-            canvas.height = canvas.parentElement.clientHeight || 150;
+            canvas.height = canvas.parentElement.clientHeight || 170;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Step 1: Collect all dates from Trades and Cash Flows
+            const dateMap = {};
             const allTrades = getAllTradesSorted();
-            if (allTrades.length === 0) {
-                ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-                ctx.fillText('No trade data for equity curve', canvas.width / 2, canvas.height / 2);
+
+            allTrades.forEach(t => {
+                const dStr = normalizeDateStr(t.date);
+                if (dStr) {
+                    if (!dateMap[dStr]) dateMap[dStr] = { pnl: 0, cashFlow: 0 };
+                    dateMap[dStr].pnl += calculateMetrics(t).netPnl;
+                }
+            });
+
+            Object.keys(cashFlows).forEach(dStr => {
+                if (!dateMap[dStr]) dateMap[dStr] = { pnl: 0, cashFlow: 0 };
+                cashFlows[dStr].forEach(r => {
+                    if (r.type === 'deposit') dateMap[dStr].cashFlow += r.amount;
+                    else if (r.type === 'withdrawal') dateMap[dStr].cashFlow -= r.amount;
+                });
+            });
+
+            const sortedDates = Object.keys(dateMap).sort();
+
+            if (sortedDates.length === 0) {
+                ctx.fillStyle = '#94a3b8'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText('No trade or cash flow data for equity curve', canvas.width / 2, canvas.height / 2);
                 return;
             }
 
-            // Build Data Series based on Mode
-            let rawPoints = [];
-            let runningVal = curveMode === 'pnl' ? 0 : globalInitialCapital;
+            // Step 2: Build Timeframe Groups (D, W, M, ALL)
+            let groupedPoints = []; // [ { label: string, pnl: number, cashFlow: number } ]
 
-            allTrades.forEach(t => {
-                const pnl = calculateMetrics(t).netPnl;
-                runningVal += pnl;
-                rawPoints.push({ date: normalizeDateStr(t.date), val: runningVal });
+            if (curveTimeframe === 'D' || curveTimeframe === 'ALL') {
+                sortedDates.forEach(dStr => {
+                    groupedPoints.push({ label: dStr.substring(5), fullDate: dStr, pnl: dateMap[dStr].pnl, cashFlow: dateMap[dStr].cashFlow });
+                });
+            } else if (curveTimeframe === 'W') {
+                const weekMap = {};
+                sortedDates.forEach(dStr => {
+                    const wKey = getISOWeek(dStr);
+                    if (!weekMap[wKey]) weekMap[wKey] = { label: wKey, pnl: 0, cashFlow: 0 };
+                    weekMap[wKey].pnl += dateMap[dStr].pnl;
+                    weekMap[wKey].cashFlow += dateMap[dStr].cashFlow;
+                });
+                groupedPoints = Object.values(weekMap);
+            } else if (curveTimeframe === 'M') {
+                const monthMap = {};
+                sortedDates.forEach(dStr => {
+                    const mKey = dStr.substring(0, 7);
+                    if (!monthMap[mKey]) monthMap[mKey] = { label: mKey, pnl: 0, cashFlow: 0 };
+                    monthMap[mKey].pnl += dateMap[dStr].pnl;
+                    monthMap[mKey].cashFlow += dateMap[dStr].cashFlow;
+                });
+                groupedPoints = Object.values(monthMap);
+            }
+
+            // Step 3: Cumulative Running Balance Construction
+            let runningPnl = 0;
+            let runningAsset = globalInitialCapital;
+            let plotPoints = [];
+
+            groupedPoints.forEach(p => {
+                runningPnl += p.pnl;
+                runningAsset += p.pnl + p.cashFlow;
+                plotPoints.push({
+                    label: p.label,
+                    val: curveMode === 'pnl' ? runningPnl : runningAsset
+                });
             });
 
-            let dataPoints = rawPoints.map(p => p.val);
-
-            const max = Math.max(...dataPoints, curveMode === 'pnl' ? 10 : globalInitialCapital * 1.1);
-            const min = Math.min(...dataPoints, curveMode === 'pnl' ? -10 : globalInitialCapital * 0.9);
+            const dataValues = plotPoints.map(p => p.val);
+            const max = Math.max(...dataValues, curveMode === 'pnl' ? 10 : globalInitialCapital * 1.05);
+            const min = Math.min(...dataValues, curveMode === 'pnl' ? -10 : globalInitialCapital * 0.95);
             const range = (max - min) || 1;
 
-            const paddingLeft = 45;
-            const paddingBottom = 20;
+            const paddingLeft = 55;
+            const paddingBottom = 28;
             const paddingTop = 15;
-            const chartWidth = canvas.width - paddingLeft - 10;
+            const chartWidth = canvas.width - paddingLeft - 15;
             const chartHeight = canvas.height - paddingTop - paddingBottom;
 
-            // Draw Background Grid Lines
+            // Step 4: Draw Background Y-Axis Grid Lines & Labels
             ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
             const gridRows = 4;
             for (let i = 0; i <= gridRows; i++) {
                 const y = paddingTop + (chartHeight / gridRows) * i;
-                ctx.beginPath(); ctx.moveTo(paddingLeft, y); ctx.lineTo(canvas.width - 10, y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(paddingLeft, y); ctx.lineTo(canvas.width - 15, y); ctx.stroke();
 
                 const gridVal = max - (range / gridRows) * i;
-                ctx.fillStyle = '#64748b'; ctx.font = '8px sans-serif'; ctx.textAlign = 'right';
-                ctx.fillText('$' + Math.round(gridVal), paddingLeft - 5, y + 3);
+                ctx.fillStyle = '#475569'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+                ctx.fillText('$' + Math.round(gridVal), paddingLeft - 6, y + 4);
             }
             ctx.setLineDash([]);
 
-            // Draw Zero Baseline (for PnL) or Initial Capital Line (for Asset)
+            // Step 5: Draw Zero / Baseline
             const zeroVal = curveMode === 'pnl' ? 0 : globalInitialCapital;
             if (zeroVal >= min && zeroVal <= max) {
                 const zeroY = paddingTop + chartHeight - ((zeroVal - min) / range) * chartHeight;
-                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.moveTo(paddingLeft, zeroY); ctx.lineTo(canvas.width - 10, zeroY); ctx.stroke();
+                ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(paddingLeft, zeroY); ctx.lineTo(canvas.width - 15, zeroY); ctx.stroke();
             }
 
-            // Draw Equity Curve
-            const lineColor = (dataPoints[dataPoints.length - 1] >= zeroVal) ? '#059669' : '#e11d48';
-            ctx.beginPath(); ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5;
+            // Step 6: Draw X-Axis Date Labels & Ticks
+            const totalPoints = plotPoints.length;
+            const stepX = chartWidth / (totalPoints - 1 || 1);
 
-            dataPoints.forEach((val, i) => {
-                const x = paddingLeft + (i / (dataPoints.length - 1 || 1)) * chartWidth;
-                const y = paddingTop + chartHeight - ((val - min) / range) * chartHeight;
+            ctx.fillStyle = '#475569'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+            const labelInterval = Math.max(1, Math.floor(totalPoints / 5));
+
+            plotPoints.forEach((p, idx) => {
+                const x = paddingLeft + idx * stepX;
+                if (idx === 0 || idx === totalPoints - 1 || idx % labelInterval === 0) {
+                    ctx.fillText(p.label, x, canvas.height - 8);
+                }
+            });
+
+            // Step 7: Plot Equity Curve Line
+            const lastVal = dataValues[dataValues.length - 1];
+            const lineColor = lastVal >= zeroVal ? '#059669' : '#e11d48';
+
+            ctx.beginPath(); ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5;
+            plotPoints.forEach((p, i) => {
+                const x = paddingLeft + i * stepX;
+                const y = paddingTop + chartHeight - ((p.val - min) / range) * chartHeight;
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             });
             ctx.stroke();
+
+            // Point Dots
+            plotPoints.forEach((p, i) => {
+                const x = paddingLeft + i * stepX;
+                const y = paddingTop + chartHeight - ((p.val - min) / range) * chartHeight;
+                ctx.fillStyle = lineColor;
+                ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+            });
         }
 
-        // Integrated AI Chat Assistant Logic
+        // Integrated AI Chat Assistant
         async function sendAIChatMessage() {
             const input = document.getElementById('ai-chat-input');
             const message = input.value.trim();
@@ -896,7 +1016,6 @@
 
             const history = document.getElementById('ai-chat-history');
 
-            // User Message
             const userMsgDiv = document.createElement('div');
             userMsgDiv.className = "bg-emerald-950/60 border border-emerald-800 text-emerald-200 p-2 rounded-xl text-right font-medium";
             userMsgDiv.innerText = message;
@@ -905,24 +1024,15 @@
             input.value = '';
             history.scrollTop = history.scrollHeight;
 
-            // AI Processing Indicator
             const aiMsgDiv = document.createElement('div');
             aiMsgDiv.className = "bg-slate-800/80 p-2 rounded-xl border border-slate-700 space-y-1";
             aiMsgDiv.innerText = "Thinking...";
             history.appendChild(aiMsgDiv);
             history.scrollTop = history.scrollHeight;
 
-            // Gather All-Time Context for Prompt Injection
             const allTrades = getAllTradesSorted();
-            const summaryContext = {
-                initialCapital: globalInitialCapital,
-                totalTrades: allTrades.length,
-                tradesSample: allTrades.slice(0, 15).map(t => ({ date: t.date, pair: t.pair, dir: t.dir, pnl: calculateMetrics(t).netPnl, notes: t.notes })),
-                cashFlows: cashFlows
-            };
 
             setTimeout(() => {
-                // Intelligent Context-Aware Fallback AI Responses
                 let reply = "";
                 const q = message.toLowerCase();
                 if (q.includes("승률") || q.includes("win rate")) {
@@ -979,7 +1089,6 @@
                 filteredTrades = currentMonthObj ? currentMonthObj.trades : [];
             }
 
-            let runningAccReturn = 0;
             filteredTrades.forEach((t, idx) => {
                 const m = calculateMetrics(t);
                 if (!t.checklist) { t.checklist = {}; checklistRules.forEach(r => t.checklist[r] = dropdownOptions[0] ? dropdownOptions[0].label : ''); }
@@ -1034,14 +1143,14 @@
             container.innerHTML = '';
 
             const allBtn = document.createElement('button');
-            allBtn.className = `px-2.5 py-1 text-[10px] rounded-lg font-bold transition shrink-0 cursor-pointer ${activeMonthFilter === 'ALL' ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-200'}`;
+            allBtn.className = `px-2.5 py-1 text-xs rounded-lg font-bold transition shrink-0 cursor-pointer ${activeMonthFilter === 'ALL' ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-200'}`;
             allBtn.innerText = 'ALL';
             allBtn.onclick = () => { activeMonthFilter = 'ALL'; renderJournal(); renderTabs(); };
             container.appendChild(allBtn);
 
             monthsData.forEach((m) => {
                 const btn = document.createElement('button');
-                btn.className = `px-2.5 py-1 text-[10px] rounded-lg font-bold transition shrink-0 cursor-pointer ${activeMonthFilter === m.name ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-200'}`;
+                btn.className = `px-2.5 py-1 text-xs rounded-lg font-bold transition shrink-0 cursor-pointer ${activeMonthFilter === m.name ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-200'}`;
                 btn.innerText = m.name;
                 btn.onclick = () => { activeMonthFilter = m.name; renderJournal(); renderTabs(); };
                 container.appendChild(btn);
