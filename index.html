@@ -643,7 +643,9 @@
                 const downloadURL = await snapshot.ref.getDownloadURL();
                 return downloadURL;
             } catch (e) {
-                return dataUrl;
+                console.error("Storage upload error:", e);
+                // 스토리지 업로드 실패 시 Base64를 그대로 반환하지 않고 빈 문자열로 처리하여 Firestore 1MB 제한 초과 방지
+                return ""; 
             }
         }
 
