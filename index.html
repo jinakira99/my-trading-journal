@@ -293,7 +293,7 @@
                 </div>
             </div>
 
-            <!-- Integrated Gemini AI Chat Assistant (Enlarged to h-[420px] & Free-form LLM) -->
+            <!-- Integrated Gemini AI Chat Assistant (Enlarged to h-[420px] & Fixed Model Name Issue) -->
             <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white rounded-2xl p-3.5 shadow-md border border-slate-800 flex flex-col space-y-2 flex-shrink-0 h-[420px]">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2 flex-shrink-0">
                     <div class="flex items-center gap-1.5 font-extrabold text-xs text-emerald-400">
@@ -1127,7 +1127,7 @@
             });
         }
 
-        // Fully Interactive Free-form AI Chat Assistant (Gemini API Integration)
+        // Fully Interactive Free-form AI Chat Assistant (Fix for Model Name Issue)
         async function sendAIChatMessage() {
             const input = document.getElementById('ai-chat-input');
             const message = input.value.trim();
@@ -1141,7 +1141,7 @@
 
             const history = document.getElementById('ai-chat-history');
 
-            // Append User UI Bubble
+            // 사용자 말풍선 추가
             const userMsgDiv = document.createElement('div');
             userMsgDiv.className = "bg-emerald-950/60 border border-emerald-800 text-emerald-200 p-2.5 rounded-xl text-right font-medium leading-relaxed";
             userMsgDiv.innerText = message;
@@ -1150,14 +1150,14 @@
             input.value = '';
             history.scrollTop = history.scrollHeight;
 
-            // Append Loading Bubble
+            // AI 로딩 말풍선 추가
             const aiMsgDiv = document.createElement('div');
             aiMsgDiv.className = "bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 space-y-1 text-slate-200 leading-relaxed";
             aiMsgDiv.innerText = "🤖 Gemini AI가 일지를 분석하여 답변을 작성하고 있습니다...";
             history.appendChild(aiMsgDiv);
             history.scrollTop = history.scrollHeight;
 
-            // Build Context Data Payload for Gemini Prompt
+            // 일지 데이터 전체 컨텍스트 구성
             const allTrades = getAllTradesSorted();
             let totalNetPnL = 0, wins = 0, losses = 0, totalFees = 0, totalLev = 0;
             let tradeSummaries = [];
@@ -1186,8 +1186,8 @@
             const winRate = allTrades.length > 0 ? ((wins / allTrades.length) * 100).toFixed(1) : "0.0";
             const avgLev = allTrades.length > 0 ? (totalLev / allTrades.length).toFixed(1) : "0";
 
-            const systemInstruction = `당신은 사용자의 트레이딩 일지 데이터를 완벽히 인지하고 있는 명쾌하고 전문적인 AI 트레이딩 코치입니다.
-[사용자 계좌 및 일지 전체 데이터 요약]:
+            const systemPrompt = `당신은 사용자의 트레이딩 일지 전체 데이터를 인지하고 있는 전문 AI 트레이딩 코치입니다.
+[사용자 계좌 및 일지 데이터 전체 요약]:
 - 초기 자본금: $${globalInitialCapital}
 - 순 입출금액: $${netCashFlow}
 - 현재 총 자산: $${currentTotalAsset.toFixed(2)}
@@ -1199,31 +1199,39 @@
 [최근 매매 상세 로그 목록]:
 ${tradeSummaries.slice(-10).join('\n')}
 
-사용자의 질문에 대해 데이터에 기반하여 정중하고 전문적이며 객관적으로 답변하고, 필요한 경우 리스크 관리나 매매 심리에 대한 조언도 곁들여주세요. 마크다운이나 이모지를 적절히 활용하여 읽기 쉽게 작성해 주세요.`;
+사용자의 질문에 대해 일지 데이터에 기반하여 정중하고 객관적이며 명쾌하게 답변해주세요. 마크다운과 이모지를 적절히 활용하여 읽기 쉽게 작성해 주세요.`;
 
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [
-                            { role: 'user', parts: [{ text: `${systemInstruction}\n\n[사용자 질문]: ${message}` }] }
-                        ]
-                    })
-                });
+            // 최신 모델부터 시도하는 순차 호환 호출 (gemini-2.0-flash 우선)
+            const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
+            let success = false;
 
-                const data = await response.json();
+            for (const model of modelsToTry) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [
+                                { role: 'user', parts: [{ text: `${systemPrompt}\n\n[사용자 질문]: ${message}` }] }
+                            ]
+                        })
+                    });
 
-                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-                    const aiReplyText = data.candidates[0].content.parts[0].text;
-                    aiMsgDiv.innerHTML = aiReplyText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                } else if (data.error) {
-                    aiMsgDiv.innerHTML = `<span class="text-rose-400 font-bold">⚠️ Gemini API 오류: ${data.error.message || 'API Key를 다시 확인해주세요.'}</span>`;
-                } else {
-                    aiMsgDiv.innerText = "⚠️ 응답을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.";
+                    const data = await response.json();
+
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                        const aiReplyText = data.candidates[0].content.parts[0].text;
+                        aiMsgDiv.innerHTML = aiReplyText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        success = true;
+                        break;
+                    }
+                } catch (err) {
+                    console.warn(`Model ${model} call failed, trying next...`, err);
                 }
-            } catch (err) {
-                aiMsgDiv.innerHTML = `<span class="text-rose-400 font-bold">⚠️ 네트워크 오류 또는 유효하지 않은 API Key입니다.</span>`;
+            }
+
+            if (!success) {
+                aiMsgDiv.innerHTML = `<span class="text-rose-400 font-bold">⚠️ API 호출 실패: 입력하신 Gemini API Key가 유효한지 또는 권한 설정이 완료되었는지 확인해주세요.</span>`;
             }
 
             history.scrollTop = history.scrollHeight;
