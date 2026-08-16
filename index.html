@@ -293,26 +293,28 @@
                 </div>
             </div>
 
-            <!-- Integrated Smart AI Chat Assistant (No API Key Required) -->
+            <!-- Integrated Real Gemini AI Chat Assistant -->
             <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white rounded-2xl p-3.5 shadow-md border border-slate-800 flex flex-col space-y-2 flex-shrink-0 h-[420px]">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2 flex-shrink-0">
                     <div class="flex items-center gap-1.5 font-extrabold text-xs text-emerald-400">
                         <i data-lucide="bot" class="w-4 h-4"></i> Gemini AI Trading Coach
                     </div>
                     <div class="flex items-center gap-1">
-                        <span class="text-[9px] text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded font-bold">Auto Data Coach</span>
+                        <button onclick="openApiKeyModal()" class="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 hover:bg-emerald-900 px-2 py-0.5 rounded font-bold transition cursor-pointer flex items-center gap-1">
+                            <i data-lucide="key" class="w-3 h-3"></i> API Key
+                        </button>
                     </div>
                 </div>
 
                 <div id="ai-chat-history" class="flex-1 overflow-y-auto space-y-2.5 text-[11px] text-slate-300 pr-1 leading-relaxed">
                     <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/80">
-                        👋 안녕하세요! 작성하신 모든 트레이딩 일지 데이터(PnL, 승률, 원칙 준수율, 손실 내역 등)를 실시간으로 분석하고 있습니다.<br>
-                        "내가 잘하고 있어?", "수익률 어때?", "개선점 알려줘" 등 편하게 물어보세요!
+                        👋 안녕하세요! 실제 <b>Gemini AI</b> 연동 코치입니다.<br>
+                        상단 <b>[API Key]</b> 버튼을 눌러 키를 입력하시면, 작성하신 모든 트레이딩 일지를 대화형으로 자유롭게 다각도 분석해 드립니다!
                     </div>
                 </div>
 
                 <div class="flex items-center gap-1.5 pt-1.5 border-t border-slate-800 flex-shrink-0">
-                    <input type="text" id="ai-chat-input" placeholder="Ask AI about trades, psychology, strategies..." onkeydown="if(event.key==='Enter') sendAIChatMessage()" class="flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-emerald-500">
+                    <input type="text" id="ai-chat-input" placeholder="Ask Gemini about trades, pump entries, strategies..." onkeydown="if(event.key==='Enter') sendAIChatMessage()" class="flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-emerald-500">
                     <button onclick="sendAIChatMessage()" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-xl font-bold transition cursor-pointer flex-shrink-0">
                         <i data-lucide="send" class="w-4 h-4"></i>
                     </button>
@@ -350,6 +352,27 @@
                 <textarea id="review-notes" oninput="saveNotes(this.value)" rows="6" class="w-full p-2 rounded-xl input-fintech text-[11px] leading-relaxed" placeholder="Log trade insights and psychological reflections..."></textarea>
             </div>
         </aside>
+    </div>
+
+    <!-- API Key Input Modal -->
+    <div id="apikey-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 class="font-bold text-xs text-white flex items-center gap-1.5">
+                    <i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> Gemini API Key 설정
+                </h3>
+                <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="space-y-2">
+                <label class="text-[11px] text-slate-300 font-medium block">Google AI Studio API Key</label>
+                <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-emerald-500 font-mono">
+                <p class="text-[10px] text-slate-400">키가 입력되면 실제 대화형 Gemini 모델이 트레이딩 일지를 직접 분석합니다.</p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="saveApiKey()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer">저장하기</button>
+                <button onclick="closeApiKeyModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">취소</button>
+            </div>
+        </div>
     </div>
 
     <!-- Deposit/Withdrawal Cash Flow Management Modal -->
@@ -504,6 +527,8 @@
         let activeMonthIndex = 0;
         let selectedTradeIndex = 0;
 
+        let userGeminiApiKey = localStorage.getItem('gemini_api_key') || '';
+
         let curveMode = 'pnl';
         let curveTimeframe = 'ALL';
 
@@ -522,6 +547,19 @@
         let activeChartIdx = null;
         let saveTimeout = null;
         let selectedCalendarMonth = null;
+
+        function openApiKeyModal() {
+            document.getElementById('gemini-api-key-input').value = userGeminiApiKey;
+            document.getElementById('apikey-modal').classList.remove('hidden');
+        }
+        function closeApiKeyModal() { document.getElementById('apikey-modal').classList.add('hidden'); }
+        function saveApiKey() {
+            const key = document.getElementById('gemini-api-key-input').value.trim();
+            userGeminiApiKey = key;
+            localStorage.setItem('gemini_api_key', key);
+            closeApiKeyModal();
+            alert("API Key가 저장되었습니다. Gemini AI 코치와 대화가 가능합니다!");
+        }
 
         // Image Canvas Compression Helper
         function compressImage(dataUrl, maxWidth = 800, quality = 0.6) {
@@ -1082,135 +1120,102 @@
             });
         }
 
-        // Integrated Smart Data Analysis AI Engine (No API Key Required)
+        // Real Gemini REST API Call with Full Journal Context
         async function sendAIChatMessage() {
             const input = document.getElementById('ai-chat-input');
-            const message = input.value.trim();
-            if (!message) return;
+            const userText = input.value.trim();
+            if (!userText) return;
 
             const history = document.getElementById('ai-chat-history');
 
-            // 사용자 말풍선 추가
+            // 사용자 말풍선
             const userMsgDiv = document.createElement('div');
             userMsgDiv.className = "bg-emerald-950/60 border border-emerald-800 text-emerald-200 p-2.5 rounded-xl text-right font-medium leading-relaxed";
-            userMsgDiv.innerText = message;
+            userMsgDiv.innerText = userText;
             history.appendChild(userMsgDiv);
 
             input.value = '';
             history.scrollTop = history.scrollHeight;
 
-            // AI 분석 로딩 표시
+            if (!userGeminiApiKey) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = "bg-rose-950/80 border border-rose-800 text-rose-200 p-2.5 rounded-xl space-y-1";
+                errorDiv.innerHTML = "⚠️ <b>Gemini API Key가 필요합니다.</b><br>우측 상단 <b>[API Key]</b> 버튼을 눌러 Google AI Studio에서 발급받은 키를 입력해주세요!";
+                history.appendChild(errorDiv);
+                history.scrollTop = history.scrollHeight;
+                return;
+            }
+
+            // Gemini API 로딩 상태 표시
             const aiMsgDiv = document.createElement('div');
             aiMsgDiv.className = "bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 space-y-1 text-slate-200 leading-relaxed";
-            aiMsgDiv.innerText = "🤖 일지 데이터를 정밀하게 진단하는 중입니다...";
+            aiMsgDiv.innerText = "🤖 Gemini AI가 트레이딩 일지와 질문을 분석하고 있습니다...";
             history.appendChild(aiMsgDiv);
             history.scrollTop = history.scrollHeight;
 
-            // 실시간 일지 데이터 연산
+            // 전체 일지 데이터 컨텍스트 생성
             const allTrades = getAllTradesSorted();
-            let totalNetPnL = 0, wins = 0, losses = 0, maxProfit = 0, maxLoss = 0, totalLev = 0, totalChecklistScore = 0;
-            let pairCount = {};
+            let totalNetPnL = 0, wins = 0, losses = 0, totalLev = 0, totalChecklistScore = 0;
+            let tradeSummaryList = [];
 
-            allTrades.forEach(t => {
+            allTrades.forEach((t, i) => {
                 const m = calculateMetrics(t);
                 totalNetPnL += m.netPnl;
-                if (m.netPnl > 0) {
-                    wins++;
-                    if (m.netPnl > maxProfit) maxProfit = m.netPnl;
-                } else if (m.netPnl < 0) {
-                    losses++;
-                    if (Math.abs(m.netPnl) > maxLoss) maxLoss = Math.abs(m.netPnl);
-                }
+                if (m.netPnl > 0) wins++; else if (m.netPnl < 0) losses++;
                 totalLev += (t.lev || 0);
+                if (t.checklist) totalChecklistScore += calculateChecklistScore(t.checklist).scorePct;
 
-                if (t.pair) {
-                    const p = t.pair.toUpperCase();
-                    pairCount[p] = (pairCount[p] || 0) + 1;
-                }
-
-                if (t.checklist) {
-                    totalChecklistScore += calculateChecklistScore(t.checklist).scorePct;
-                }
+                tradeSummaryList.push(`Trade #${i+1}: Date=${t.date}, Pair=${t.pair}, Dir=${t.dir}, Lev=${t.lev}x, NetPnL=$${m.netPnl.toFixed(2)}, Notes="${t.notes || ''}"`);
             });
 
-            let netCashFlow = 0;
-            Object.values(cashFlows).forEach(records => {
-                records.forEach(r => {
-                    if (r.type === 'deposit') netCashFlow += r.amount;
-                    else if (r.type === 'withdrawal') netCashFlow -= r.amount;
-                });
-            });
-
-            const currentTotalAsset = globalInitialCapital + netCashFlow + totalNetPnL;
-            const winRateNum = allTrades.length > 0 ? (wins / allTrades.length) * 100 : 0;
-            const winRate = winRateNum.toFixed(1);
+            const winRate = allTrades.length > 0 ? ((wins / allTrades.length) * 100).toFixed(1) : "0";
             const avgLev = allTrades.length > 0 ? (totalLev / allTrades.length).toFixed(1) : "0";
-            const avgChecklistNum = allTrades.length > 0 ? (totalChecklistScore / allTrades.length) : 0;
-            const avgChecklist = avgChecklistNum.toFixed(1);
+            const avgChecklist = allTrades.length > 0 ? (totalChecklistScore / allTrades.length).toFixed(1) : "0";
 
-            let topPair = "없음";
-            let topPairCount = 0;
-            Object.keys(pairCount).forEach(p => {
-                if (pairCount[p] > topPairCount) {
-                    topPairCount = pairCount[p];
-                    topPair = p;
-                }
-            });
+            const systemContext = `You are a professional trading psychology & risk management coach inside a Trading Journal App.
+Analyze the user's trading journal data below and respond directly in Korean.
 
-            const q = message.toLowerCase();
+[Trader Journal Summary Data]
+- Total Trades: ${allTrades.length} (Wins: ${wins}, Losses: ${losses})
+- Win Rate: ${winRate}%
+- Cumulative Net PnL: $${totalNetPnL.toFixed(2)}
+- Average Leverage: ${avgLev}x
+- Average A+ Checklist Rule Compliance: ${avgChecklist}%
 
-            setTimeout(() => {
-                let reply = "";
+[Recent Trade Logs]
+${tradeSummaryList.slice(-10).join('\n')}
 
-                if (q.includes("잘하고") || q.includes("어때") || q.includes("평가") || q.includes("진단") || q.includes("피드백")) {
-                    reply = `📊 **현재 트레이딩 성과 진단 리포트**:\n\n` +
-                            `• **누적 PnL**: ${totalNetPnL >= 0 ? '+$' : '-$'}${Math.abs(totalNetPnL).toFixed(2)}\n` +
-                            `• **승률**: ${winRate}% (${allTrades.length}전 ${wins}승 ${losses}패)\n` +
-                            `• **원칙 준수율**: ${avgChecklist}%\n` +
-                            `• **평균 레버리지**: ${avgLev}배\n\n` +
-                            (winRateNum >= 55 && avgChecklistNum >= 70
-                                ? `🔥 **총평**: 원칙을 잘 지키면서 높은 승률을 유지하고 있습니다! 손익비(RR) 관리를 병행하면 우상향 곡선을 그릴 수 있습니다.`
-                                : avgChecklistNum < 70
-                                ? `⚠️ **총평**: A+ 체크리스트 원칙 준수율이 낮습니다. 뇌동매매를 피하고 체크리스트 70% 이상 달성 시에만 진입해보세요!`
-                                : `💡 **총평**: 승률이 다소 낮은 편입니다. 손실 거래들의 진입 타점과 복기 노트를 재점검해 보시는 것을 추천합니다.`);
-                } 
-                else if (q.includes("수익") || q.includes("pnl") || q.includes("돈") || q.includes("벌")) {
-                    reply = `💰 **수익 및 PnL 현황**:\n` +
-                            `• 누적 PnL: **${totalNetPnL >= 0 ? '+$' : '-$'}${Math.abs(totalNetPnL).toFixed(2)}**\n` +
-                            `• 최대 단일 수익: +$${maxProfit.toFixed(2)}\n` +
-                            `• 현재 총 자산: **$${currentTotalAsset.toLocaleString('en-US', {minimumFractionDigits:2})}**`;
-                }
-                else if (q.includes("승률") || q.includes("승") || q.includes("패") || q.includes("win")) {
-                    reply = `🎯 **승률 및 건수 분석**:\n` +
-                            `• 총 거래: **${allTrades.length}건** (${wins}승 ${losses}패)\n` +
-                            `• 현재 승률: **${winRate}%**\n` +
-                            `• 주 거래 종목: **${topPair}** (${topPairCount}회)`;
-                }
-                else if (q.includes("손실") || q.includes("잃") || q.includes("적자") || q.includes("리스크")) {
-                    reply = `📉 **손실 및 리스크 분석**:\n` +
-                            `• 손실 거래 수: **${losses}건**\n` +
-                            `• 최대 단일 손실: **-$${maxLoss.toFixed(2)}**\n` +
-                            `• 사용 평균 레버리지: **${avgLev}배**`;
-                }
-                else if (q.includes("원칙") || q.includes("체크리스트") || q.includes("점수") || q.includes("룰")) {
-                    reply = `📋 **원칙 준수 상태**:\n` +
-                            `• 평균 A+ 체크리스트 달성률: **${avgChecklist}%**\n` +
-                            (avgChecklistNum >= 70 
-                                ? `👍 정해진 규율을 훌륭하게 따르고 계십니다!` 
-                                : `⚠️ 원칙 미준수 매매는 손실 위험을 키웁니다. 체크리스트를 꼭 채우고 진입하세요.`);
-                }
-                else {
-                    reply = `🤖 **트레이딩 일지 브리핑**:\n` +
-                            `• 질문: "${message}"\n\n` +
-                            `• 현재 총 자산: $${currentTotalAsset.toLocaleString('en-US', {minimumFractionDigits:2})}\n` +
-                            `• 누적 PnL: ${totalNetPnL >= 0 ? '+' : ''}$${totalNetPnL.toFixed(2)} (승률 ${winRate}%)\n` +
-                            `• A+ 원칙 준수율: ${avgChecklist}%\n\n` +
-                            `수익률, 승률, 손실 분석, 레버리지, 매매 원칙 등에 대해 구체적으로 질문해주시면 정밀 진단을 제공합니다!`;
-                }
+[User Question]
+"${userText}"
 
-                aiMsgDiv.innerHTML = reply.replace(/\n/g, '<br>');
-                history.scrollTop = history.scrollHeight;
-            }, 300);
+Provide concise, sharp, and actionable professional advice based on the provided trading metrics and context.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userGeminiApiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: systemContext }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    const aiReply = data.candidates[0].content.parts[0].text;
+                    aiMsgDiv.innerHTML = aiReply.replace(/\n/g, '<br>');
+                } else if (data.error) {
+                    aiMsgDiv.innerHTML = `<span class="text-rose-400">⚠️ API Error: ${data.error.message || 'Key 유효성을 확인해주세요.'}</span>`;
+                } else {
+                    aiMsgDiv.innerHTML = `<span class="text-rose-400">⚠️ Gemini API 응답 생성 실패</span>`;
+                }
+            } catch (err) {
+                aiMsgDiv.innerHTML = `<span class="text-rose-400">⚠️ 통신 오류: 네트워크 연결 및 API Key를 확인해주세요.</span>`;
+            }
+
+            history.scrollTop = history.scrollHeight;
         }
 
         // Journal Execution Functions
