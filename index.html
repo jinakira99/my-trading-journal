@@ -632,18 +632,17 @@
             alert("API Key가 저장되었습니다. Gemini AI 코치와 대화가 가능합니다!");
         }
 
-        // [완벽 개선된 업로드 함수]: 스토리지 실패 시 1MB 초과(Sync Fail)가 발생하지 않도록 빈 문자열 처리
+        // [완벽 방어 로직]: 스토리지 업로드 실패 시 Base64 문자열을 절대 Firestore에 저장하지 않고 빈 문자열로 처리하여 Sync Fail 원인 차단
         async function uploadImageToStorage(dataUrl) {
             if (!isFirebaseActive || !dataUrl || dataUrl.startsWith('http')) return dataUrl;
             
-            // 1. 캔버스를 이용해 초강력 압축 (최대 너비 600px, JPEG 화질 0.6)
             const compressedDataUrl = await new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    const maxWidth = 600;
+                    const maxWidth = 500;
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
@@ -652,7 +651,7 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    resolve(canvas.toDataURL('image/jpeg', 0.5));
                 };
                 img.onerror = () => resolve('');
                 img.src = dataUrl;
@@ -660,7 +659,6 @@
 
             if (!compressedDataUrl) return '';
 
-            // 2. 파이어베이스 스토리지 업로드 시도
             try {
                 const response = await fetch(compressedDataUrl);
                 const blob = await response.blob();
@@ -671,16 +669,28 @@
                 return downloadURL;
             } catch (e) {
                 console.error("Storage upload error:", e);
-                // 핵심 방어 코드: 스토리지 업로드 실패 시 Firestore 문서(1MB 제한)가 터지지 않도록 빈 문자열 반환 및 Sync Fail 방지
-                return ''; 
+                alert("⚠️ 파이어베이스 스토리지(Storage) 업로드 실패! Firebase 콘솔에서 Storage가 활성화되어 있는지 확인해주세요.");
+                return ''; // 절대 무거운 Base64 데이터를 Firestore에 넣지 않아 1MB 제한 방지
             }
         }
 
+        // [자동 정화 로직]: 불러올 때 기존의 무거운 임시 이미지 데이터(data:image)를 자동 제거하여 1MB 초과 오류 즉시 해결
         function applyLoadedData(data) {
             if (!data) return;
             if (data.globalInitialCapital !== undefined) globalInitialCapital = data.globalInitialCapital;
             if (data.cashFlows) cashFlows = data.cashFlows;
-            if (data.monthsData && data.monthsData.length > 0) monthsData = data.monthsData;
+            if (data.monthsData && data.monthsData.length > 0) {
+                monthsData = data.monthsData.map(m => ({
+                    ...m,
+                    trades: m.trades.map(t => ({
+                        ...t,
+                        customCharts: t.customCharts ? t.customCharts.map(c => ({
+                            ...c,
+                            img: (c.img && c.img.startsWith('data:image')) ? '' : c.img
+                        })) : []
+                    }))
+                }));
+            }
             if (data.checklistRules) checklistRules = data.checklistRules;
             if (data.dropdownOptions) dropdownOptions = data.dropdownOptions;
             if (data.compoundSettings) compoundSettings = data.compoundSettings;
