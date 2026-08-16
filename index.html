@@ -471,6 +471,22 @@
                 <h3 class="font-bold text-slate-900 text-xs">Manage A+ Rules & Options</h3>
                 <button onclick="closeChecklistModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
+            
+            <!-- 드랍다운 옵션 설정 영역 추가 -->
+            <div class="space-y-2 border-b border-slate-100 pb-3">
+                <label class="text-[10px] text-slate-500 font-medium block">Rule Status Options (Colors & Labels)</label>
+                <div id="dropdown-options-list" class="space-y-1.5 max-h-24 overflow-y-auto"></div>
+                <div class="flex gap-2 pt-1">
+                    <input type="text" id="new-option-label" placeholder="e.g. Perfect" class="flex-1 p-1.5 rounded-lg input-fintech text-xs">
+                    <select id="new-option-color" class="p-1.5 rounded-lg input-fintech text-xs font-bold">
+                        <option value="green" class="text-emerald-600">Green (+)</option>
+                        <option value="pink" class="text-rose-600">Pink (-)</option>
+                        <option value="gray" class="text-slate-600">Gray (Neutral)</option>
+                    </select>
+                    <button onclick="addDropdownOption()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-1 rounded-lg text-xs cursor-pointer">Add Opt</button>
+                </div>
+            </div>
+
             <div>
                 <label class="text-[10px] text-slate-500 font-medium block mb-1">Add Rule</label>
                 <div class="flex gap-2">
@@ -483,15 +499,34 @@
         </div>
     </div>
 
-    <!-- Live Asset Search Modal -->
+    <!-- Live Asset Search & Custom Asset Modal -->
     <div id="add-asset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-96 max-w-[90vw] space-y-4 shadow-2xl text-slate-200">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                <h3 class="font-bold text-xs text-white">Live Asset Search</h3>
+                <h3 class="font-bold text-xs text-white">Live Asset Search & Management</h3>
                 <button onclick="closeAddAssetModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. XAUUSD, BTC)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none">
-            <div id="search-results-list" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
+            
+            <div class="space-y-2">
+                <label class="text-[10px] text-slate-400 font-medium">새 에셋 직접 추가 (Custom Ticker)</label>
+                <div class="flex gap-1.5">
+                    <input type="text" id="custom-asset-name" placeholder="Name (e.g. Ethereum)" class="flex-1 p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none">
+                    <input type="text" id="custom-asset-ticker" placeholder="Ticker (e.g. ETH-USD)" class="w-28 p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none font-mono">
+                    <button onclick="addCustomAsset()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-xl text-xs cursor-pointer">추가</button>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-2">
+                <label class="text-[10px] text-slate-400 font-medium mb-1 block">현재 상단 트커 에셋 목록 (관리 및 삭제)</label>
+                <div id="tracked-assets-manage-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-2">
+                <label class="text-[10px] text-slate-400 font-medium mb-1 block">빠른 에셋 검색 추가 (Preset Search)</label>
+                <input type="text" id="asset-search-input" oninput="filterAssetSearchResults(this.value)" placeholder="Search symbol (e.g. XAUUSD, BTC, AAPL)..." class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none">
+                <div id="search-results-list" class="space-y-1.5 max-h-36 overflow-y-auto mt-2"></div>
+            </div>
+
             <button onclick="closeAddAssetModal()" class="w-full bg-slate-800 text-slate-300 font-semibold py-2 rounded-xl text-xs border border-slate-700 cursor-pointer">Close</button>
         </div>
     </div>
@@ -544,9 +579,23 @@
             { name: "Bitcoin", ticker: "BTC-USD", price: "$63,407.23", change: -0.25 }
         ];
 
+        // 사전 정의된 프리셋 에셋 검색 풀
+        const presetAssetPool = [
+            { name: "Bitcoin", ticker: "BTC-USD" },
+            { name: "Ethereum", ticker: "ETH-USD" },
+            { name: "Spot Gold (XAUUSD)", ticker: "XAU=X" },
+            { name: "Spot Silver (XAGUSD)", ticker: "XAG=X" },
+            { name: "S&P 500", ticker: "^GSPC" },
+            { name: "Nasdaq 100", ticker: "^IXIC" },
+            { name: "Apple Inc", ticker: "AAPL" },
+            { name: "Tesla Inc", ticker: "TSLA" },
+            { name: "NVIDIA Corp", ticker: "NVDA" },
+            { name: "EUR/USD", ticker: "EURUSD=X" },
+            { name: "USD/JPY", ticker: "USDJPY=X" }
+        ];
+
         let activeChartKey = 'htf';
         let activeChartIdx = null;
-        let saveTimeout = null;
 
         function openApiKeyModal() {
             document.getElementById('gemini-api-key-input').value = userGeminiApiKey;
@@ -584,9 +633,9 @@
             if (data.checklistRules) checklistRules = data.checklistRules;
             if (data.dropdownOptions) dropdownOptions = data.dropdownOptions;
             if (data.compoundSettings) compoundSettings = data.compoundSettings;
+            if (data.trackedAssets) trackedAssets = data.trackedAssets;
         }
 
-        // 최적화된 동기화 및 저장 로직
         async function saveCloudData() {
             const payload = { 
                 globalInitialCapital, 
@@ -595,16 +644,15 @@
                 checklistRules, 
                 dropdownOptions, 
                 compoundSettings, 
+                trackedAssets,
                 updatedAt: new Date().toISOString() 
             };
             
-            // 1. 로컬에 즉시 저장 (즉각적인 반응성)
             try { localStorage.setItem('fintech_trading_journal_data', JSON.stringify(payload)); } catch (e) {}
 
             const badge = document.getElementById('cloud-status-badge');
             if (!isFirebaseActive) return;
 
-            // 2. 클라우드 저장 (백그라운드 비동기 처리)
             if (badge) { badge.innerText = "Syncing..."; badge.className = "text-[11px] text-amber-400 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
 
             try {
@@ -620,7 +668,6 @@
             const badge = document.getElementById('cloud-status-badge');
             if (badge) { badge.innerText = "Loading..."; badge.className = "text-[11px] text-blue-400 font-semibold px-2 py-1 bg-blue-950/60 rounded-lg border border-blue-800 whitespace-nowrap"; }
 
-            // 1. Firebase에서 최신 데이터 강제 로딩
             if (isFirebaseActive) {
                 try {
                     const doc = await db.collection("journals").doc("main_journal").get();
@@ -628,14 +675,12 @@
                         const data = doc.data();
                         applyLoadedData(data);
                         localStorage.setItem('fintech_trading_journal_data', JSON.stringify(data));
-                        console.log("Cloud data loaded successfully");
                     }
                 } catch (e) {
-                    console.error("Cloud load error, falling back to local:", e);
+                    console.error("Cloud load error:", e);
                 }
             }
 
-            // 2. 로컬 스토리지 데이터 확인
             try {
                 const localSaved = localStorage.getItem('fintech_trading_journal_data');
                 if (localSaved) {
@@ -647,9 +692,7 @@
             if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
         }
 
-        function forceSyncData() { 
-            loadCloudData();
-        }
+        function forceSyncData() { loadCloudData(); }
 
         // Global Paste Event Listener for Ctrl+V
         document.addEventListener('paste', (e) => {
@@ -705,9 +748,7 @@
             document.getElementById('cashflow-modal').classList.remove('hidden');
         }
 
-        function closeCashFlowModal() {
-            document.getElementById('cashflow-modal').classList.add('hidden');
-        }
+        function closeCashFlowModal() { document.getElementById('cashflow-modal').classList.add('hidden'); }
 
         function renderExistingCashFlowsInModal() {
             const dateStr = document.getElementById('cf-date').value;
@@ -727,7 +768,7 @@
                             <span class="font-black text-white">$${item.amount.toLocaleString()}</span>
                             ${item.note ? `<span class="text-[10px] text-slate-400">(${item.note})</span>` : ''}
                         </div>
-                        <button onclick="deleteCashFlowRecord('${dateStr}', ${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-1.5 py-0.5 rounded hover:bg-rose-950/50 transition cursor-pointer" title="삭제">✕ 삭제</button>
+                        <button onclick="deleteCashFlowRecord('${dateStr}', ${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-1.5 py-0.5 rounded hover:bg-rose-950/50 transition cursor-pointer">✕ 삭제</button>
                     `;
                     list.appendChild(div);
                 });
@@ -1551,18 +1592,19 @@ Provide concise, sharp, and actionable professional advice based on the provided
         function closeImageLightbox() { document.getElementById('image-lightbox-modal').classList.add('hidden'); }
         function openCompoundCalcModal() { document.getElementById('compound-calc-modal').classList.remove('hidden'); }
         function closeCompoundCalcModal() { document.getElementById('compound-calc-modal').classList.add('hidden'); }
-        function openChecklistModal() { document.getElementById('checklist-modal').classList.remove('hidden'); renderRulesList(); }
+        function openChecklistModal() { document.getElementById('checklist-modal').classList.remove('hidden'); renderRulesList(); renderDropdownOptionsList(); }
         function closeChecklistModal() { document.getElementById('checklist-modal').classList.add('hidden'); }
-        function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); }
+        function openAddAssetModal() { document.getElementById('add-asset-modal').classList.remove('hidden'); renderTrackedAssetsManageList(); filterAssetSearchResults(''); }
         function closeAddAssetModal() { document.getElementById('add-asset-modal').classList.add('hidden'); }
 
+        // A+ Rules & Options Management Functions
         function renderRulesList() {
             const list = document.getElementById('active-rules-list');
             list.innerHTML = '';
             checklistRules.forEach((rule, idx) => {
                 const div = document.createElement('div');
                 div.className = "flex items-center justify-between text-xs bg-slate-50 p-2 rounded-xl border border-slate-200";
-                div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-pink-600 font-bold">✕</button>`;
+                div.innerHTML = `<span>${rule}</span><button onclick="removeRule(${idx})" class="text-pink-600 font-bold cursor-pointer">✕</button>`;
                 list.appendChild(div);
             });
         }
@@ -1573,6 +1615,132 @@ Provide concise, sharp, and actionable professional advice based on the provided
         }
 
         function removeRule(idx) { checklistRules.splice(idx, 1); renderRulesList(); renderCheckerboardChecklist(); saveCloudData(); }
+
+        function renderDropdownOptionsList() {
+            const list = document.getElementById('dropdown-options-list');
+            if (!list) return;
+            list.innerHTML = '';
+            dropdownOptions.forEach((opt, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between text-xs bg-slate-50 p-1.5 rounded-lg border border-slate-200";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full ${opt.color === 'green' ? 'bg-emerald-500' : opt.color === 'pink' ? 'bg-rose-500' : 'bg-slate-400'}"></span>
+                        <span class="font-bold">${opt.label}</span>
+                        <span class="text-[9px] text-slate-400">(${opt.color})</span>
+                    </div>
+                    <button onclick="removeDropdownOption(${idx})" class="text-pink-600 font-bold cursor-pointer">✕</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function addDropdownOption() {
+            const labelInput = document.getElementById('new-option-label');
+            const colorSelect = document.getElementById('new-option-color');
+            const label = labelInput.value.trim();
+            const color = colorSelect.value;
+            if (label) {
+                dropdownOptions.push({ label, color });
+                labelInput.value = '';
+                renderDropdownOptionsList();
+                renderCheckerboardChecklist();
+                saveCloudData();
+            }
+        }
+
+        function removeDropdownOption(idx) {
+            if (dropdownOptions.length <= 1) { alert("최소 1개의 옵션은 유지되어야 합니다."); return; }
+            dropdownOptions.splice(idx, 1);
+            renderDropdownOptionsList();
+            renderCheckerboardChecklist();
+            saveCloudData();
+        }
+
+        // Asset Search, Add, Delete & External Link Functions
+        function renderTrackedAssetsManageList() {
+            const list = document.getElementById('tracked-assets-manage-list');
+            if (!list) return;
+            list.innerHTML = '';
+            trackedAssets.forEach((asset, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-slate-800 p-2 rounded-xl text-xs border border-slate-700";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-white">${asset.name}</span>
+                        <span class="text-[10px] text-slate-400 font-mono ml-1">(${asset.ticker})</span>
+                    </div>
+                    <button onclick="removeTrackedAsset(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-0.5 rounded hover:bg-rose-950/50 transition cursor-pointer">삭제</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function addCustomAsset() {
+            const nameInput = document.getElementById('custom-asset-name');
+            const tickerInput = document.getElementById('custom-asset-ticker');
+            const name = nameInput.value.trim();
+            const ticker = tickerInput.value.trim().toUpperCase();
+            if (name && ticker) {
+                trackedAssets.push({ name, ticker, price: "$0.00", change: 0.00 });
+                nameInput.value = '';
+                tickerInput.value = '';
+                renderTickerBar();
+                renderTrackedAssetsManageList();
+                saveCloudData();
+            } else {
+                alert("에셋 이름과 티커를 모두 입력해주세요.");
+            }
+        }
+
+        function removeTrackedAsset(idx) {
+            trackedAssets.splice(idx, 1);
+            renderTickerBar();
+            renderTrackedAssetsManageList();
+            saveCloudData();
+        }
+
+        function filterAssetSearchResults(query) {
+            const container = document.getElementById('search-results-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const q = query.toLowerCase();
+            const filtered = presetAssetPool.filter(a => a.name.toLowerCase().includes(q) || a.ticker.toLowerCase().includes(q));
+
+            filtered.forEach(asset => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-slate-800/80 hover:bg-slate-800 p-2 rounded-xl text-xs border border-slate-700 cursor-pointer transition";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-emerald-400">${asset.name}</span>
+                        <span class="text-[10px] text-slate-400 font-mono ml-1">(${asset.ticker})</span>
+                    </div>
+                    <span class="text-[10px] bg-emerald-950 text-emerald-300 font-bold px-2 py-1 rounded border border-emerald-800">추가하기 ＋</span>
+                `;
+                div.onclick = () => {
+                    if (!trackedAssets.some(t => t.ticker === asset.ticker)) {
+                        trackedAssets.push({ name: asset.name, ticker: asset.ticker, price: "$0.00", change: 0.00 });
+                        renderTickerBar();
+                        renderTrackedAssetsManageList();
+                        saveCloudData();
+                        alert(`${asset.name} 에셋이 추가되었습니다.`);
+                    } else {
+                        alert("이미 추가된 에셋입니다.");
+                    }
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function openAssetExternalLink(ticker) {
+            // 트레이딩뷰 또는 야후 파이낸스 에셋 페이지로 이동
+            let url = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(ticker)}`;
+            if (ticker.includes('XAU') || ticker.includes('XAG') || ticker.includes('=X')) {
+                url = `https://finance.yahoo.com/quote/${encodeURIComponent(ticker)}`;
+            }
+            window.open(url, '_blank');
+        }
 
         function renderNewsFeeds() {
             const container = document.getElementById('news-feeds-container');
@@ -1598,7 +1766,7 @@ Provide concise, sharp, and actionable professional advice based on the provided
         function renderTickerBar() {
             const container = document.getElementById('ticker-container');
             container.innerHTML = trackedAssets.map((a, i) => `
-                <div class="flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-xl shrink-0 text-xs whitespace-nowrap">
+                <div onclick="openAssetExternalLink('${a.ticker}')" class="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 px-2.5 py-1 rounded-xl shrink-0 text-xs whitespace-nowrap cursor-pointer transition" title="클릭시 트레이딩뷰/야후 차트 페이지로 이동">
                     <span class="text-slate-300 font-semibold">${a.name}</span>
                     <span class="text-white font-bold">${a.price}</span>
                     <span class="text-[9px] font-semibold px-1 py-0.5 rounded ${a.change >= 0 ? 'text-emerald-400 bg-emerald-500/10' : 'text-pink-400 bg-pink-500/10'}">${a.change >= 0 ? '+' : ''}${a.change}%</span>
