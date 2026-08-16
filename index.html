@@ -48,9 +48,9 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Calendar Styling */
+        /* Calendar Styling - Compact Height */
         .cal-day-box {
-            min-height: 58px;
+            min-height: 38px;
             transition: all 0.2s ease;
         }
         .cal-day-profit {
@@ -127,7 +127,7 @@
 
         <div id="resizer-left" class="hidden lg:block resizer-left"></div>
 
-        <main class="flex-1 flex flex-col p-4 lg:p-6 gap-6 min-w-[300px]">
+        <main class="flex-1 flex flex-col p-4 lg:p-6 gap-4 min-w-[300px]">
             <div class="flex items-center justify-between flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-x-auto no-scrollbar">
                     <h2 class="text-base font-black text-slate-900 tracking-tight whitespace-nowrap">Trading Dashboard</h2>
@@ -140,46 +140,46 @@
             </div>
 
             <!-- Bento-Box Style Top KPI Bar -->
-            <div class="fintech-card p-4 flex-shrink-0">
+            <div class="fintech-card p-3.5 flex-shrink-0">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3.5 items-stretch">
                     
                     <!-- 1. Total Net PnL Card -->
-                    <div id="kpi-net-pnl-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[100px]">
+                    <div id="kpi-net-pnl-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px]">
                         <div id="kpi-net-pnl-title" class="text-[10px] text-emerald-100 font-bold uppercase tracking-wider">TOTAL NET PnL</div>
-                        <div id="kpi-net-pnl" class="text-2xl font-black tracking-tight my-1">$0.00</div>
+                        <div id="kpi-net-pnl" class="text-xl font-black tracking-tight my-0.5">$0.00</div>
                         <div id="kpi-pnl-pct" class="text-[11px] font-bold text-emerald-100">+0.00% Return</div>
                     </div>
 
                     <!-- 2. Total Asset Card -->
-                    <div id="kpi-total-asset-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[100px]">
+                    <div id="kpi-total-asset-card" class="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px]">
                         <div id="kpi-asset-title" class="text-[10px] text-emerald-100 font-bold uppercase tracking-wider">TOTAL ASSET</div>
-                        <div id="kpi-total-asset" class="text-2xl font-black tracking-tight my-1">$0.00</div>
+                        <div id="kpi-total-asset" class="text-xl font-black tracking-tight my-0.5">$0.00</div>
                         <div id="kpi-asset-subtitle" class="text-[10px] font-medium text-emerald-100">Initial Capital + Net PnL</div>
                     </div>
 
                     <!-- 3. Mini KPI Grid Matrix (Checkerboard / Bento Box) -->
                     <div class="lg:col-span-4 grid grid-cols-3 gap-2">
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
                             <span class="text-[9px] text-slate-500 font-semibold truncate">Initial Capital</span>
                             <input type="number" id="kpi-initial-input" onchange="updateInitialAsset(this.value)" class="w-full text-center bg-transparent text-xs font-black text-slate-900 border-b border-slate-300 focus:border-emerald-600 outline-none p-0 mt-0.5">
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
                             <span class="text-[9px] text-slate-500 font-semibold truncate">Win Rate</span>
                             <div id="kpi-winrate" class="text-xs font-black text-slate-900 mt-0.5">0.0%</div>
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
                             <span class="text-[9px] text-slate-500 font-semibold truncate">Profit Factor</span>
                             <div id="kpi-pf" class="text-xs font-black text-slate-900 mt-0.5">0.00</div>
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs">
                             <span class="text-[9px] text-slate-500 font-semibold truncate">Checklist Score</span>
                             <div id="kpi-avg-checklist" class="text-xs font-black text-emerald-600 mt-0.5">0%</div>
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col justify-between text-center shadow-2xs col-span-2">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-1.5 flex flex-col justify-between text-center shadow-2xs col-span-2">
                             <span class="text-[9px] text-slate-500 font-semibold truncate">TOTAL FEES</span>
                             <div id="kpi-fees" class="text-xs font-black text-rose-600 mt-0.5">$0.00</div>
                         </div>
@@ -188,40 +188,40 @@
                 </div>
             </div>
 
-            <!-- Middle Split Panel: Daily Return Calendar (Left) & Long-Term Equity Curve (Right) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-shrink-0">
+            <!-- Middle Split Panel: Compact Daily Return Calendar (Left) & Long-Term Equity Curve (Right) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-shrink-0">
                 
                 <!-- Daily Return Calendar Card -->
-                <div class="lg:col-span-7 fintech-card p-5 flex flex-col">
-                    <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i>
-                            <button onclick="changeCalendarMonth(-1)" class="px-2 py-0.5 text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer transition border border-slate-200" title="Previous Month">&lt;</button>
-                            <h3 id="calendar-month-title" class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">DAILY RETURN CALENDAR</h3>
-                            <button onclick="changeCalendarMonth(1)" class="px-2 py-0.5 text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer transition border border-slate-200" title="Next Month">&gt;</button>
+                <div class="lg:col-span-7 fintech-card p-3.5 flex flex-col">
+                    <div class="flex items-center justify-between mb-2 border-b border-slate-100 pb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i>
+                            <button onclick="changeCalendarMonth(-1)" class="px-1.5 py-0.5 text-[10px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded cursor-pointer transition border border-slate-200" title="Previous Month">&lt;</button>
+                            <h3 id="calendar-month-title" class="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider">DAILY RETURN CALENDAR</h3>
+                            <button onclick="changeCalendarMonth(1)" class="px-1.5 py-0.5 text-[10px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 rounded cursor-pointer transition border border-slate-200" title="Next Month">&gt;</button>
                         </div>
                         <div class="flex items-center gap-1">
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">Green (+)</span>
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-rose-100 text-rose-800">Pink (-)</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Green (+)</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">Pink (-)</span>
                         </div>
                     </div>
 
                     <!-- Calendar Table Header -->
-                    <div class="grid grid-cols-7 gap-1.5 text-center font-bold text-[10px] text-slate-500 py-1 mb-1 border-b border-slate-100">
+                    <div class="grid grid-cols-7 gap-1 text-center font-bold text-[9px] text-slate-500 py-0.5 mb-1 border-b border-slate-100">
                         <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                     </div>
 
                     <!-- Dynamic Calendar Grid Container -->
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 flex-1"></div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 flex-1"></div>
                 </div>
 
                 <!-- Long-Term Equity Curve Card -->
-                <div class="lg:col-span-5 fintech-card p-5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
-                        <h3 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">LONG-TERM EQUITY CURVE</h3>
-                        <span class="text-[9px] font-bold text-slate-400">Cumulative PnL</span>
+                <div class="lg:col-span-5 fintech-card p-3.5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-2">
+                        <h3 class="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider">LONG-TERM EQUITY CURVE</h3>
+                        <span class="text-[8px] font-bold text-slate-400">Cumulative PnL</span>
                     </div>
-                    <div class="flex-1 min-h-[220px] relative w-full flex items-center justify-center">
+                    <div class="flex-1 min-h-[140px] relative w-full flex items-center justify-center">
                         <canvas id="pnl-canvas" class="w-full h-full"></canvas>
                     </div>
                 </div>
@@ -229,11 +229,11 @@
             </div>
 
             <!-- Trading Journal Execution Log -->
-            <div class="fintech-card p-5 flex-1 flex flex-col">
-                <div class="flex items-center justify-between mb-4 flex-shrink-0">
+            <div class="fintech-card p-4 flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3 flex-shrink-0">
                     <div class="flex items-center gap-3">
                         <h3 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Trading Journal Execution Log</h3>
-                        <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition text-xs shadow-md cursor-pointer whitespace-nowrap">
+                        <button onclick="addNewTrade()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-xl flex items-center gap-1.5 transition text-xs shadow-md cursor-pointer whitespace-nowrap">
                             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Trade
                         </button>
                     </div>
@@ -243,25 +243,25 @@
                     <table class="w-full text-left whitespace-nowrap border-collapse">
                         <thead class="bg-slate-100 text-slate-600 text-[10px] uppercase sticky top-0 z-10 border-b border-slate-200">
                             <tr>
-                                <th class="p-2.5 border-r border-slate-200 text-center">Binder</th>
-                                <th class="p-2.5 border-r border-slate-200 text-center">Date</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Pair / Ticker</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Dir</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Lev</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Ent Price 1</th>
-                                <th class="p-2.5 border-r border-slate-200 text-center">Ent Qty 1</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Ent Price 2</th>
-                                <th class="p-2.5 border-r border-slate-200 text-center">Ent Qty 2</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Exit Price 1</th>
-                                <th class="p-2.5 border-r border-slate-200 text-center">Exit Qty 1</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Exit Price 2</th>
-                                <th class="p-2.5 border-r border-slate-200 text-center">Exit Qty 2</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Fees ($)</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-center">Checklist (%)</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-right">Net PnL ($)</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-right">Net PnL (%)</th>
-                                <th class="p-2.5 border-r border-slate-200 section-divider text-right">Acc. Return (%)</th>
-                                <th class="p-2.5 section-divider text-center">Actions</th>
+                                <th class="p-2 border-r border-slate-200 text-center">Binder</th>
+                                <th class="p-2 border-r border-slate-200 text-center">Date</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Pair / Ticker</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Dir</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Lev</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Ent Price 1</th>
+                                <th class="p-2 border-r border-slate-200 text-center">Ent Qty 1</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Ent Price 2</th>
+                                <th class="p-2 border-r border-slate-200 text-center">Ent Qty 2</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Exit Price 1</th>
+                                <th class="p-2 border-r border-slate-200 text-center">Exit Qty 1</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Exit Price 2</th>
+                                <th class="p-2 border-r border-slate-200 text-center">Exit Qty 2</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Fees ($)</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-center">Checklist (%)</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-right">Net PnL ($)</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-right">Net PnL (%)</th>
+                                <th class="p-2 border-r border-slate-200 section-divider text-right">Acc. Return (%)</th>
+                                <th class="p-2 section-divider text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="journal-tbody" class="divide-y divide-slate-200 text-slate-700"></tbody>
@@ -464,7 +464,7 @@
 
         let draggedIndex = null; 
         let draggedOptionIndex = null; 
-        let selectedCalendarMonth = null; // null일 경우 최신 거래일 월로 자동 설정
+        let selectedCalendarMonth = null;
 
         function clearAllImages() {
             if (confirm("모든 차트 이미지 링크를 삭제하시겠습니까?\n\n(※ 작성하신 숫자 데이터와 텍스트 메모는 100% 안전하게 유지됩니다.)")) {
@@ -574,7 +574,7 @@
                     }
                 } catch (err) {}
             }
-            selectedCalendarMonth = null; // 로드 완료 후 최신일 기준 자동 감지
+            selectedCalendarMonth = null;
             renderAll();
         }
 
@@ -671,7 +671,6 @@
             if (wrapper) wrapper.innerHTML = `<iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone&countries=5,72,22,17,36,43,10,35,11,26&calType=day&lang=1&time=${Date.now()}" width="100%" height="100%" style="position: absolute; top:0; left:0; border:0; width:100%; height:100%;" frameborder="0" allowtransparency="true"></iframe>`;
         }
 
-        /* --- Daily Return Calendar Helper Functions --- */
         function normalizeDateStr(dateStr) {
             if (!dateStr) return '';
             if (dateStr.includes('/')) {
@@ -713,14 +712,14 @@
             renderDailyReturnCalendar();
         }
 
-        /* --- Daily Return Calendar Rendering --- */
+        /* --- Compact Daily Return Calendar Rendering --- */
         function renderDailyReturnCalendar() {
             const container = document.getElementById('calendar-grid');
             const titleElem = document.getElementById('calendar-month-title');
             if (!container) return;
 
             container.innerHTML = '';
-            const monthStr = getEffectiveCalendarMonth(); // Format: YYYY-MM
+            const monthStr = getEffectiveCalendarMonth();
             
             if (titleElem) titleElem.innerText = `DAILY RETURN CALENDAR (${monthStr})`;
 
@@ -728,7 +727,6 @@
             const year = parseInt(yearStr) || 2026;
             const month = parseInt(monthNumStr) || 8;
 
-            // Calculate daily profits/losses aggregated from trades
             const dailyStats = {};
             const currentMonthObj = monthsData[activeMonthIndex];
             if (currentMonthObj && currentMonthObj.trades) {
@@ -745,18 +743,15 @@
                 });
             }
 
-            // Calendar geometry
-            const firstDay = new Date(year, month - 1, 1).getDay(); // 0 = Sun
+            const firstDay = new Date(year, month - 1, 1).getDay();
             const totalDaysInMonth = new Date(year, month, 0).getDate();
 
-            // Render empty padding cells for previous month
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
-                emptyCell.className = "cal-day-box bg-slate-50/40 rounded-xl border border-transparent";
+                emptyCell.className = "cal-day-box bg-slate-50/40 rounded-lg border border-transparent";
                 container.appendChild(emptyCell);
             }
 
-            // Render actual day cells
             for (let d = 1; d <= totalDaysInMonth; d++) {
                 const dayString = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const hasData = dailyStats[dayString] !== undefined;
@@ -765,41 +760,40 @@
                 const pct = initialAsset > 0 ? (pnl / initialAsset) * 100 : 0;
 
                 const dayCell = document.createElement('div');
-                dayCell.className = "cal-day-box rounded-xl p-1.5 flex flex-col justify-between shadow-2xs font-sans transition hover:scale-[1.02]";
+                dayCell.className = "cal-day-box rounded-lg p-1 flex flex-col justify-between shadow-2xs font-sans transition hover:scale-[1.02]";
 
                 if (hasData) {
                     if (pnl > 0) {
                         dayCell.className += " cal-day-profit";
                         dayCell.innerHTML = `
-                            <div class="text-[10px] font-black opacity-90">${d}</div>
+                            <div class="text-[9px] font-black opacity-90 leading-none">${d}</div>
                             <div class="text-center my-auto">
-                                <div class="text-xs font-black tracking-tight">+$${pnl >= 1000 ? (pnl/1000).toFixed(2) + 'K' : pnl.toFixed(2)}</div>
-                                <div class="text-[9px] font-bold opacity-90">+${pct.toFixed(2)}%</div>
+                                <div class="text-[10px] font-black tracking-tight leading-tight">+$${pnl >= 1000 ? (pnl/1000).toFixed(1) + 'K' : pnl.toFixed(1)}</div>
+                                <div class="text-[8px] font-bold opacity-90 leading-none">+${pct.toFixed(1)}%</div>
                             </div>
                         `;
                     } else if (pnl < 0) {
                         dayCell.className += " cal-day-loss";
                         dayCell.innerHTML = `
-                            <div class="text-[10px] font-black opacity-90">${d}</div>
+                            <div class="text-[9px] font-black opacity-90 leading-none">${d}</div>
                             <div class="text-center my-auto">
-                                <div class="text-xs font-black tracking-tight">-$${Math.abs(pnl) >= 1000 ? (Math.abs(pnl)/1000).toFixed(2) + 'K' : Math.abs(pnl).toFixed(2)}</div>
-                                <div class="text-[9px] font-bold opacity-90">${pct.toFixed(2)}%</div>
+                                <div class="text-[10px] font-black tracking-tight leading-tight">-$${Math.abs(pnl) >= 1000 ? (Math.abs(pnl)/1000).toFixed(1) + 'K' : Math.abs(pnl).toFixed(1)}</div>
+                                <div class="text-[8px] font-bold opacity-90 leading-none">${pct.toFixed(1)}%</div>
                             </div>
                         `;
                     } else {
                         dayCell.className += " bg-emerald-500/20 text-emerald-900 border border-emerald-300";
                         dayCell.innerHTML = `
-                            <div class="text-[10px] font-bold">${d}</div>
+                            <div class="text-[9px] font-bold leading-none">${d}</div>
                             <div class="text-center my-auto">
-                                <div class="text-[11px] font-extrabold">$0.00</div>
-                                <div class="text-[8px] font-semibold">0.00%</div>
+                                <div class="text-[9px] font-extrabold leading-none">$0.0</div>
                             </div>
                         `;
                     }
                 } else {
                     dayCell.className += " cal-day-empty";
                     dayCell.innerHTML = `
-                        <div class="text-[10px] font-bold text-slate-400">${d}</div>
+                        <div class="text-[9px] font-bold text-slate-400 leading-none">${d}</div>
                         <div></div>
                     `;
                 }
@@ -815,7 +809,7 @@
             const trades = monthsData[activeMonthIndex].trades;
 
             canvas.width = canvas.parentElement.clientWidth || 300; 
-            canvas.height = canvas.parentElement.clientHeight || 180;
+            canvas.height = canvas.parentElement.clientHeight || 140;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (!trades || trades.length === 0) {
@@ -830,11 +824,11 @@
             const lineColor = running >= 0 ? '#059669' : '#e11d48';
 
             ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif';
-            ctx.fillText('+$' + max.toFixed(0), 5, 14); ctx.fillText('-$' + Math.abs(min).toFixed(0), 5, canvas.height - 8);
+            ctx.fillText('+$' + max.toFixed(0), 5, 12); ctx.fillText('-$' + Math.abs(min).toFixed(0), 5, canvas.height - 6);
 
-            ctx.beginPath(); ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.strokeStyle = lineColor; ctx.lineWidth = 2;
             dataPoints.forEach((val, i) => {
-                const x = (i / (dataPoints.length - 1 || 1)) * (canvas.width - 45) + 38, y = canvas.height - 20 - ((val - min) / range) * (canvas.height - 40);
+                const x = (i / (dataPoints.length - 1 || 1)) * (canvas.width - 45) + 38, y = canvas.height - 15 - ((val - min) / range) * (canvas.height - 30);
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             });
             ctx.stroke();
@@ -1284,15 +1278,15 @@
             const totalAsset = currentMonth.initialAsset + totalNetPnl;
 
             document.getElementById('kpi-net-pnl').innerText = (totalNetPnl >= 0 ? '+$' : '-$') + Math.abs(totalNetPnl).toFixed(2);
-            document.getElementById('kpi-net-pnl-card').className = totalNetPnl < 0 ? "lg:col-span-4 bg-gradient-to-br from-pink-600 to-rose-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[100px] transition-all" : "lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[100px] transition-all";
+            document.getElementById('kpi-net-pnl-card').className = totalNetPnl < 0 ? "lg:col-span-4 bg-gradient-to-br from-pink-600 to-rose-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px] transition-all" : "lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px] transition-all";
             document.getElementById('kpi-net-pnl-title').className = totalNetPnl < 0 ? "text-[10px] text-pink-100 font-bold uppercase tracking-wider" : "text-[10px] text-emerald-100 font-bold uppercase tracking-wider";
             document.getElementById('kpi-pnl-pct').innerText = (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '% Return';
 
             document.getElementById('kpi-total-asset').innerText = '$' + totalAsset.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             const isAssetLess = totalAsset < currentMonth.initialAsset;
             document.getElementById('kpi-total-asset-card').className = isAssetLess 
-                ? "lg:col-span-4 bg-gradient-to-br from-pink-600 to-rose-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[100px] transition-all" 
-                : "lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between min-h-[100px] transition-all";
+                ? "lg:col-span-4 bg-gradient-to-br from-pink-600 to-rose-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px] transition-all" 
+                : "lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between min-h-[90px] transition-all";
             document.getElementById('kpi-asset-title').className = isAssetLess ? "text-[10px] text-pink-100 font-bold uppercase tracking-wider" : "text-[10px] text-emerald-100 font-bold uppercase tracking-wider";
             document.getElementById('kpi-asset-subtitle').className = isAssetLess ? "text-[10px] font-bold text-pink-100" : "text-[10px] font-bold text-emerald-100";
             document.getElementById('kpi-asset-subtitle').innerText = isAssetLess ? "Below Initial Capital" : "Initial Capital + Net P&L";
