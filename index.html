@@ -584,9 +584,17 @@
             });
         }
 
-        // 강제 Cloud Sync 저장 로직
+        // Firestore 저장 안정화 (Date 객체 에러 방지)
         async function saveCloudData() {
-            const payload = { globalInitialCapital, cashFlows, monthsData, checklistRules, dropdownOptions, compoundSettings, updatedAt: new Date() };
+            const payload = { 
+                globalInitialCapital, 
+                cashFlows, 
+                monthsData, 
+                checklistRules, 
+                dropdownOptions, 
+                compoundSettings, 
+                updatedAt: new Date().toISOString() // 문자열로 변환하여 에러 원인 제거
+            };
             try { localStorage.setItem('fintech_trading_journal_data', JSON.stringify(payload)); } catch (e) {}
 
             const badge = document.getElementById('cloud-status-badge');
