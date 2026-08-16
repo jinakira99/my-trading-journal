@@ -40,7 +40,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Calendar Cell Styling - Enhanced Font Sizes & Height */
         .cal-day-box {
             min-height: 56px;
             transition: all 0.2s ease;
@@ -666,16 +665,6 @@
             return dateStr;
         }
 
-        function getISOWeek(dateStr) {
-            const d = new Date(dateStr);
-            if (isNaN(d)) return dateStr;
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-            return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
-        }
-
         // All-Time Global KPI Update
         function updateKPIs() {
             const allTrades = getAllTradesSorted();
@@ -846,7 +835,7 @@
             renderDailyReturnCalendar();
         }
 
-        // Advanced Equity Curve Rendering (Integrated Cash Flows & Dynamic Timeframe Grouping)
+        // Advanced Equity Curve Rendering (Fixed Range Filtering for D, W, M, ALL)
         function setCurveMode(mode) {
             curveMode = mode;
             document.getElementById('curve-mode-pnl').className = mode === 'pnl' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-2xs" : "px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900";
@@ -872,7 +861,7 @@
             canvas.height = canvas.parentElement.clientHeight || 170;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Step 1: Collect all dates from Trades and Cash Flows
+            // Step 1: Collect all dates with trades and cash flows
             const dateMap = {};
             const allTrades = getAllTradesSorted();
 
@@ -892,52 +881,66 @@
                 });
             });
 
-            const sortedDates = Object.keys(dateMap).sort();
+            const allDatesSorted = Object.keys(dateMap).sort();
 
-            if (sortedDates.length === 0) {
-                ctx.fillStyle = '#94a3b8'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
-                ctx.fillText('No trade or cash flow data for equity curve', canvas.width / 2, canvas.height / 2);
-                return;
-            }
+            // Determine Target Date Filter
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-            // Step 2: Build Timeframe Groups (D, W, M, ALL)
-            let groupedPoints = []; // [ { label: string, pnl: number, cashFlow: number } ]
+            let filteredDates = [];
 
-            if (curveTimeframe === 'D' || curveTimeframe === 'ALL') {
-                sortedDates.forEach(dStr => {
-                    groupedPoints.push({ label: dStr.substring(5), fullDate: dStr, pnl: dateMap[dStr].pnl, cashFlow: dateMap[dStr].cashFlow });
-                });
+            if (curveTimeframe === 'D') {
+                // Today only
+                filteredDates = [todayStr];
             } else if (curveTimeframe === 'W') {
-                const weekMap = {};
-                sortedDates.forEach(dStr => {
-                    const wKey = getISOWeek(dStr);
-                    if (!weekMap[wKey]) weekMap[wKey] = { label: wKey, pnl: 0, cashFlow: 0 };
-                    weekMap[wKey].pnl += dateMap[dStr].pnl;
-                    weekMap[wKey].cashFlow += dateMap[dStr].cashFlow;
-                });
-                groupedPoints = Object.values(weekMap);
+                // Last 7 days continuous
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(now);
+                    d.setDate(now.getDate() - i);
+                    filteredDates.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+                }
             } else if (curveTimeframe === 'M') {
-                const monthMap = {};
-                sortedDates.forEach(dStr => {
-                    const mKey = dStr.substring(0, 7);
-                    if (!monthMap[mKey]) monthMap[mKey] = { label: mKey, pnl: 0, cashFlow: 0 };
-                    monthMap[mKey].pnl += dateMap[dStr].pnl;
-                    monthMap[mKey].cashFlow += dateMap[dStr].cashFlow;
-                });
-                groupedPoints = Object.values(monthMap);
+                // Last 30 days continuous
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date(now);
+                    d.setDate(now.getDate() - i);
+                    filteredDates.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+                }
+            } else {
+                // ALL: All dates from first trade to today
+                if (allDatesSorted.length > 0) {
+                    filteredDates = [...allDatesSorted];
+                    if (!filteredDates.includes(todayStr)) filteredDates.push(todayStr);
+                } else {
+                    filteredDates = [todayStr];
+                }
             }
 
-            // Step 3: Cumulative Running Balance Construction
-            let runningPnl = 0;
-            let runningAsset = globalInitialCapital;
+            // Calculate Starting Accumulated Balance prior to the filtered range
+            const startDate = filteredDates[0];
+            let startPnl = 0;
+            let startAsset = globalInitialCapital;
+
+            allDatesSorted.forEach(dStr => {
+                if (dStr < startDate) {
+                    startPnl += dateMap[dStr].pnl;
+                    startAsset += dateMap[dStr].pnl + dateMap[dStr].cashFlow;
+                }
+            });
+
+            // Construct Daily Points over the Filtered Range
+            let runningPnl = startPnl;
+            let runningAsset = startAsset;
             let plotPoints = [];
 
-            groupedPoints.forEach(p => {
-                runningPnl += p.pnl;
-                runningAsset += p.pnl + p.cashFlow;
+            filteredDates.forEach(dStr => {
+                const data = dateMap[dStr] || { pnl: 0, cashFlow: 0 };
+                runningPnl += data.pnl;
+                runningAsset += data.pnl + data.cashFlow;
                 plotPoints.push({
-                    label: p.label,
-                    val: curveMode === 'pnl' ? runningPnl : runningAsset
+                    label: dStr.substring(5), // "MM-DD"
+                    val: curveMode === 'pnl' ? runningPnl : runningAsset,
+                    hasTrade: data.pnl !== 0 || data.cashFlow !== 0
                 });
             });
 
@@ -952,7 +955,7 @@
             const chartWidth = canvas.width - paddingLeft - 15;
             const chartHeight = canvas.height - paddingTop - paddingBottom;
 
-            // Step 4: Draw Background Y-Axis Grid Lines & Labels
+            // Background Y-Axis Grid Lines & Labels
             ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
             const gridRows = 4;
             for (let i = 0; i <= gridRows; i++) {
@@ -965,7 +968,7 @@
             }
             ctx.setLineDash([]);
 
-            // Step 5: Draw Zero / Baseline
+            // Baseline Line ($0 PnL or Initial Capital)
             const zeroVal = curveMode === 'pnl' ? 0 : globalInitialCapital;
             if (zeroVal >= min && zeroVal <= max) {
                 const zeroY = paddingTop + chartHeight - ((zeroVal - min) / range) * chartHeight;
@@ -973,38 +976,38 @@
                 ctx.beginPath(); ctx.moveTo(paddingLeft, zeroY); ctx.lineTo(canvas.width - 15, zeroY); ctx.stroke();
             }
 
-            // Step 6: Draw X-Axis Date Labels & Ticks
+            // X-Axis Date Labels
             const totalPoints = plotPoints.length;
             const stepX = chartWidth / (totalPoints - 1 || 1);
 
             ctx.fillStyle = '#475569'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-            const labelInterval = Math.max(1, Math.floor(totalPoints / 5));
+            const labelInterval = Math.max(1, Math.floor(totalPoints / 6));
 
             plotPoints.forEach((p, idx) => {
-                const x = paddingLeft + idx * stepX;
-                if (idx === 0 || idx === totalPoints - 1 || idx % labelInterval === 0) {
+                const x = paddingLeft + (totalPoints === 1 ? chartWidth / 2 : idx * stepX);
+                if (totalPoints === 1 || idx === 0 || idx === totalPoints - 1 || idx % labelInterval === 0) {
                     ctx.fillText(p.label, x, canvas.height - 8);
                 }
             });
 
-            // Step 7: Plot Equity Curve Line
+            // Plot Equity Curve Line
             const lastVal = dataValues[dataValues.length - 1];
             const lineColor = lastVal >= zeroVal ? '#059669' : '#e11d48';
 
             ctx.beginPath(); ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5;
             plotPoints.forEach((p, i) => {
-                const x = paddingLeft + i * stepX;
+                const x = paddingLeft + (totalPoints === 1 ? chartWidth / 2 : i * stepX);
                 const y = paddingTop + chartHeight - ((p.val - min) / range) * chartHeight;
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             });
             ctx.stroke();
 
-            // Point Dots
+            // Plot Point Dots
             plotPoints.forEach((p, i) => {
-                const x = paddingLeft + i * stepX;
+                const x = paddingLeft + (totalPoints === 1 ? chartWidth / 2 : i * stepX);
                 const y = paddingTop + chartHeight - ((p.val - min) / range) * chartHeight;
-                ctx.fillStyle = lineColor;
-                ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = p.hasTrade ? lineColor : '#cbd5e1';
+                ctx.beginPath(); ctx.arc(x, y, p.hasTrade ? 4 : 2, 0, Math.PI * 2); ctx.fill();
             });
         }
 
