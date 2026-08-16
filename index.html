@@ -561,24 +561,32 @@
             alert("API Key가 저장되었습니다. Gemini AI 코치와 대화가 가능합니다!");
         }
 
-        // 이미지 압축 후 Firebase Storage에 업로드하여 URL만 반환하는 함수 (Firestore 1MB 용량 초과 방지)
         async function uploadImageToStorage(dataUrl) {
             if (!isFirebaseActive || !dataUrl || dataUrl.startsWith('http')) return dataUrl;
             try {
                 const response = await fetch(dataUrl);
                 const blob = await response.blob();
-                const filename = `charts/${Date.now()}_${Math.random().toString(36.substring(2, 7))}.jpg`;
+                const filename = `charts/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.jpg`;
                 const storageRef = storage.ref().child(filename);
                 const snapshot = await storageRef.put(blob);
                 const downloadURL = await snapshot.ref.getDownloadURL();
                 return downloadURL;
             } catch (e) {
-                console.log("Storage upload fallback to base64:", e);
                 return dataUrl;
             }
         }
 
-        // Firestore 저장 로직 (용량 최적화 및 에러 핸들링)
+        // 로컬 데이터 우선 복구 및 클라우드 동기화 로직
+        function applyLoadedData(data) {
+            if (!data) return;
+            if (data.globalInitialCapital !== undefined) globalInitialCapital = data.globalInitialCapital;
+            if (data.cashFlows) cashFlows = data.cashFlows;
+            if (data.monthsData && data.monthsData.length > 0) monthsData = data.monthsData;
+            if (data.checklistRules) checklistRules = data.checklistRules;
+            if (data.dropdownOptions) dropdownOptions = data.dropdownOptions;
+            if (data.compoundSettings) compoundSettings = data.compoundSettings;
+        }
+
         async function saveCloudData() {
             const payload = { 
                 globalInitialCapital, 
@@ -608,43 +616,41 @@
                     console.log("Cloud save error:", e);
                     if (badge) { badge.innerText = "Sync Error"; badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; }
                 }
-            }, 500);
+            }, 300);
         }
 
         async function loadCloudData() {
             const badge = document.getElementById('cloud-status-badge');
-            let loaded = false;
+            let cloudLoaded = false;
 
+            // 1순위: 로컬 스토리지에서 먼저 복구 시도 (기존 데이터 즉시 복원용)
+            try {
+                const localSaved = localStorage.getItem('fintech_trading_journal_data');
+                if (localSaved) {
+                    const parsed = JSON.parse(localSaved);
+                    applyLoadedData(parsed);
+                }
+            } catch (err) {}
+
+            // 2순위: 클라우드 데이터와 동기화
             if (isFirebaseActive) {
                 if (badge) { badge.innerText = "Loading..."; badge.className = "text-[11px] text-amber-300 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
                 try {
                     const doc = await db.collection("journals").doc("main_journal").get();
                     if (doc.exists) {
                         const data = doc.data();
-                        if (data.globalInitialCapital !== undefined) globalInitialCapital = data.globalInitialCapital;
-                        if (data.cashFlows) cashFlows = data.cashFlows;
-                        if (data.monthsData) monthsData = data.monthsData;
-                        if (data.checklistRules) checklistRules = data.checklistRules;
-                        if (data.dropdownOptions) dropdownOptions = data.dropdownOptions;
-                        if (data.compoundSettings) compoundSettings = data.compoundSettings;
-                        loaded = true;
+                        // 클라우드 데이터에 거래 기록이 있으면 우선 반영
+                        if (data.monthsData && data.monthsData.length > 0 && data.monthsData[0].trades.length > 0) {
+                            applyLoadedData(data);
+                        } else {
+                            // 클라우드가 비어있고 로컬에 데이터가 있다면 현재 로컬 데이터를 클라우드로 즉시 업로드 반영
+                            saveCloudData();
+                        }
+                        cloudLoaded = true;
+                    } else {
+                        saveCloudData();
                     }
                 } catch (e) { console.log("Cloud load error:", e); }
-            }
-
-            if (!loaded) {
-                try {
-                    const localSaved = localStorage.getItem('fintech_trading_journal_data');
-                    if (localSaved) {
-                        const parsed = JSON.parse(localSaved);
-                        if (parsed.globalInitialCapital !== undefined) globalInitialCapital = parsed.globalInitialCapital;
-                        if (parsed.cashFlows) cashFlows = parsed.cashFlows;
-                        if (parsed.monthsData) monthsData = parsed.monthsData;
-                        if (parsed.checklistRules) checklistRules = parsed.checklistRules;
-                        if (parsed.dropdownOptions) dropdownOptions = parsed.dropdownOptions;
-                        if (parsed.compoundSettings) compoundSettings = parsed.compoundSettings;
-                    }
-                } catch (err) {}
             }
 
             if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
