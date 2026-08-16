@@ -632,18 +632,18 @@
             alert("API Key가 저장되었습니다. Gemini AI 코치와 대화가 가능합니다!");
         }
 
-        // [수정됨] 캔버스를 이용한 확실한 클라이언트 측 이미지 압축 및 리사이징 후 파이어베이스 업로드
+        // [완벽 개선된 업로드 함수]: 스토리지 실패 시 1MB 초과(Sync Fail)가 발생하지 않도록 빈 문자열 처리
         async function uploadImageToStorage(dataUrl) {
             if (!isFirebaseActive || !dataUrl || dataUrl.startsWith('http')) return dataUrl;
             
-            // 1. Canvas를 이용해 이미지 압축 (최대 너비 800px, JPEG 화질 0.7)
+            // 1. 캔버스를 이용해 초강력 압축 (최대 너비 600px, JPEG 화질 0.6)
             const compressedDataUrl = await new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    const maxWidth = 800;
+                    const maxWidth = 600;
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
@@ -652,11 +652,13 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    resolve(canvas.toDataURL('image/jpeg', 0.6));
                 };
-                img.onerror = () => resolve(dataUrl);
+                img.onerror = () => resolve('');
                 img.src = dataUrl;
             });
+
+            if (!compressedDataUrl) return '';
 
             // 2. 파이어베이스 스토리지 업로드 시도
             try {
@@ -669,8 +671,8 @@
                 return downloadURL;
             } catch (e) {
                 console.error("Storage upload error:", e);
-                // 스토리지 오류 시에도 압축된 데이터 문자열을 그대로 반환하여 1MB Firestore 제한 초과 방지
-                return compressedDataUrl;
+                // 핵심 방어 코드: 스토리지 업로드 실패 시 Firestore 문서(1MB 제한)가 터지지 않도록 빈 문자열 반환 및 Sync Fail 방지
+                return ''; 
             }
         }
 
