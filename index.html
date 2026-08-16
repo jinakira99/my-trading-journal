@@ -576,7 +576,6 @@
             }
         }
 
-        // 로컬 데이터 우선 복구 및 클라우드 동기화 로직
         function applyLoadedData(data) {
             if (!data) return;
             if (data.globalInitialCapital !== undefined) globalInitialCapital = data.globalInitialCapital;
@@ -587,6 +586,7 @@
             if (data.compoundSettings) compoundSettings = data.compoundSettings;
         }
 
+        // 최적화된 동기화 및 저장 로직
         async function saveCloudData() {
             const payload = { 
                 globalInitialCapital, 
@@ -597,64 +597,58 @@
                 compoundSettings, 
                 updatedAt: new Date().toISOString() 
             };
+            
+            // 1. 로컬에 즉시 저장 (즉각적인 반응성)
             try { localStorage.setItem('fintech_trading_journal_data', JSON.stringify(payload)); } catch (e) {}
 
             const badge = document.getElementById('cloud-status-badge');
-            if (!isFirebaseActive) {
-                if (badge) { badge.innerText = "Local Mode"; badge.className = "text-[11px] text-amber-400 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
-                return;
+            if (!isFirebaseActive) return;
+
+            // 2. 클라우드 저장 (백그라운드 비동기 처리)
+            if (badge) { badge.innerText = "Syncing..."; badge.className = "text-[11px] text-amber-400 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
+
+            try {
+                await db.collection("journals").doc("main_journal").set(payload);
+                if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
+            } catch (e) {
+                console.error("Cloud save error:", e);
+                if (badge) { badge.innerText = "Sync Fail"; badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; }
             }
-
-            if (badge) { badge.innerText = "Saving..."; badge.className = "text-[11px] text-amber-300 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
-
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                try {
-                    await db.collection("journals").doc("main_journal").set(payload);
-                    if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
-                } catch (e) {
-                    console.log("Cloud save error:", e);
-                    if (badge) { badge.innerText = "Sync Error"; badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; }
-                }
-            }, 300);
         }
 
         async function loadCloudData() {
             const badge = document.getElementById('cloud-status-badge');
-            let cloudLoaded = false;
+            if (badge) { badge.innerText = "Loading..."; badge.className = "text-[11px] text-blue-400 font-semibold px-2 py-1 bg-blue-950/60 rounded-lg border border-blue-800 whitespace-nowrap"; }
 
-            // 1순위: 로컬 스토리지에서 먼저 복구 시도 (기존 데이터 즉시 복원용)
-            try {
-                const localSaved = localStorage.getItem('fintech_trading_journal_data');
-                if (localSaved) {
-                    const parsed = JSON.parse(localSaved);
-                    applyLoadedData(parsed);
-                }
-            } catch (err) {}
-
-            // 2순위: 클라우드 데이터와 동기화
+            // 1. Firebase에서 최신 데이터 강제 로딩
             if (isFirebaseActive) {
-                if (badge) { badge.innerText = "Loading..."; badge.className = "text-[11px] text-amber-300 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
                 try {
                     const doc = await db.collection("journals").doc("main_journal").get();
                     if (doc.exists) {
                         const data = doc.data();
-                        // 클라우드 데이터에 거래 기록이 있으면 우선 반영
-                        if (data.monthsData && data.monthsData.length > 0 && data.monthsData[0].trades.length > 0) {
-                            applyLoadedData(data);
-                        } else {
-                            // 클라우드가 비어있고 로컬에 데이터가 있다면 현재 로컬 데이터를 클라우드로 즉시 업로드 반영
-                            saveCloudData();
-                        }
-                        cloudLoaded = true;
-                    } else {
-                        saveCloudData();
+                        applyLoadedData(data);
+                        localStorage.setItem('fintech_trading_journal_data', JSON.stringify(data));
+                        console.log("Cloud data loaded successfully");
                     }
-                } catch (e) { console.log("Cloud load error:", e); }
+                } catch (e) {
+                    console.error("Cloud load error, falling back to local:", e);
+                }
             }
 
-            if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
+            // 2. 로컬 스토리지 데이터 확인
+            try {
+                const localSaved = localStorage.getItem('fintech_trading_journal_data');
+                if (localSaved) {
+                    applyLoadedData(JSON.parse(localSaved));
+                }
+            } catch (err) {}
+
             renderAll();
+            if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
+        }
+
+        function forceSyncData() { 
+            loadCloudData();
         }
 
         // Global Paste Event Listener for Ctrl+V
@@ -768,7 +762,6 @@
             saveCloudData();
         }
 
-        // Helper Functions
         function getAllTradesSorted() {
             let all = [];
             monthsData.forEach((mObj, mIdx) => {
@@ -789,7 +782,6 @@
             return dateStr;
         }
 
-        // All-Time Global KPI Update
         function updateKPIs() {
             const allTrades = getAllTradesSorted();
             let totalNetPnL = 0;
@@ -842,7 +834,6 @@
             saveCloudData();
         }
 
-        // Daily Return Calendar
         function renderDailyReturnCalendar() {
             const container = document.getElementById('calendar-grid');
             const titleElem = document.getElementById('calendar-month-title');
@@ -959,7 +950,6 @@
             renderDailyReturnCalendar();
         }
 
-        // Advanced Equity Curve Rendering
         function setCurveMode(mode) {
             curveMode = mode;
             document.getElementById('curve-mode-pnl').className = mode === 'pnl' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-2xs" : "px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900";
@@ -1138,7 +1128,6 @@
             });
         }
 
-        // Real Gemini REST API Call
         async function sendAIChatMessage() {
             const input = document.getElementById('ai-chat-input');
             const userText = input.value.trim();
@@ -1249,7 +1238,6 @@ Provide concise, sharp, and actionable professional advice based on the provided
             history.scrollTop = history.scrollHeight;
         }
 
-        // Journal Execution Functions
         function calculateMetrics(trade) {
             let totalEntVal = 0, totalEntQty = 0;
             trade.ent.forEach((p, i) => { if (p > 0 && trade.entQty[i] > 0) { totalEntVal += p * trade.entQty[i]; totalEntQty += trade.entQty[i]; } });
@@ -1617,8 +1605,6 @@ Provide concise, sharp, and actionable professional advice based on the provided
                 </div>
             `).join('');
         }
-
-        function forceSyncData() { loadCloudData(); alert("클라우드 데이터를 동기화했습니다."); }
 
         function renderAll() {
             renderNewsFeeds();
