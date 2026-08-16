@@ -584,15 +584,18 @@
             });
         }
 
-        // Data Management & Storage (에러 방지 및 로컬 백업 강화)
+        // 강제 Cloud Sync 저장 로직
         async function saveCloudData() {
             const payload = { globalInitialCapital, cashFlows, monthsData, checklistRules, dropdownOptions, compoundSettings, updatedAt: new Date() };
             try { localStorage.setItem('fintech_trading_journal_data', JSON.stringify(payload)); } catch (e) {}
 
             const badge = document.getElementById('cloud-status-badge');
-            if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
+            if (!isFirebaseActive) {
+                if (badge) { badge.innerText = "Local Mode"; badge.className = "text-[11px] text-amber-400 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
+                return;
+            }
 
-            if (!isFirebaseActive) return;
+            if (badge) { badge.innerText = "Saving..."; badge.className = "text-[11px] text-amber-300 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
 
             if (saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
@@ -600,16 +603,18 @@
                     await db.collection("journals").doc("main_journal").set(payload);
                     if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
                 } catch (e) {
-                    console.log("Cloud save warning (using local fallback):", e);
-                    // 권한이나 네트워크 에러 시 빨간 에러 대신 로컬 저장 완료 상태 유지
-                    if (badge) { badge.innerText = "Local Saved"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
+                    console.log("Cloud save error:", e);
+                    if (badge) { badge.innerText = "Sync Error"; badge.className = "text-[11px] text-rose-400 font-semibold px-2 py-1 bg-rose-950/60 rounded-lg border border-rose-800 whitespace-nowrap"; }
                 }
-            }, 800);
+            }, 300);
         }
 
         async function loadCloudData() {
+            const badge = document.getElementById('cloud-status-badge');
             let loaded = false;
+
             if (isFirebaseActive) {
+                if (badge) { badge.innerText = "Loading..."; badge.className = "text-[11px] text-amber-300 font-semibold px-2 py-1 bg-amber-950/60 rounded-lg border border-amber-800 whitespace-nowrap"; }
                 try {
                     const doc = await db.collection("journals").doc("main_journal").get();
                     if (doc.exists) {
@@ -639,6 +644,8 @@
                     }
                 } catch (err) {}
             }
+
+            if (badge) { badge.innerText = "Synced"; badge.className = "text-[11px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-950/60 rounded-lg border border-emerald-800 whitespace-nowrap"; }
             renderAll();
         }
 
@@ -1601,7 +1608,7 @@ Provide concise, sharp, and actionable professional advice based on the provided
             `).join('');
         }
 
-        function forceSyncData() { loadCloudData(); alert("데이터를 동기화했습니다."); }
+        function forceSyncData() { loadCloudData(); alert("클라우드 데이터를 동기화했습니다."); }
 
         function renderAll() {
             renderNewsFeeds();
