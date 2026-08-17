@@ -306,12 +306,7 @@
                     </div>
                 </div>
 
-                <div id="ai-chat-history" class="flex-1 overflow-y-auto space-y-2.5 text-[11px] text-slate-300 pr-1 leading-relaxed">
-                    <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/80">
-                        👋 안녕하세요! 실제 <b>Gemini AI</b> 연동 코치입니다.<br>
-                        상단 <b>[API Key]</b> 버튼을 눌러 키를 입력하시면, 작성하신 모든 트레이딩 일지를 대화형으로 자유롭게 다각도 분석해 드립니다!
-                    </div>
-                </div>
+                <div id="ai-chat-history" class="flex-1 overflow-y-auto space-y-2.5 text-[11px] text-slate-300 pr-1 leading-relaxed"></div>
 
                 <div class="flex items-center gap-1.5 pt-1.5 border-t border-slate-800 flex-shrink-0">
                     <input type="text" id="ai-chat-input" placeholder="Ask Gemini about trades, pump entries, strategies..." onkeydown="if(event.key==='Enter') sendAIChatMessage()" class="flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-emerald-500">
@@ -595,6 +590,10 @@
         let dropdownOptions = [ { label: "Confirmed", color: "green" }, { label: "Ignored", color: "pink" }, { label: "Not found", color: "gray" } ];
         let compoundSettings = { initial: 400, rate: 1.5, days: 30 };
 
+        let chatMessages = [
+            { role: 'ai', text: '👋 안녕하세요! 실제 <b>Gemini AI</b> 연동 코치입니다.<br>상단 <b>[API Key]</b> 버튼을 눌러 키를 입력하시면, 작성하신 모든 트레이딩 일지를 대화형으로 자유롭게 다각도 분석해 드립니다!' }
+        ];
+
         let trackedAssets = [
             { name: "Spot Gold (XAUUSD)", ticker: "XAU=X", price: "$4,324.08", change: 0.50 },
             { name: "Spot Silver (XAGUSD)", ticker: "XAG=X", price: "$28.50", change: 0.80 },
@@ -632,7 +631,7 @@
             alert("API Key가 저장되었습니다. Gemini AI 코치와 대화가 가능합니다!");
         }
 
-        // [완벽 방어 로직]: 스토리지 업로드 실패 시 Base64 문자열을 절대 Firestore에 저장하지 않고 빈 문자열로 처리하여 Sync Fail 원인 차단
+        // [화질 개선]: 해상도 한도를 maxWidth = 1400, 화질을 0.85로 높여 선명하게 표시
         async function uploadImageToStorage(dataUrl) {
             if (!isFirebaseActive || !dataUrl || dataUrl.startsWith('http')) return dataUrl;
             
@@ -642,7 +641,7 @@
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    const maxWidth = 500;
+                    const maxWidth = 1400; // 대폭 선명하게 상향
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
@@ -651,7 +650,7 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.5));
+                    resolve(canvas.toDataURL('image/jpeg', 0.85)); // 고화질 설정
                 };
                 img.onerror = () => resolve('');
                 img.src = dataUrl;
@@ -669,16 +668,19 @@
                 return downloadURL;
             } catch (e) {
                 console.error("Storage upload error:", e);
-                alert("⚠️ 파이어베이스 스토리지(Storage) 업로드 실패! Firebase 콘솔에서 Storage가 활성화되어 있는지 확인해주세요.");
-                return ''; // 절대 무거운 Base64 데이터를 Firestore에 넣지 않아 1MB 제한 방지
+                alert("⚠️ 파이어베이스 스토리지(Storage) 업로드 실패!");
+                return '';
             }
         }
 
-        // [자동 정화 로직]: 불러올 때 기존의 무거운 임시 이미지 데이터(data:image)를 자동 제거하여 1MB 초과 오류 즉시 해결
+        // [데이터 로드 및 AI 대화 내역 복원]
         function applyLoadedData(data) {
             if (!data) return;
             if (data.globalInitialCapital !== undefined) globalInitialCapital = data.globalInitialCapital;
             if (data.cashFlows) cashFlows = data.cashFlows;
+            if (data.chatMessages && Array.isArray(data.chatMessages)) {
+                chatMessages = data.chatMessages;
+            }
             if (data.monthsData && data.monthsData.length > 0) {
                 monthsData = data.monthsData.map(m => ({
                     ...m,
@@ -715,6 +717,7 @@
                     dropdownOptions, 
                     compoundSettings, 
                     trackedAssets,
+                    chatMessages, // AI 대화 내역 저장
                     updatedAt: new Date().toISOString() 
                 };
                 
@@ -762,6 +765,25 @@
         }
 
         function forceSyncData() { loadCloudData(); }
+
+        // [AI 대화 내역 화면 렌더링 함수]
+        function renderChatHistory() {
+            const history = document.getElementById('ai-chat-history');
+            if (!history) return;
+            history.innerHTML = '';
+            chatMessages.forEach(msg => {
+                const div = document.createElement('div');
+                if (msg.role === 'user') {
+                    div.className = "bg-emerald-950/60 border border-emerald-800 text-emerald-200 p-2.5 rounded-xl text-right font-medium leading-relaxed";
+                    div.innerText = msg.text;
+                } else {
+                    div.className = "bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 space-y-1 text-slate-200 leading-relaxed";
+                    div.innerHTML = msg.text;
+                }
+                history.appendChild(div);
+            });
+            history.scrollTop = history.scrollHeight;
+        }
 
         document.addEventListener('paste', (e) => {
             const activeElem = document.activeElement;
@@ -1239,30 +1261,19 @@
             const userText = input.value.trim();
             if (!userText) return;
 
-            const history = document.getElementById('ai-chat-history');
-
-            const userMsgDiv = document.createElement('div');
-            userMsgDiv.className = "bg-emerald-950/60 border border-emerald-800 text-emerald-200 p-2.5 rounded-xl text-right font-medium leading-relaxed";
-            userMsgDiv.innerText = userText;
-            history.appendChild(userMsgDiv);
-
+            chatMessages.push({ role: 'user', text: userText });
+            renderChatHistory();
             input.value = '';
-            history.scrollTop = history.scrollHeight;
 
             if (!userGeminiApiKey) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = "bg-rose-950/80 border border-rose-800 text-rose-200 p-2.5 rounded-xl space-y-1";
-                errorDiv.innerHTML = "⚠️ <b>Gemini API Key가 필요합니다.</b><br>우측 상단 <b>[API Key]</b> 버튼을 눌러 Google AI Studio에서 발급받은 키를 입력해주세요!";
-                history.appendChild(errorDiv);
-                history.scrollTop = history.scrollHeight;
+                chatMessages.push({ role: 'ai', text: '⚠️ <b>Gemini API Key가 필요합니다.</b><br>우측 상단 <b>[API Key]</b> 버튼을 눌러 Google AI Studio에서 발급받은 키를 입력해주세요!' });
+                renderChatHistory();
+                saveCloudData();
                 return;
             }
 
-            const aiMsgDiv = document.createElement('div');
-            aiMsgDiv.className = "bg-slate-800/80 p-2.5 rounded-xl border border-slate-700 space-y-1 text-slate-200 leading-relaxed";
-            aiMsgDiv.innerText = "🤖 사용 가능한 AI 모델을 탐색하고 답변을 생성하는 중입니다...";
-            history.appendChild(aiMsgDiv);
-            history.scrollTop = history.scrollHeight;
+            chatMessages.push({ role: 'ai', text: '🤖 사용 가능한 AI 모델을 탐색하고 답변을 생성하는 중입니다...' });
+            renderChatHistory();
 
             const allTrades = getAllTradesSorted();
             let totalNetPnL = 0, wins = 0, losses = 0, totalLev = 0, totalChecklistScore = 0;
@@ -1331,17 +1342,18 @@ Provide concise, sharp, and actionable professional advice based on the provided
 
                 if (data.candidates && data.candidates[0] && data.candidates[0].content) {
                     const aiReply = data.candidates[0].content.parts[0].text;
-                    aiMsgDiv.innerHTML = aiReply.replace(/\n/g, '<br>');
+                    chatMessages[chatMessages.length - 1] = { role: 'ai', text: aiReply.replace(/\n/g, '<br>') };
                 } else if (data.error) {
-                    aiMsgDiv.innerHTML = `<span class="text-rose-400">⚠️ API Error: ${data.error.message || 'Key 유효성을 확인해주세요.'}</span>`;
+                    chatMessages[chatMessages.length - 1] = { role: 'ai', text: `<span class="text-rose-400">⚠️ API Error: ${data.error.message || 'Key 유효성을 확인해주세요.'}</span>` };
                 } else {
-                    aiMsgDiv.innerHTML = `<span class="text-rose-400">⚠️ Gemini API 응답 생성 실패</span>`;
+                    chatMessages[chatMessages.length - 1] = { role: 'ai', text: `<span class="text-rose-400">⚠️ Gemini API 응답 생성 실패</span>` };
                 }
             } catch (err) {
-                aiMsgDiv.innerHTML = `<span class="text-rose-400">⚠️ 통신 오류: 네트워크 연결 및 API Key를 확인해주세요.</span>`;
+                chatMessages[chatMessages.length - 1] = { role: 'ai', text: `<span class="text-rose-400">⚠️ 통신 오류: 네트워크 연결 및 API Key를 확인해주세요.</span>` };
             }
 
-            history.scrollTop = history.scrollHeight;
+            renderChatHistory();
+            saveCloudData();
         }
 
         function calculateMetrics(trade) {
@@ -1905,6 +1917,7 @@ Provide concise, sharp, and actionable professional advice based on the provided
             renderTickerBar();
             renderTabs();
             renderJournal();
+            renderChatHistory(); // AI 대화 내역 렌더링
             selectTrade(selectedTradeIndex);
         }
 
