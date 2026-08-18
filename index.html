@@ -62,11 +62,11 @@
 </head>
 <body class="flex flex-col min-h-screen text-xs overflow-x-hidden">
 
-    <!-- Safety Loading Shield (데이터 로딩 전까지 화면을 덮어 보호함) -->
+    <!-- Safety Loading Shield (데이터 로딩 완료 전까지 화면을 완벽히 차단하여 디폴트값 노출 및 덮어쓰기 원천 방지) -->
     <div id="app-loading-screen" class="fixed inset-0 bg-slate-950 text-white flex flex-col items-center justify-center z-50 transition-opacity duration-300">
         <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-emerald-500 mb-3"></div>
         <h2 class="text-xs font-black tracking-wider uppercase text-emerald-400">클라우드 데이터 안전 동기화 중...</h2>
-        <p class="text-[10px] text-slate-400 mt-1">기록을 불러올 때까지 안전하게 보호하고 있습니다.</p>
+        <p class="text-[10px] text-slate-400 mt-1">기록을 안전하게 불러올 때까지 보호하고 있습니다.</p>
     </div>
 
     <!-- Top Ticker Bar -->
@@ -1938,7 +1938,7 @@ Provide concise, sharp, and actionable professional advice based on the provided
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadCloudData(); // [철통 방어]: 페이지 로드 시 무조건 클라우드 데이터를 먼저 가져와 로딩막을 해제합니다.
+            loadCloudData(); // 페이지 로드 시 클라우드 데이터를 확실히 가져온 뒤 로딩 실드 해제
         });
     </script>
 </body>
