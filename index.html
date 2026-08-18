@@ -618,6 +618,8 @@
         let activeChartKey = 'htf';
         let activeChartIdx = null;
 
+        let isDataLoadedFromCloud = false; // [안전 잠금 장치]: 클라우드 로드 완료 전 저장 차단
+
         function openApiKeyModal() {
             document.getElementById('gemini-api-key-input').value = userGeminiApiKey;
             document.getElementById('apikey-modal').classList.remove('hidden');
@@ -631,7 +633,6 @@
             alert("API Key가 저장되었습니다. Gemini AI 코치와 대화가 가능합니다!");
         }
 
-        // [화질 개선]: 해상도 한도를 maxWidth = 1400, 화질을 0.85로 높여 선명하게 표시
         async function uploadImageToStorage(dataUrl) {
             if (!isFirebaseActive || !dataUrl || dataUrl.startsWith('http')) return dataUrl;
             
@@ -641,7 +642,7 @@
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    const maxWidth = 1400; // 대폭 선명하게 상향
+                    const maxWidth = 1400;
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
@@ -650,7 +651,7 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.85)); // 고화질 설정
+                    resolve(canvas.toDataURL('image/jpeg', 0.85));
                 };
                 img.onerror = () => resolve('');
                 img.src = dataUrl;
@@ -668,12 +669,10 @@
                 return downloadURL;
             } catch (e) {
                 console.error("Storage upload error:", e);
-                alert("⚠️ 파이어베이스 스토리지(Storage) 업로드 실패!");
                 return '';
             }
         }
 
-        // [데이터 로드 및 AI 대화 내역 복원]
         function applyLoadedData(data) {
             if (!data) return;
             if (data.globalInitialCapital !== undefined) globalInitialCapital = data.globalInitialCapital;
@@ -701,6 +700,8 @@
 
         let saveTimeout = null;
         async function saveCloudData() {
+            if (!isDataLoadedFromCloud) return; // [핵심 방어선]: 데이터가 로드되지 않았다면 절대 클라우드에 덮어쓰지 않음
+
             const badge = document.getElementById('cloud-status-badge');
             if (badge) {
                 badge.innerText = "Saving...";
@@ -717,7 +718,7 @@
                     dropdownOptions, 
                     compoundSettings, 
                     trackedAssets,
-                    chatMessages, // AI 대화 내역 저장
+                    chatMessages,
                     updatedAt: new Date().toISOString() 
                 };
                 
@@ -757,6 +758,7 @@
                 }
             }
 
+            isDataLoadedFromCloud = true; // [해제]: 클라우드 데이터 로드가 완벽히 끝난 후 안전 장치 해제
             renderAll();
             if (badge) {
                 badge.innerText = "Synced";
@@ -766,7 +768,6 @@
 
         function forceSyncData() { loadCloudData(); }
 
-        // [AI 대화 내역 화면 렌더링 함수]
         function renderChatHistory() {
             const history = document.getElementById('ai-chat-history');
             if (!history) return;
@@ -1917,12 +1918,12 @@ Provide concise, sharp, and actionable professional advice based on the provided
             renderTickerBar();
             renderTabs();
             renderJournal();
-            renderChatHistory(); // AI 대화 내역 렌더링
+            renderChatHistory();
             selectTrade(selectedTradeIndex);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadCloudData();
+            loadCloudData(); // [핵심 수정]: 페이지가 켜지면 무조건 클라우드 데이터를 먼저 불러온 뒤 화면을 그립니다!
         });
     </script>
 </body>
